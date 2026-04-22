@@ -142,10 +142,11 @@ export function ClientDashboard({
     async (from: string, to: string) => {
       const since = Math.floor(dateStrToBoundaryMs(from, false) / 1000);
       const until = Math.floor(dateStrToBoundaryMs(to, true) / 1000);
+      const days = Math.max(1, Math.ceil((until - since) / (24 * 60 * 60)));
       setSyncing(true);
       try {
         const res = await fetch(
-          `/api/instagram/sync/${clientId}?since=${since}&until=${until}&redirect=false`,
+          `/api/instagram/sync/${clientId}?days=${days}&since=${since}&until=${until}&redirect=false`,
           { method: "GET" }
         );
         if (!res.ok) {

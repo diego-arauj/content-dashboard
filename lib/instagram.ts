@@ -132,10 +132,92 @@ export async function sumStoryImpressionsAsViews(storyIds: string[], accessToken
 }
 
 export type SyncInstagramOptions = {
-  /** Unix segundos — insights da conta; se omitido, usa últimos 30 dias até agora */
+  /** Quantidade de dias para trás a partir de `until` (padrão 30). */
+  days?: number;
+  /** Unix segundos — pode ser usado para sobrescrever o início do período. */
   since?: number;
+  /** Unix segundos — pode ser usado para sobrescrever o fim do período. */
   until?: number;
 };
+
+const DAY_IN_SECONDS = 24 * 60 * 60;
+const MAX_INSIGHTS_WINDOW_DAYS = 89;
+
+function toUnixSeconds(date: string | undefined) {
+  if (!date) return null;
+  const seconds = Math.floor(new Date(date).getTime() / 1000);
+  return Number.isFinite(seconds) ? seconds : null;
+}
+
+async function fetchMediaByCursorUntilDate(
+  igUserId: string,
+  accessToken: string,
+  periodStartUnix: number
+): Promise<MediaItem[]> {
+  const collected: MediaItem[] = [];
+  let after: string | undefined;
+
+  while (true) {
+    const media = await graphGet<{
+      data: MediaItem[];
+      paging?: { cursors?: { after?: string } };
+    }>(`/${igUserId}/media`, {
+      fields:
+        "id,caption,media_type,timestamp,like_count,comments_count,permalink,thumbnail_url,media_url",
+      limit: 50,
+      ...(after ? { after } : {}),
+      access_token: accessToken
+    });
+
+    let reachedOlderThanPeriod = false;
+    for (const item of media.data) {
+      const itemUnix = toUnixSeconds(item.timestamp);
+      if (itemUnix != null && itemUnix < periodStartUnix) {
+        reachedOlderThanPeriod = true;
+        continue;
+      }
+      collected.push(item);
+    }
+
+    if (reachedOlderThanPeriod) {
+      break;
+    }
+
+    const nextCursor = media.paging?.cursors?.after;
+    if (!nextCursor || nextCursor === after) {
+      break;
+    }
+    after = nextCursor;
+  }
+
+  return collected;
+}
+
+async function fetchAccountInsightsByWindows(
+  igUserId: string,
+  accessToken: string,
+  since: number,
+  until: number
+) {
+  const allMetrics: Array<{ name: string; values: Array<{ value: number; end_time: string }> }> = [];
+  const step = MAX_INSIGHTS_WINDOW_DAYS * DAY_IN_SECONDS;
+
+  for (let windowEnd = until; windowEnd > since; windowEnd -= step) {
+    const windowStart = Math.max(windowEnd - step, since);
+    const windowData = await graphGet<{
+      data: Array<{ name: string; values: Array<{ value: number; end_time: string }> }>;
+    }>(`/${igUserId}/insights`, {
+      metric: "follower_count,reach,impressions,profile_views,website_clicks",
+      period: "day",
+      since: windowStart,
+      until: windowEnd,
+      access_token: accessToken
+    });
+    allMetrics.push(...windowData.data);
+  }
+
+  return allMetrics;
+}
 
 export async function fetchInstagramStories(igUserId: string, accessToken: string) {
   return graphGet<{
@@ -182,14 +264,21 @@ export async function syncInstagramForClient(clientId: string, options?: SyncIns
     })
     .where(eq(instagramAccounts.clientId, clientId));
 
-  const media = await graphGet<{ data: MediaItem[] }>(`/${igUserId}/media`, {
-    fields:
-      "id,caption,media_type,timestamp,like_count,comments_count,permalink,thumbnail_url,media_url",
-    limit: 30,
-    access_token: accessToken
-  });
+  const now = Math.floor(Date.now() / 1000);
+  const normalizedUntil = options?.until ?? now;
+  const requestedDays = options?.days != null && options.days > 0 ? Math.floor(options.days) : 30;
+  const normalizedSince = options?.since ?? normalizedUntil - requestedDays * DAY_IN_SECONDS;
+  let since = normalizedSince;
+  let until = normalizedUntil;
+  if (since > until) {
+    const tmp = since;
+    since = until;
+    until = tmp;
+  }
 
-  for (const item of media.data) {
+  const media = await fetchMediaByCursorUntilDate(igUserId, accessToken, since);
+
+  for (const item of media) {
     let metrics: Record<string, number> = {};
 
     try {
@@ -255,46 +344,7 @@ export async function syncInstagramForClient(clientId: string, options?: SyncIns
       });
   }
 
-  const now = Math.floor(Date.now() / 1000);
-  let since = options?.since ?? now - 30 * 24 * 60 * 60;
-  let until = options?.until ?? now;
-  if (since > until) {
-    const t = since;
-    since = until;
-    until = t;
-  }
-
-  const accountInsightsPath = `/${igUserId}/insights`;
-  const accountInsightsParams: Record<string, string | number> = {
-    metric: "follower_count,reach,website_clicks",
-    period: "day",
-    since,
-    until,
-    access_token: accessToken
-  };
-  const queryString = new URLSearchParams(
-    Object.entries(accountInsightsParams).reduce<Record<string, string>>((acc, [key, value]) => {
-      acc[key] = String(value);
-      return acc;
-    }, {})
-  ).toString();
-  const url = `${GRAPH_API_BASE}${accountInsightsPath}?${queryString}`;
-
-  const accountInsightsResponse = await fetch(url, {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-    cache: "no-store"
-  });
-
-  const accountInsightsJson = (await accountInsightsResponse.json()) as GraphResponse<{
-    data: Array<{ name: string; values: Array<{ value: number; end_time: string }> }>;
-  }>;
-
-  if (!accountInsightsResponse.ok || accountInsightsJson.error) {
-    throw new Error(accountInsightsJson.error?.message ?? "Instagram Graph API request failed.");
-  }
-
-  const accountInsights = accountInsightsJson;
+  const accountInsights = await fetchAccountInsightsByWindows(igUserId, accessToken, since, until);
 
   const byDate = new Map<
     string,
@@ -302,7 +352,7 @@ export async function syncInstagramForClient(clientId: string, options?: SyncIns
   >();
 
   try {
-    for (const metric of accountInsights.data) {
+    for (const metric of accountInsights) {
       for (const entry of metric.values) {
         const key = entry.end_time.slice(0, 10);
         const current = byDate.get(key) ?? {
