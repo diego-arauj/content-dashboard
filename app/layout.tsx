@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Sans } from "next/font/google";
 import { Toaster } from "sonner";
+import { ThemeProvider, ThemeToggle } from "@/components/ThemeProvider";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -20,10 +21,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR">
-      <body className={`${dmSans.variable} min-h-screen bg-white font-sans text-[#111] antialiased`}>
-        {children}
-        <Toaster richColors position="top-center" />
+    <html lang="pt-BR" suppressHydrationWarning>
+      <body className={`${dmSans.variable} min-h-screen bg-white font-sans text-[#111] antialiased dark:bg-[#0f0f0f] dark:text-[#f0f0f0]`}>
+        <ThemeProvider>
+          {children}
+          <ThemeToggle />
+          <Toaster richColors position="top-center" />
+        </ThemeProvider>
       </body>
     </html>
   );
