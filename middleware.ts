@@ -11,11 +11,17 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  const allCookies = req.cookies.getAll();
+  console.log("[middleware] pathname:", pathname);
+  console.log("[middleware] cookies:", JSON.stringify(allCookies.map((c) => c.name)));
+
   const token = await getToken({
     req,
     secret: process.env.AUTH_SECRET,
     cookieName: "__Host-authjs.session-token",
   });
+
+  console.log("[middleware] token:", token ? "FOUND" : "NULL");
 
   if (!token) {
     return NextResponse.redirect(new URL("/login", req.url));
