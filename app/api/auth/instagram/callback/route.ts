@@ -59,7 +59,7 @@ export async function GET(request: Request) {
 
     await syncInstagramForClient(clientId);
 
-    return NextResponse.redirect(new URL(`/dashboard/${clientId}`, request.url));
+    return NextResponse.redirect(new URL(`/dashboard/${clientId}`, process.env.NEXT_PUBLIC_BASE_URL));
   } catch (error) {
     console.error("OAUTH ERROR:", error);
     const message = error instanceof Error ? error.message : "Falha no OAuth do Instagram.";
