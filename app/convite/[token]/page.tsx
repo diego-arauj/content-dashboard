@@ -4,6 +4,8 @@ import { InvitePasswordForm } from "@/components/convite/InvitePasswordForm";
 import { db } from "@/db";
 import { inviteTokens } from "@/db/schema";
 
+export const dynamic = "force-dynamic";
+
 type PageProps = {
   params: Promise<{ token: string }>;
 };

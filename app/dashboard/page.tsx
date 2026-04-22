@@ -7,6 +7,8 @@ import { ClientCard } from "@/components/dashboard/ClientCard";
 import { NewClientModal } from "@/components/dashboard/NewClientModal";
 import { Button } from "@/components/ui/button";
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardPage() {
   const session = await auth();
   if (!session) {

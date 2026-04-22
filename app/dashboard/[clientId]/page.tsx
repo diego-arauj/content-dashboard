@@ -11,6 +11,8 @@ import {
 } from "@/components/dashboard/ClientDashboard";
 import { Button } from "@/components/ui/button";
 
+export const dynamic = "force-dynamic";
+
 export default async function ClientDashboardPage({
   params
 }: PageProps<"/dashboard/[clientId]">) {
