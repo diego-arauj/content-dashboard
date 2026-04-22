@@ -1,12 +1,4 @@
-export type PostSortKey =
-  | "engagement"
-  | "reach"
-  | "likes"
-  | "comments"
-  | "shares"
-  | "saves"
-  | "link_clicks";
-
+export type PostSortKey = "engagement" | "reach" | "likes" | "comments" | "shares" | "saves";
 export type PostFormatFilter = "all" | "IMAGE" | "CAROUSEL_ALBUM" | "VIDEO";
 
 export const SORT_LABELS: Record<PostSortKey, string> = {
@@ -15,8 +7,7 @@ export const SORT_LABELS: Record<PostSortKey, string> = {
   likes: "Curtidas",
   comments: "Comentários",
   shares: "Compartilhamentos",
-  saves: "Salvamentos",
-  link_clicks: "Cliques no link"
+  saves: "Salvamentos"
 };
 
 export const FORMAT_LABELS: Record<PostFormatFilter, string> = {

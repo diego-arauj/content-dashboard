@@ -75,7 +75,8 @@ export default async function ClientDashboardPage({
       followers: accountInsightsCache.followers,
       reach: accountInsightsCache.reach,
       impressions: accountInsightsCache.impressions,
-      profileViews: accountInsightsCache.profileViews
+      profileViews: accountInsightsCache.profileViews,
+      websiteClicks: accountInsightsCache.websiteClicks
     })
     .from(accountInsightsCache)
     .where(eq(accountInsightsCache.clientId, clientId))
@@ -101,7 +102,8 @@ export default async function ClientDashboardPage({
     followers: row.followers,
     reach: row.reach,
     impressions: row.impressions,
-    profileViews: row.profileViews
+    profileViews: row.profileViews,
+    websiteClicks: row.websiteClicks
   }));
 
   const expiresAt = client.tokenExpiresAt;

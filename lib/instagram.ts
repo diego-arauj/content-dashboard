@@ -266,7 +266,7 @@ export async function syncInstagramForClient(clientId: string, options?: SyncIns
 
   const accountInsightsPath = `/${igUserId}/insights`;
   const accountInsightsParams: Record<string, string | number> = {
-    metric: "follower_count,reach",
+    metric: "follower_count,reach,website_clicks",
     period: "day",
     since,
     until,
@@ -296,7 +296,10 @@ export async function syncInstagramForClient(clientId: string, options?: SyncIns
 
   const accountInsights = accountInsightsJson;
 
-  const byDate = new Map<string, { followers: number; reach: number; impressions: number; profileViews: number }>();
+  const byDate = new Map<
+    string,
+    { followers: number; reach: number; impressions: number; profileViews: number; websiteClicks: number }
+  >();
 
   try {
     for (const metric of accountInsights.data) {
@@ -306,7 +309,8 @@ export async function syncInstagramForClient(clientId: string, options?: SyncIns
           followers: 0,
           reach: 0,
           impressions: 0,
-          profileViews: 0
+          profileViews: 0,
+          websiteClicks: 0
         };
         if (metric.name === "follower_count") {
           current.followers = getInt(entry.value);
@@ -316,6 +320,8 @@ export async function syncInstagramForClient(clientId: string, options?: SyncIns
           current.impressions = getInt(entry.value);
         } else if (metric.name === "profile_views") {
           current.profileViews = getInt(entry.value);
+        } else if (metric.name === "website_clicks") {
+          current.websiteClicks = getInt(entry.value);
         }
         byDate.set(key, current);
       }
@@ -330,7 +336,8 @@ export async function syncInstagramForClient(clientId: string, options?: SyncIns
           followers: values.followers,
           reach: values.reach,
           impressions: values.impressions,
-          profileViews: values.profileViews
+          profileViews: values.profileViews,
+          websiteClicks: values.websiteClicks
         })
         .onConflictDoUpdate({
           target: [accountInsightsCache.clientId, accountInsightsCache.date],
@@ -338,7 +345,8 @@ export async function syncInstagramForClient(clientId: string, options?: SyncIns
             followers: values.followers,
             reach: values.reach,
             impressions: values.impressions,
-            profileViews: values.profileViews
+            profileViews: values.profileViews,
+            websiteClicks: values.websiteClicks
           }
         });
     }

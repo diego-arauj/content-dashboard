@@ -29,6 +29,7 @@ export type DashboardInsightRow = {
   reach: number | null;
   impressions: number | null;
   profileViews: number | null;
+  websiteClicks: number | null;
 };
 
 export type DashboardPostRow = {
@@ -39,7 +40,6 @@ export type DashboardPostRow = {
   reach: number | null;
   saved: number | null;
   shares: number | null;
-  link_clicks: number | null;
   media_type: string | null;
   thumbnail_url: string | null;
   media_url: string | null;
@@ -105,8 +105,6 @@ function comparePosts(a: DashboardPostRow, b: DashboardPostRow, sort: PostSortKe
       return (b.shares ?? 0) - (a.shares ?? 0);
     case "saves":
       return (b.saved ?? 0) - (a.saved ?? 0);
-    case "link_clicks":
-      return (b.link_clicks ?? 0) - (a.link_clicks ?? 0);
     default:
       return 0;
   }
@@ -216,7 +214,8 @@ export function ClientDashboard({
         .map((item) => ({
           date: item.date as string,
           reach: item.reach ?? 0,
-          impressions: item.impressions ?? 0
+          impressions: item.impressions ?? 0,
+          websiteClicks: item.websiteClicks ?? 0
         })),
     [filteredInsights]
   );
@@ -232,7 +231,6 @@ export function ClientDashboard({
         reach: post.reach ?? 0,
         saved: post.saved ?? 0,
         shares: post.shares ?? 0,
-        link_clicks: post.link_clicks ?? 0,
         thumbnail_url: post.thumbnail_url,
         media_url: post.media_url,
         permalink: post.permalink
@@ -249,7 +247,6 @@ export function ClientDashboard({
         reach: post.reach ?? 0,
         saved: post.saved ?? 0,
         shares: post.shares ?? 0,
-        link_clicks: post.link_clicks ?? 0,
         mediaType: post.media_type,
         mediaUrl: post.media_url,
         thumbnailUrl: post.thumbnail_url,
@@ -259,9 +256,9 @@ export function ClientDashboard({
   );
 
   return (
-    <main className="min-h-screen bg-[#F5F5F5] px-6 py-10">
+    <main className="min-h-screen bg-[#F5F5F5] px-6 py-10 dark:bg-[#0f0f0f]">
       <div className="mx-auto max-w-7xl space-y-6">
-        <header className="flex flex-col gap-4 border-b border-[#E5E5E5] pb-6 md:flex-row md:items-center md:justify-between">
+        <header className="flex flex-col gap-4 border-b border-[#E5E5E5] pb-6 dark:border-[#2a2a2a] md:flex-row md:items-center md:justify-between">
           <div className="flex items-start gap-3">
             {profilePictureUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -276,9 +273,9 @@ export function ClientDashboard({
               <div className="h-10 w-10 shrink-0 rounded-full bg-[#E5E5E5]" aria-hidden />
             )}
             <div>
-              <h1 className="text-3xl font-semibold tracking-tight">{clientName}</h1>
+              <h1 className="text-3xl font-semibold tracking-tight dark:text-[#f0f0f0]">{clientName}</h1>
               <div className="mt-2 flex flex-wrap items-center gap-3">
-                <p className="text-sm text-neutral-600">
+                <p className="text-sm text-neutral-600 dark:text-neutral-400">
                   @{username} {niche ? `· ${niche}` : ""}
                 </p>
                 {expiringSoon ? <Badge variant="warning">Token expira em menos de 7 dias</Badge> : null}
@@ -299,7 +296,7 @@ export function ClientDashboard({
           </div>
         </header>
 
-        <section className="rounded-xl border border-[#E5E5E5] bg-white p-4 shadow-subtle">
+        <section className="rounded-xl border border-[#E5E5E5] bg-white p-4 shadow-subtle dark:border-[#2a2a2a] dark:bg-[#1a1a1a]">
           <p className="text-sm font-medium text-neutral-700">Período</p>
           <div className="mt-3 flex flex-wrap items-end gap-4">
             <label className="flex flex-col gap-1 text-xs text-neutral-600">
@@ -308,7 +305,7 @@ export function ClientDashboard({
                 type="date"
                 value={dateFrom}
                 onChange={(e) => setDateFrom(e.target.value)}
-                className="rounded-md border border-[#E5E5E5] bg-white px-3 py-2 text-sm text-[#111]"
+                className="rounded-md border border-[#E5E5E5] bg-white px-3 py-2 text-sm text-[#111] dark:border-[#2a2a2a] dark:bg-[#1a1a1a] dark:text-[#f0f0f0]"
               />
             </label>
             <label className="flex flex-col gap-1 text-xs text-neutral-600">
@@ -317,7 +314,7 @@ export function ClientDashboard({
                 type="date"
                 value={dateTo}
                 onChange={(e) => setDateTo(e.target.value)}
-                className="rounded-md border border-[#E5E5E5] bg-white px-3 py-2 text-sm text-[#111]"
+                className="rounded-md border border-[#E5E5E5] bg-white px-3 py-2 text-sm text-[#111] dark:border-[#2a2a2a] dark:bg-[#1a1a1a] dark:text-[#f0f0f0]"
               />
             </label>
             <p className="pb-2 text-xs text-neutral-500">
@@ -367,10 +364,19 @@ type HistoryRow = {
 };
 
 function StoriesPanel({ clientId }: { clientId: string }) {
+  const [isDark, setIsDark] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [stories, setStories] = useState<StoryItem[]>([]);
   const [history, setHistory] = useState<HistoryRow[]>([]);
+
+  useEffect(() => {
+    const update = () => setIsDark(document.documentElement.classList.contains("dark"));
+    update();
+    const observer = new MutationObserver(update);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -415,9 +421,15 @@ function StoriesPanel({ clientId }: { clientId: string }) {
     [history]
   );
 
+  const gridColor = isDark ? "#2a2a2a" : "#E5E5E5";
+  const tickColor = isDark ? "#a0a0a0" : "#6B7280";
+  const barColor = isDark ? "#f0f0f0" : "#111111";
+  const tooltipBg = isDark ? "#1a1a1a" : "#ffffff";
+  const tooltipBorder = isDark ? "#2a2a2a" : "#E5E5E5";
+
   return (
-    <section className="space-y-8 rounded-xl border border-[#E5E5E5] bg-white p-6 shadow-subtle">
-      <h2 className="text-lg font-semibold">Stories</h2>
+    <section className="space-y-8 rounded-xl border border-[#E5E5E5] bg-white p-6 shadow-subtle dark:border-[#2a2a2a] dark:bg-[#1a1a1a]">
+      <h2 className="text-lg font-semibold dark:text-[#f0f0f0]">Stories</h2>
 
       {loading ? (
         <p className="text-sm text-neutral-600">Carregando...</p>
@@ -465,22 +477,34 @@ function StoriesPanel({ clientId }: { clientId: string }) {
               <div className="mt-4 h-[280px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={chartData}>
-                    <CartesianGrid stroke="#E5E5E5" strokeDasharray="3 3" />
+                    <CartesianGrid stroke={gridColor} strokeDasharray="3 3" />
                     <XAxis
                       dataKey="date"
-                      tick={{ fontSize: 11 }}
+                      tick={{ fontSize: 11, fill: tickColor }}
+                      axisLine={{ stroke: gridColor }}
+                      tickLine={false}
                       tickFormatter={(v: string) =>
                         format(new Date(v + "T12:00:00"), "dd/MM", { locale: ptBR })
                       }
                     />
-                    <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => formatMetric(v)} />
+                    <YAxis
+                      tick={{ fontSize: 12, fill: tickColor }}
+                      tickLine={false}
+                      tickFormatter={(v) => formatMetric(v)}
+                    />
                     <Tooltip
                       formatter={(value: number) => formatMetric(value)}
                       labelFormatter={(label: string) =>
                         format(new Date(label + "T12:00:00"), "dd 'de' MMM yyyy", { locale: ptBR })
                       }
+                      contentStyle={{
+                        border: `1px solid ${tooltipBorder}`,
+                        borderRadius: "0.5rem",
+                        backgroundColor: tooltipBg,
+                        color: isDark ? "#f0f0f0" : "#111111"
+                      }}
                     />
-                    <Bar dataKey="views" fill="#111111" name="Visualizações (impressões)" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="views" fill={barColor} name="Visualizações (impressões)" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

@@ -48,7 +48,8 @@ export const accountInsightsCache = pgTable(
     followers: integer("followers").default(0),
     reach: integer("reach").default(0),
     impressions: integer("impressions").default(0),
-    profileViews: integer("profile_views").default(0)
+    profileViews: integer("profile_views").default(0),
+    websiteClicks: integer("website_clicks").default(0)
   },
   (t) => ({
     uniq: unique().on(t.clientId, t.date)
