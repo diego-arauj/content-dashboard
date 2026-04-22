@@ -14,6 +14,7 @@ import {
   XAxis,
   YAxis
 } from "recharts";
+import { EngagementChart } from "@/components/dashboard/EngagementChart";
 import { InsightsChart } from "@/components/dashboard/InsightsChart";
 import { OverviewMetrics } from "@/components/dashboard/OverviewMetrics";
 import { PostsGrid } from "@/components/dashboard/PostsGrid";
@@ -213,12 +214,30 @@ export function ClientDashboard({
         .filter((item) => item.date)
         .map((item) => ({
           date: item.date as string,
-          reach: item.reach ?? 0,
-          impressions: item.impressions ?? 0,
-          websiteClicks: item.websiteClicks ?? 0
+          reach: item.reach ?? 0
         })),
     [filteredInsights]
   );
+
+  const engagementChartData = useMemo(() => {
+    const byDate = new Map<
+      string,
+      { date: string; likes: number; comments: number; shares: number; saves: number }
+    >();
+
+    for (const post of postsInRange) {
+      if (!post.timestamp) continue;
+      const key = format(new Date(post.timestamp), "yyyy-MM-dd");
+      const current = byDate.get(key) ?? { date: key, likes: 0, comments: 0, shares: 0, saves: 0 };
+      current.likes += post.likes ?? 0;
+      current.comments += post.comments ?? 0;
+      current.shares += post.shares ?? 0;
+      current.saves += post.saved ?? 0;
+      byDate.set(key, current);
+    }
+
+    return [...byDate.values()].sort((a, b) => a.date.localeCompare(b.date));
+  }, [postsInRange]);
 
   const gridPosts = useMemo(
     () =>
@@ -331,6 +350,7 @@ export function ClientDashboard({
         />
 
         <InsightsChart data={chartData} />
+        <EngagementChart data={engagementChartData} />
 
         <section className="grid grid-cols-1 gap-6 xl:grid-cols-[2fr_1fr]">
           <PostsGrid

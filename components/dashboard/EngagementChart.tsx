@@ -15,11 +15,17 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatMetric } from "@/lib/utils";
 
-type InsightsChartProps = {
-  data: Array<{ date: string; reach: number }>;
+type EngagementChartProps = {
+  data: Array<{
+    date: string;
+    likes: number;
+    comments: number;
+    shares: number;
+    saves: number;
+  }>;
 };
 
-export function InsightsChart({ data }: InsightsChartProps) {
+export function EngagementChart({ data }: EngagementChartProps) {
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
@@ -32,14 +38,14 @@ export function InsightsChart({ data }: InsightsChartProps) {
 
   const gridColor = isDark ? "#2a2a2a" : "#E5E5E5";
   const tickColor = isDark ? "#a0a0a0" : "#6B7280";
-  const lineColor = isDark ? "#f0f0f0" : "#111111";
+  const likesColor = isDark ? "#f0f0f0" : "#111111";
   const tooltipBg = isDark ? "#1a1a1a" : "#ffffff";
   const tooltipBorder = isDark ? "#2a2a2a" : "#E5E5E5";
 
   return (
     <Card className="dark:border-[#2a2a2a] dark:bg-[#1a1a1a]">
       <CardHeader>
-        <CardTitle className="text-lg dark:text-[#f0f0f0]">Evolução de alcance</CardTitle>
+        <CardTitle className="text-lg dark:text-[#f0f0f0]">Engajamento diário</CardTitle>
       </CardHeader>
       <CardContent className="h-[320px]">
         <ResponsiveContainer width="100%" height="100%">
@@ -67,7 +73,17 @@ export function InsightsChart({ data }: InsightsChartProps) {
                 color: isDark ? "#f0f0f0" : "#111111"
               }}
             />
-            <Line type="monotone" dataKey="reach" stroke={lineColor} strokeWidth={2} dot={false} name="Alcance" />
+            <Line type="monotone" dataKey="likes" stroke={likesColor} strokeWidth={2} dot={false} name="Curtidas" />
+            <Line type="monotone" dataKey="comments" stroke="#6B7280" strokeWidth={2} dot={false} name="Comentários" />
+            <Line
+              type="monotone"
+              dataKey="shares"
+              stroke="#3B82F6"
+              strokeWidth={2}
+              dot={false}
+              name="Compartilhamentos"
+            />
+            <Line type="monotone" dataKey="saves" stroke="#10B981" strokeWidth={2} dot={false} name="Salvamentos" />
           </LineChart>
         </ResponsiveContainer>
       </CardContent>
