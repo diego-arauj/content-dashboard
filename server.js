@@ -580,7 +580,7 @@ app.post("/api/invites/:token/accept", async (req, res) => {
   }
 });
 
-app.use(express.static(require("path").join(__dirname, "public")));
+app.use(express.static(process.env.STATIC_DIR || "/app/public"));
 
 app.listen(PORT, () => {
   console.log(`Listening on http://localhost:${PORT}`);
