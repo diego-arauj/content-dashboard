@@ -347,6 +347,7 @@
         <div class="range">
           <label>Início <input type="date" id="start" /></label>
           <label>Fim <input type="date" id="end" /></label>
+          <button type="button" class="pill" id="btn-refresh">Atualizar</button>
         </div>
       </header>
 
@@ -896,11 +897,7 @@
         document.getElementById("end").value = dr.end;
         document.getElementById("subtitle").textContent = "";
 
-        document.getElementById("start").addEventListener("change", () => {
-          clearPresetActive();
-          loadAll();
-        });
-        document.getElementById("end").addEventListener("change", () => {
+        document.getElementById("btn-refresh").addEventListener("click", () => {
           clearPresetActive();
           loadAll();
         });
