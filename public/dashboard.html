@@ -803,7 +803,7 @@
           totalReachPosts > 0 ? totalEng / totalReachPosts : totalEng > 0 ? null : 0;
         const engPct = engRatio === null ? null : engRatio * 100;
         document.getElementById("k-eng").textContent =
-          engPct === null ? "—" : fmtNum(engPct) + "%";
+          engPct === null ? "—" : engPct.toFixed(1).replace(".", ",") + "%";
 
         const byCount = new Map();
         for (const row of posts) {
