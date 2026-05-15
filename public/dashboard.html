@@ -174,6 +174,18 @@
         grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
         gap: 0.75rem;
       }
+      .post-wrap {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+      }
+      .post-wrap.post-wrap--link .post {
+        cursor: pointer;
+        transition: border-color 0.15s ease;
+      }
+      .post-wrap.post-wrap--link:hover .post {
+        border-color: var(--accent);
+      }
       .post {
         background: var(--surface-2);
         border: 1px solid var(--border);
@@ -200,8 +212,14 @@
       }
       .post .meta {
         padding: 0.45rem 0.55rem;
+      }
+      .post .meta-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.25rem;
         font-size: 0.75rem;
         color: var(--muted);
+        line-height: 1.3;
       }
       aside h2 {
         margin: 0 0 0.65rem;
@@ -406,6 +424,14 @@
         );
       }
 
+      function translateMediaType(mt) {
+        if (!mt) return "—";
+        if (mt === "IMAGE") return "Imagem";
+        if (mt === "VIDEO") return "Vídeo";
+        if (mt === "CAROUSEL_ALBUM") return "Carrossel";
+        return escapeHtml(mt);
+      }
+
       function renderPosts(posts) {
         const el = document.getElementById("posts");
         if (!posts.length) {
@@ -418,10 +444,33 @@
             const img = src
               ? `<div class="ph"><img src="${src}" alt="" loading="lazy" /></div>`
               : `<div class="ph">sem mídia</div>`;
-            const mt = p.media_type || "—";
-            const lc = Number(p.likes) || 0;
-            const r = Number(p.reach) || 0;
-            return `<article class="post">${img}<div class="meta">${escapeHtml(mt)} · ♥ ${lc} · Alcance ${fmtNum(r)}</div></article>`;
+            const tipoLabel = translateMediaType(p.media_type);
+            const likes = Number(p.likes) || 0;
+            const comments = Number(p.comments) || 0;
+            const shares = Number(p.shares) || 0;
+            const saved = Number(p.saved) || 0;
+            const reach = Number(p.reach);
+            const linkClicks = Number(p.link_clicks) || 0;
+
+            const metricSpans = [
+              `<span>Tipo: ${tipoLabel}</span>`,
+              `<span>Curtidas: ${fmtNum(likes)}</span>`,
+              `<span>Comentários: ${fmtNum(comments)}</span>`,
+              `<span>Compartilhamentos: ${fmtNum(shares)}</span>`,
+              `<span>Salvamentos: ${fmtNum(saved)}</span>`,
+              `<span>Alcance: ${fmtNum(reach)}</span>`,
+            ];
+            if (linkClicks > 0) {
+              metricSpans.push(`<span>Link clicks: ${fmtNum(linkClicks)}</span>`);
+            }
+
+            const meta = `<div class="meta"><div class="meta-grid">${metricSpans.join("")}</div></div>`;
+            const article = `<article class="post">${img}${meta}</article>`;
+            const permalink = p.permalink && String(p.permalink).trim();
+            if (permalink) {
+              return `<a class="post-wrap post-wrap--link" href="${escapeHtml(permalink)}" target="_blank" rel="noopener noreferrer">${article}</a>`;
+            }
+            return article;
           })
           .join("");
       }
