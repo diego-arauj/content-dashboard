@@ -592,10 +592,9 @@ cron.schedule("0 */2 * * *", async () => {
     const clients = await pool.query("SELECT id FROM clients");
     for (const client of clients.rows) {
       try {
-        await syncInstagramForClient(client.id, { days: 3 });
-        console.log(`[cron] Synced client ${client.id}`);
+        await syncInstagramForClient(client.id, { days: 730 });
       } catch (err) {
-        console.error(`[cron] Failed to sync client ${client.id}:`, err.message);
+        console.error(`[cron] sync failed for ${client.id}:`, err.message);
       }
     }
   } catch (err) {

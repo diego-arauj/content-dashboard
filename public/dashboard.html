@@ -579,6 +579,15 @@
         );
       }
 
+      function postImageSrc(p) {
+        const media = p.media_url && String(p.media_url).trim();
+        const thumb = p.thumbnail_url && String(p.thumbnail_url).trim();
+        if (p.media_type === "VIDEO") {
+          return thumb || media || "";
+        }
+        return media || "";
+      }
+
       function translateMediaType(mt) {
         if (!mt) return "—";
         if (mt === "IMAGE") return "Imagem";
@@ -598,11 +607,12 @@
           `<div class="mr"><span class="ml">${label}</span><span class="mv">${valueHtml}</span></div>`;
         el.innerHTML = posts
           .map((p) => {
-            const src = p.local_media_path ? esc(p.local_media_path) : "";
+            const srcRaw = postImageSrc(p);
+            const src = srcRaw ? esc(srcRaw) : "";
             const tipoLabel = translateMediaType(p.media_type);
             const badge = `<span class="tipo-badge">${tipoLabel}</span>`;
             const img = src
-              ? `<div class="ph">${badge}<img src="${src}" alt="" loading="lazy" /></div>`
+              ? `<div class="ph">${badge}<img src="${src}" alt="" loading="lazy" onerror="this.style.display='none'" /></div>`
               : `<div class="ph">${badge}sem mídia</div>`;
             const likes = Number(p.likes) || 0;
             const comments = Number(p.comments) || 0;
@@ -642,9 +652,10 @@
         }
         const rows = posts
           .map((p) => {
-            const src = p.local_media_path ? esc(p.local_media_path) : "";
+            const srcRaw = postImageSrc(p);
+            const src = srcRaw ? esc(srcRaw) : "";
             const thumb = src
-              ? `<img class="tthumb" src="${src}" alt="" loading="lazy" />`
+              ? `<img class="tthumb" src="${src}" alt="" loading="lazy" onerror="this.style.display='none'" />`
               : `<div class="tthumb" style="background:#0a0c10"></div>`;
             const date = p.timestamp ? new Date(p.timestamp).toLocaleDateString("pt-BR") : "—";
             const tipo = translateMediaType(p.media_type);
@@ -686,9 +697,10 @@
         el.innerHTML = sorted
           .map((p) => {
             const score = engagementScore(p);
-            const src = p.local_media_path ? esc(p.local_media_path) : "";
+            const srcRaw = postImageSrc(p);
+            const src = srcRaw ? esc(srcRaw) : "";
             const thumb = src
-              ? `<div class="thumb"><img src="${src}" alt="" /></div>`
+              ? `<div class="thumb"><img src="${src}" alt="" loading="lazy" onerror="this.style.display='none'" /></div>`
               : `<div class="thumb"></div>`;
             return `<li class="side-item">${thumb}<div class="txt"><strong>${fmtNum(score)} pts</strong><br />Alcance ${fmtNum(
               Number(p.reach) || 0
