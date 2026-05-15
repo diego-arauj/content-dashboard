@@ -2,6 +2,7 @@ const crypto = require("crypto");
 const express = require("express");
 const session = require("express-session");
 const bcrypt = require("bcrypt");
+const cron = require("node-cron");
 const pool = require("./lib/db");
 const { encrypt } = require("./lib/encryption");
 const {
@@ -583,4 +584,21 @@ app.use(express.static("public"));
 
 app.listen(PORT, () => {
   console.log(`Listening on http://localhost:${PORT}`);
+});
+
+cron.schedule("0 */2 * * *", async () => {
+  console.log("[cron] Starting scheduled sync for all clients...");
+  try {
+    const clients = await pool.query("SELECT id FROM clients");
+    for (const client of clients.rows) {
+      try {
+        await syncInstagramForClient(client.id, { days: 3 });
+        console.log(`[cron] Synced client ${client.id}`);
+      } catch (err) {
+        console.error(`[cron] Failed to sync client ${client.id}:`, err.message);
+      }
+    }
+  } catch (err) {
+    console.error("[cron] Failed to fetch clients:", err.message);
+  }
 });
