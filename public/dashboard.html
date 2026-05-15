@@ -74,6 +74,13 @@
         color: var(--text);
         font: inherit;
       }
+      .presets {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        margin-bottom: 1.25rem;
+      }
       .back {
         font-size: 0.85rem;
         color: var(--accent);
@@ -315,6 +322,16 @@
         </div>
       </header>
 
+      <div class="presets" role="group" aria-label="Períodos rápidos">
+        <button type="button" class="pill" data-preset="7">7 dias</button>
+        <button type="button" class="pill" data-preset="14">14 dias</button>
+        <button type="button" class="pill active" data-preset="30">30 dias</button>
+        <button type="button" class="pill" data-preset="90">90 dias</button>
+        <button type="button" class="pill" data-preset="week">Esta semana</button>
+        <button type="button" class="pill" data-preset="month">Este mês</button>
+        <button type="button" class="pill" data-preset="all">Todo período</button>
+      </div>
+
       <div id="error" class="err" style="display: none"></div>
 
       <section class="kpis" id="kpis">
@@ -385,14 +402,79 @@
         return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
       }
 
-      function defaultRange() {
+      function computePresetRange(key) {
         const end = new Date();
-        const start = new Date(end);
-        start.setDate(start.getDate() - 30);
-        return {
-          start: localDateKey(start),
-          end: localDateKey(end),
-        };
+        const endStr = localDateKey(end);
+        let startStr;
+        switch (key) {
+          case "7": {
+            const s = new Date(end);
+            s.setDate(s.getDate() - 7);
+            startStr = localDateKey(s);
+            break;
+          }
+          case "14": {
+            const s = new Date(end);
+            s.setDate(s.getDate() - 14);
+            startStr = localDateKey(s);
+            break;
+          }
+          case "30": {
+            const s = new Date(end);
+            s.setDate(s.getDate() - 30);
+            startStr = localDateKey(s);
+            break;
+          }
+          case "90": {
+            const s = new Date(end);
+            s.setDate(s.getDate() - 90);
+            startStr = localDateKey(s);
+            break;
+          }
+          case "week": {
+            const s = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+            const dow = s.getDay();
+            const offset = dow === 0 ? -6 : 1 - dow;
+            s.setDate(s.getDate() + offset);
+            startStr = localDateKey(s);
+            break;
+          }
+          case "month": {
+            const s = new Date(end.getFullYear(), end.getMonth(), 1);
+            startStr = localDateKey(s);
+            break;
+          }
+          case "all":
+            startStr = "2020-01-01";
+            break;
+          default: {
+            const s = new Date(end);
+            s.setDate(s.getDate() - 30);
+            startStr = localDateKey(s);
+          }
+        }
+        return { start: startStr, end: endStr };
+      }
+
+      function defaultRange() {
+        return computePresetRange("30");
+      }
+
+      function clearPresetActive() {
+        document.querySelectorAll(".presets [data-preset]").forEach((b) => b.classList.remove("active"));
+      }
+
+      function wirePresets() {
+        document.querySelectorAll(".presets [data-preset]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            clearPresetActive();
+            btn.classList.add("active");
+            const r = computePresetRange(btn.getAttribute("data-preset"));
+            document.getElementById("start").value = r.start;
+            document.getElementById("end").value = r.end;
+            loadAll();
+          });
+        });
       }
 
       function rangeParams() {
@@ -718,9 +800,16 @@
         document.getElementById("end").value = dr.end;
         document.getElementById("subtitle").textContent = "Cliente · " + clientId;
 
-        document.getElementById("start").addEventListener("change", loadAll);
-        document.getElementById("end").addEventListener("change", loadAll);
+        document.getElementById("start").addEventListener("change", () => {
+          clearPresetActive();
+          loadAll();
+        });
+        document.getElementById("end").addEventListener("change", () => {
+          clearPresetActive();
+          loadAll();
+        });
         wireToolbar();
+        wirePresets();
 
         try {
           await loadAll();
