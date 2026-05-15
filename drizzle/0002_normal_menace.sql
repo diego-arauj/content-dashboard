@@ -1,1 +1,0 @@
-ALTER TABLE "account_insights_cache" ALTER COLUMN "date" SET DATA TYPE text;

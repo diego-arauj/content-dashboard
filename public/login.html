@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Login — Content Dashboard</title>
+    <style>
+      :root {
+        --bg: #0c0e12;
+        --surface: #141820;
+        --surface-2: #1c2230;
+        --border: #2a3244;
+        --text: #e8edf5;
+        --muted: #8b97ad;
+        --accent: #6c8cff;
+        --accent-hover: #8aa3ff;
+        --danger: #f87171;
+        --radius: 10px;
+        --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: var(--font);
+        background: radial-gradient(ellipse 120% 80% at 50% -20%, #1a2240 0%, var(--bg) 55%);
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+      }
+      .card {
+        width: min(400px, 100%);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.75rem;
+        box-shadow: 0 24px 48px rgba(0, 0, 0, 0.35);
+      }
+      h1 {
+        margin: 0 0 0.25rem;
+        font-size: 1.35rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+      }
+      p.sub {
+        margin: 0 0 1.5rem;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      label {
+        display: block;
+        font-size: 0.8rem;
+        color: var(--muted);
+        margin-bottom: 0.35rem;
+      }
+      input {
+        width: 100%;
+        padding: 0.65rem 0.75rem;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--surface-2);
+        color: var(--text);
+        font: inherit;
+        margin-bottom: 1rem;
+      }
+      input:focus {
+        outline: 2px solid rgba(108, 140, 255, 0.35);
+        border-color: var(--accent);
+      }
+      button {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: none;
+        border-radius: 8px;
+        background: linear-gradient(135deg, var(--accent), #5568d6);
+        color: #fff;
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+        transition: filter 0.15s, transform 0.1s;
+      }
+      button:hover {
+        filter: brightness(1.06);
+      }
+      button:active {
+        transform: translateY(1px);
+      }
+      button:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+      .error {
+        color: var(--danger);
+        font-size: 0.85rem;
+        margin-bottom: 0.75rem;
+        min-height: 1.2em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Entrar</h1>
+      <p class="sub">Content Dashboard</p>
+      <div class="error" id="err" aria-live="polite"></div>
+      <form id="form">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" autocomplete="username" required />
+        <label for="password">Senha</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required />
+        <button type="submit" id="btn">Entrar</button>
+      </form>
+    </div>
+    <script>
+      const form = document.getElementById("form");
+      const err = document.getElementById("err");
+      const btn = document.getElementById("btn");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        err.textContent = "";
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+        btn.disabled = true;
+        try {
+          const res = await fetch("/api/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ email, password }),
+          });
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            err.textContent = data.error || "Credenciais inválidas.";
+            return;
+          }
+          window.location.href = "/index.html";
+        } catch {
+          err.textContent = "Erro de rede. Tente de novo.";
+        } finally {
+          btn.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>

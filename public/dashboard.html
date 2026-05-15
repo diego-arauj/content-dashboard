@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboard — Content Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+      :root {
+        --bg: #0c0e12;
+        --surface: #141820;
+        --surface-2: #1c2230;
+        --border: #2a3244;
+        --text: #e8edf5;
+        --muted: #8b97ad;
+        --accent: #6c8cff;
+        --accent-hover: #8aa3ff;
+        --chart-grid: rgba(139, 151, 173, 0.12);
+        --radius: 10px;
+        --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: var(--font);
+        background: radial-gradient(ellipse 120% 80% at 50% -20%, #1a2240 0%, var(--bg) 50%);
+        color: var(--text);
+        min-height: 100vh;
+      }
+      .shell {
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 1.5rem clamp(1rem, 4vw, 2rem) 3rem;
+      }
+      header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+      }
+      h1 {
+        margin: 0;
+        font-size: 1.35rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+      }
+      .sub {
+        margin: 0.25rem 0 0;
+        color: var(--muted);
+        font-size: 0.88rem;
+      }
+      .range {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .range label {
+        font-size: 0.75rem;
+        color: var(--muted);
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+      }
+      .range input[type="date"] {
+        padding: 0.45rem 0.55rem;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--surface-2);
+        color: var(--text);
+        font: inherit;
+      }
+      .back {
+        font-size: 0.85rem;
+        color: var(--accent);
+        text-decoration: none;
+      }
+      .back:hover {
+        text-decoration: underline;
+      }
+      .kpis {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+      }
+      .kpi {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1rem;
+      }
+      .kpi .k {
+        font-size: 0.75rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+      .kpi .v {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-top: 0.25rem;
+      }
+      .charts {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+      }
+      @media (min-width: 960px) {
+        .charts {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      .panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1rem;
+      }
+      .panel h2 {
+        margin: 0 0 0.75rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+      }
+      .chart-wrap {
+        position: relative;
+        height: 280px;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      @media (min-width: 1000px) {
+        .layout {
+          grid-template-columns: 1fr 300px;
+          align-items: start;
+        }
+      }
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+      }
+      .toolbar span.h {
+        font-size: 0.75rem;
+        color: var(--muted);
+        margin-right: 0.25rem;
+      }
+      .pill {
+        font: inherit;
+        padding: 0.35rem 0.65rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--surface-2);
+        color: var(--text);
+        cursor: pointer;
+        font-size: 0.82rem;
+      }
+      .pill.active {
+        border-color: var(--accent);
+        background: rgba(108, 140, 255, 0.15);
+        color: var(--accent-hover);
+      }
+      .posts {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 0.75rem;
+      }
+      .post {
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      .post .ph {
+        aspect-ratio: 1;
+        background: #0a0c10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--muted);
+        font-size: 0.75rem;
+      }
+      .post img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        aspect-ratio: 1;
+      }
+      .post .meta {
+        padding: 0.45rem 0.55rem;
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
+      aside h2 {
+        margin: 0 0 0.65rem;
+        font-size: 0.95rem;
+      }
+      .side-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .side-item {
+        display: flex;
+        gap: 0.5rem;
+        align-items: flex-start;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 0.45rem;
+        background: var(--surface-2);
+      }
+      .side-item .thumb {
+        width: 46px;
+        height: 46px;
+        border-radius: 6px;
+        overflow: hidden;
+        flex-shrink: 0;
+        background: #0a0c10;
+      }
+      .side-item .thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .side-item .txt {
+        font-size: 0.78rem;
+        color: var(--muted);
+        line-height: 1.35;
+      }
+      .side-item strong {
+        color: var(--text);
+        font-size: 0.82rem;
+      }
+      .err {
+        color: #f87171;
+        padding: 1rem;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <header>
+        <div>
+          <a class="back" href="/index.html" id="back-link">← Admin</a>
+          <h1>Dashboard</h1>
+          <p class="sub" id="subtitle">Carregando…</p>
+        </div>
+        <div class="range">
+          <label>Início <input type="date" id="start" /></label>
+          <label>Fim <input type="date" id="end" /></label>
+        </div>
+      </header>
+
+      <div id="error" class="err" style="display: none"></div>
+
+      <section class="kpis" id="kpis">
+        <div class="kpi"><div class="k">Seguidores</div><div class="v" id="k-follow">—</div></div>
+        <div class="kpi"><div class="k">Alcance médio</div><div class="v" id="k-reach">—</div></div>
+        <div class="kpi"><div class="k">Engajamento médio</div><div class="v" id="k-eng">—</div></div>
+        <div class="kpi"><div class="k">Posts no período</div><div class="v" id="k-posts">—</div></div>
+      </section>
+
+      <div class="charts">
+        <div class="panel">
+          <h2>Evolução de alcance</h2>
+          <div class="chart-wrap"><canvas id="c-reach"></canvas></div>
+        </div>
+        <div class="panel">
+          <h2>Engajamento diário</h2>
+          <div class="chart-wrap"><canvas id="c-eng"></canvas></div>
+        </div>
+      </div>
+
+      <div class="layout">
+        <div class="panel">
+          <div class="toolbar">
+            <span class="h">Ordenar</span>
+            <button type="button" class="pill active" data-sort="likes">likes</button>
+            <button type="button" class="pill" data-sort="reach">reach</button>
+            <button type="button" class="pill" data-sort="comments">comments</button>
+            <button type="button" class="pill" data-sort="shares">shares</button>
+            <button type="button" class="pill" data-sort="saved">saved</button>
+          </div>
+          <div class="toolbar">
+            <span class="h">Formato</span>
+            <button type="button" class="pill active" data-fmt="">todos</button>
+            <button type="button" class="pill" data-fmt="IMAGE">IMAGE</button>
+            <button type="button" class="pill" data-fmt="VIDEO">VIDEO</button>
+            <button type="button" class="pill" data-fmt="CAROUSEL_ALBUM">CAROUSEL</button>
+          </div>
+          <h2 style="margin-top: 0.5rem">Posts</h2>
+          <div class="posts" id="posts"></div>
+        </div>
+        <aside class="panel">
+          <h2>Top 5 — engajamento</h2>
+          <ol class="side-list" id="top5"></ol>
+        </aside>
+      </div>
+    </div>
+
+    <script>
+      const api = (path, opts) =>
+        fetch(path, { credentials: "include", ...opts });
+
+      let clientId = "";
+      let chartReach = null;
+      let chartEng = null;
+      let sortKey = "likes";
+      let formatKey = "";
+
+      function qs(name) {
+        const u = new URL(window.location.href);
+        return u.searchParams.get(name) || "";
+      }
+
+      function pad2(n) {
+        return String(n).padStart(2, "0");
+      }
+
+      function localDateKey(d) {
+        return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+      }
+
+      function defaultRange() {
+        const end = new Date();
+        const start = new Date(end);
+        start.setDate(start.getDate() - 30);
+        return {
+          start: localDateKey(start),
+          end: localDateKey(end),
+        };
+      }
+
+      function rangeParams() {
+        const s = document.getElementById("start").value;
+        const e = document.getElementById("end").value;
+        const startDt = new Date(s + "T00:00:00");
+        const endDt = new Date(e + "T23:59:59.999");
+        return {
+          startIso: startDt.toISOString(),
+          endIso: endDt.toISOString(),
+          startDay: s,
+          endDay: e,
+        };
+      }
+
+      function enumerateDays(startStr, endStr) {
+        const out = [];
+        const a = new Date(startStr + "T12:00:00");
+        const b = new Date(endStr + "T12:00:00");
+        if (a > b) {
+          return out;
+        }
+        for (let t = a.getTime(); t <= b.getTime(); t += 86400000) {
+          out.push(localDateKey(new Date(t)));
+        }
+        return out;
+      }
+
+      function showErr(msg) {
+        const el = document.getElementById("error");
+        el.style.display = msg ? "block" : "none";
+        el.textContent = msg || "";
+      }
+
+      function destroyCharts() {
+        if (chartReach) {
+          chartReach.destroy();
+          chartReach = null;
+        }
+        if (chartEng) {
+          chartEng.destroy();
+          chartEng = null;
+        }
+      }
+
+      function fmtNum(n) {
+        if (n == null || !Number.isFinite(n)) return "—";
+        if (n >= 1e6) return (n / 1e6).toFixed(1) + "M";
+        if (n >= 1e3) return (n / 1e3).toFixed(1) + "k";
+        return String(Math.round(n * 1000) / 1000);
+      }
+
+      function engagementScore(p) {
+        return (
+          (Number(p.likes) || 0) +
+          (Number(p.comments) || 0) +
+          (Number(p.shares) || 0) +
+          (Number(p.saved) || 0)
+        );
+      }
+
+      function renderPosts(posts) {
+        const el = document.getElementById("posts");
+        if (!posts.length) {
+          el.innerHTML = "<p class=\"sub\">Nenhum post no período.</p>";
+          return;
+        }
+        el.innerHTML = posts
+          .map((p) => {
+            const src = p.local_media_path ? esc(p.local_media_path) : "";
+            const img = src
+              ? `<div class="ph"><img src="${src}" alt="" loading="lazy" /></div>`
+              : `<div class="ph">sem mídia</div>`;
+            const mt = p.media_type || "—";
+            const lc = Number(p.likes) || 0;
+            const r = Number(p.reach) || 0;
+            return `<article class="post">${img}<div class="meta">${escapeHtml(mt)} · ♥ ${lc} · reach ${fmtNum(r)}</div></article>`;
+          })
+          .join("");
+      }
+
+      function renderTop5(posts) {
+        const el = document.getElementById("top5");
+        const sorted = [...posts].sort((a, b) => engagementScore(b) - engagementScore(a)).slice(0, 5);
+        if (!sorted.length) {
+          el.innerHTML = "<li class=\"txt\">—</li>";
+          return;
+        }
+        el.innerHTML = sorted
+          .map((p) => {
+            const score = engagementScore(p);
+            const src = p.local_media_path ? esc(p.local_media_path) : "";
+            const thumb = src
+              ? `<div class="thumb"><img src="${src}" alt="" /></div>`
+              : `<div class="thumb"></div>`;
+            return `<li class="side-item">${thumb}<div class="txt"><strong>${fmtNum(score)} pts</strong><br />reach ${fmtNum(
+              Number(p.reach) || 0
+            )} · ${escapeHtml(p.media_type || "")}</div></li>`;
+          })
+          .join("");
+      }
+
+      function esc(s) {
+        return String(s).replace(/"/g, "&quot;");
+      }
+
+      function escapeHtml(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      async function loadAll() {
+        showErr("");
+        const p = rangeParams();
+        const overviewUrl = `/api/dashboard/${encodeURIComponent(
+          clientId
+        )}/overview?start=${encodeURIComponent(p.startDay)}&end=${encodeURIComponent(p.endDay)}`;
+        const postsParams = new URLSearchParams({
+          start: p.startIso,
+          end: p.endIso,
+          sort: sortKey,
+        });
+        if (formatKey) {
+          postsParams.set("format", formatKey);
+        }
+        const postsUrl = `/api/dashboard/${encodeURIComponent(clientId)}/posts?${postsParams.toString()}`;
+
+        const [ovRes, profRes, postsRes] = await Promise.all([
+          api(overviewUrl),
+          api(`/api/dashboard/${encodeURIComponent(clientId)}/profile`),
+          api(postsUrl),
+        ]);
+
+        if (ovRes.status === 401 || profRes.status === 401 || postsRes.status === 401) {
+          window.location.href = "/login.html";
+          return;
+        }
+        if (ovRes.status === 403 || profRes.status === 403 || postsRes.status === 403) {
+          showErr("Sem permissão para este cliente.");
+          return;
+        }
+        if (!profRes.ok) {
+          document.getElementById("k-follow").textContent = "—";
+        } else {
+          const prof = await profRes.json();
+          document.getElementById("k-follow").textContent = fmtNum(Number(prof.followers_count) || 0);
+        }
+
+        const overview = ovRes.ok ? await ovRes.json() : [];
+        const dayLabels = enumerateDays(p.startDay, p.endDay);
+        const byDayReach = new Map();
+        for (const row of overview) {
+          if (row.date) {
+            byDayReach.set(row.date.slice(0, 10), Number(row.reach) || 0);
+          }
+        }
+        const reachVals = dayLabels.map((d) => byDayReach.get(d) ?? 0);
+        const reachAvg =
+          overview.length > 0
+            ? overview.reduce((s, r) => s + (Number(r.reach) || 0), 0) / overview.length
+            : null;
+        document.getElementById("k-reach").textContent = reachAvg != null ? fmtNum(reachAvg) : "—";
+
+        destroyCharts();
+        const tickColor = "#8b97ad";
+        const gridColor = "rgba(139, 151, 173, 0.12)";
+        const commonOpts = {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { ticks: { color: tickColor }, grid: { color: gridColor } },
+            y: { ticks: { color: tickColor }, grid: { color: gridColor }, beginAtZero: true },
+          },
+          plugins: { legend: { labels: { color: tickColor } } },
+        };
+
+        const ChartCtor = window.Chart;
+        chartReach = new ChartCtor(document.getElementById("c-reach"), {
+          type: "line",
+          data: {
+            labels: dayLabels,
+            datasets: [
+              {
+                label: "Alcance",
+                data: reachVals,
+                borderColor: "#6c8cff",
+                backgroundColor: "rgba(108, 140, 255, 0.2)",
+                tension: 0.25,
+                fill: true,
+              },
+            ],
+          },
+          options: commonOpts,
+        });
+
+        const posts = postsRes.ok ? await postsRes.json() : [];
+        document.getElementById("k-posts").textContent = String(posts.length);
+
+        const totalEng = posts.reduce((s, p) => s + engagementScore(p), 0);
+        const totalReachPosts = posts.reduce((s, p) => s + (Number(p.reach) || 0), 0);
+        const engRatio =
+          totalReachPosts > 0 ? totalEng / totalReachPosts : totalEng > 0 ? null : 0;
+        document.getElementById("k-eng").textContent =
+          engRatio === null ? "—" : fmtNum(engRatio);
+
+        const byCount = new Map();
+        for (const row of posts) {
+          if (!row.timestamp) continue;
+          const k = localDateKey(new Date(row.timestamp));
+          const cur = byCount.get(k) || { likes: 0, comments: 0, shares: 0, saved: 0 };
+          cur.likes += Number(row.likes) || 0;
+          cur.comments += Number(row.comments) || 0;
+          cur.shares += Number(row.shares) || 0;
+          cur.saved += Number(row.saved) || 0;
+          byCount.set(k, cur);
+        }
+        const likesD = dayLabels.map((d) => (byCount.get(d)?.likes ?? 0));
+        const commentsD = dayLabels.map((d) => (byCount.get(d)?.comments ?? 0));
+        const sharesD = dayLabels.map((d) => (byCount.get(d)?.shares ?? 0));
+        const savedD = dayLabels.map((d) => (byCount.get(d)?.saved ?? 0));
+
+        chartEng = new ChartCtor(document.getElementById("c-eng"), {
+          type: "line",
+          data: {
+            labels: dayLabels,
+            datasets: [
+              { label: "likes", data: likesD, borderColor: "#f472b6", tension: 0.2, fill: false },
+              { label: "comments", data: commentsD, borderColor: "#22d3ee", tension: 0.2, fill: false },
+              { label: "shares", data: sharesD, borderColor: "#a78bfa", tension: 0.2, fill: false },
+              { label: "saved", data: savedD, borderColor: "#4ade80", tension: 0.2, fill: false },
+            ],
+          },
+          options: commonOpts,
+        });
+
+        renderPosts(posts);
+        renderTop5(posts);
+
+        if (!postsRes.ok) {
+          showErr("Não foi possível carregar posts.");
+        }
+      }
+
+      function wireToolbar() {
+        document.querySelectorAll("[data-sort]").forEach((b) => {
+          b.addEventListener("click", () => {
+            document.querySelectorAll("[data-sort]").forEach((x) => x.classList.remove("active"));
+            b.classList.add("active");
+            sortKey = b.getAttribute("data-sort") || "likes";
+            loadAll();
+          });
+        });
+        document.querySelectorAll("[data-fmt]").forEach((b) => {
+          b.addEventListener("click", () => {
+            document.querySelectorAll("[data-fmt]").forEach((x) => x.classList.remove("active"));
+            b.classList.add("active");
+            formatKey = b.getAttribute("data-fmt") || "";
+            loadAll();
+          });
+        });
+      }
+
+      (async function init() {
+        clientId = qs("client");
+        if (!clientId) {
+          showErr("Parâmetro client ausente.");
+          document.getElementById("subtitle").textContent = "Defina ?client=";
+          return;
+        }
+
+        const meRes = await api("/api/auth/me");
+        if (meRes.status === 401) {
+          window.location.href = "/login.html";
+          return;
+        }
+        const me = await meRes.json();
+        if (me.role === "client") {
+          if (me.clientId && String(me.clientId) !== String(clientId)) {
+            window.location.href = `/dashboard.html?client=${encodeURIComponent(me.clientId)}`;
+            return;
+          }
+          document.getElementById("back-link").style.display = "none";
+        }
+
+        const dr = defaultRange();
+        document.getElementById("start").value = dr.start;
+        document.getElementById("end").value = dr.end;
+        document.getElementById("subtitle").textContent = "Cliente · " + clientId;
+
+        document.getElementById("start").addEventListener("change", loadAll);
+        document.getElementById("end").addEventListener("change", loadAll);
+        wireToolbar();
+
+        try {
+          await loadAll();
+        } catch (e) {
+          console.error(e);
+          showErr("Erro ao carregar dados.");
+        }
+      })();
+    </script>
+  </body>
+</html>

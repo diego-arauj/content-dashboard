@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin — Content Dashboard</title>
+    <style>
+      :root {
+        --bg: #0c0e12;
+        --surface: #141820;
+        --surface-2: #1c2230;
+        --border: #2a3244;
+        --text: #e8edf5;
+        --muted: #8b97ad;
+        --accent: #6c8cff;
+        --accent-hover: #8aa3ff;
+        --success: #4ade80;
+        --danger: #f87171;
+        --radius: 10px;
+        --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: var(--font);
+        background: radial-gradient(ellipse 120% 80% at 50% -20%, #1a2240 0%, var(--bg) 50%);
+        color: var(--text);
+        min-height: 100vh;
+      }
+      .shell {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 1.5rem clamp(1rem, 4vw, 2rem) 3rem;
+      }
+      header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+      h1 {
+        margin: 0;
+        font-size: 1.35rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+      }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      button,
+      .btn {
+        font: inherit;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--surface-2);
+        color: var(--text);
+        padding: 0.55rem 0.9rem;
+        cursor: pointer;
+        transition: background 0.15s, border-color 0.15s;
+      }
+      button.primary,
+      .btn.primary {
+        background: linear-gradient(135deg, var(--accent), #5568d6);
+        border-color: transparent;
+        color: #fff;
+        font-weight: 600;
+      }
+      button:hover,
+      .btn:hover {
+        filter: brightness(1.08);
+      }
+      button.small {
+        padding: 0.35rem 0.65rem;
+        font-size: 0.85rem;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 1rem;
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.1rem 1.15rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+      }
+      .card h2 {
+        margin: 0;
+        font-size: 1.05rem;
+      }
+      .card .niche {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.88rem;
+        min-height: 1.25rem;
+      }
+      .card-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        margin-top: auto;
+        padding-top: 0.35rem;
+      }
+      .meta {
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+      .overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        z-index: 50;
+      }
+      .overlay.open {
+        display: flex;
+      }
+      .modal {
+        width: min(420px, 100%);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.25rem;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+      }
+      .modal h3 {
+        margin: 0 0 1rem;
+        font-size: 1.1rem;
+      }
+      .modal label {
+        display: block;
+        font-size: 0.8rem;
+        color: var(--muted);
+        margin-bottom: 0.25rem;
+      }
+      .modal input,
+      .modal select {
+        width: 100%;
+        padding: 0.55rem 0.65rem;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--surface-2);
+        color: var(--text);
+        font: inherit;
+        margin-bottom: 0.85rem;
+      }
+      .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+      }
+      .toast {
+        margin-top: 0.75rem;
+        padding: 0.6rem 0.75rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        word-break: break-all;
+      }
+      .toast.success {
+        border-color: rgba(74, 222, 128, 0.35);
+        color: var(--success);
+      }
+      .loading {
+        color: var(--muted);
+        padding: 2rem;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <header>
+        <h1>Clientes</h1>
+        <div class="actions">
+          <button type="button" class="primary" id="btn-new">Novo cliente</button>
+          <button type="button" id="btn-invite">Convidar cliente</button>
+        </div>
+      </header>
+      <div id="list" class="loading">Carregando…</div>
+    </div>
+
+    <div class="overlay" id="modal-new" aria-hidden="true">
+      <div class="modal" role="dialog" aria-modal="true">
+        <h3>Novo cliente</h3>
+        <form id="form-new">
+          <label for="nf-name">Nome</label>
+          <input id="nf-name" required autocomplete="off" />
+          <label for="nf-niche">Niche (opcional)</label>
+          <input id="nf-niche" autocomplete="off" />
+          <div class="modal-actions">
+            <button type="button" id="nf-cancel">Cancelar</button>
+            <button type="submit" class="primary">Criar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="overlay" id="modal-invite" aria-hidden="true">
+      <div class="modal" role="dialog" aria-modal="true">
+        <h3>Convidar cliente</h3>
+        <form id="form-invite">
+          <label for="inv-client">Cliente</label>
+          <select id="inv-client" required></select>
+          <label for="inv-email">Email</label>
+          <input id="inv-email" type="email" required autocomplete="off" />
+          <div class="modal-actions">
+            <button type="button" id="inv-cancel">Fechar</button>
+            <button type="submit" class="primary">Enviar convite</button>
+          </div>
+        </form>
+        <div id="inv-toast" class="toast" style="display: none"></div>
+      </div>
+    </div>
+
+    <script>
+      const api = (path, opts) =>
+        fetch(path, { credentials: "include", ...opts });
+
+      async function ensureSession() {
+        const res = await api("/api/auth/me");
+        if (res.status === 401) {
+          window.location.href = "/login.html";
+          return null;
+        }
+        const me = await res.json();
+        if (me.role === "client") {
+          const id = me.clientId;
+          window.location.href = id
+            ? `/dashboard.html?client=${encodeURIComponent(id)}`
+            : "/dashboard.html";
+          return null;
+        }
+        if (me.role !== "admin") {
+          window.location.href = "/login.html";
+          return null;
+        }
+        return me;
+      }
+
+      function openModal(el) {
+        el.classList.add("open");
+        el.setAttribute("aria-hidden", "false");
+      }
+      function closeModal(el) {
+        el.classList.remove("open");
+        el.setAttribute("aria-hidden", "true");
+      }
+
+      async function loadClients() {
+        const res = await api("/api/clients");
+        if (!res.ok) {
+          document.getElementById("list").innerHTML = "<p>Não foi possível carregar clientes.</p>";
+          return;
+        }
+        const clients = await res.json();
+        const list = document.getElementById("list");
+        if (!clients.length) {
+          list.innerHTML = "<p class=\"meta\">Nenhum cliente ainda.</p>";
+          return;
+        }
+        list.className = "grid";
+        list.innerHTML = clients
+          .map(
+            (c) => `
+          <article class="card" data-id="${c.id}">
+            <h2>${escapeHtml(c.name || "—")}</h2>
+            <p class="niche">${escapeHtml(c.niche || "Sem niche")}</p>
+            <p class="meta">${formatDate(c.created_at)}</p>
+            <div class="card-actions">
+              <button type="button" class="small primary" data-open-dash>Abrir dashboard</button>
+              <button type="button" class="small" data-sync>Sincronizar</button>
+              <button type="button" class="small" data-invite-one>Convidar</button>
+            </div>
+          </article>
+        `
+          )
+          .join("");
+
+        populateInviteSelect(clients);
+      }
+
+      function populateInviteSelect(clients) {
+        const sel = document.getElementById("inv-client");
+        sel.innerHTML =
+          '<option value="">Selecione…</option>' +
+          clients
+            .map(
+              (c) =>
+                `<option value="${c.id}">${escapeHtml(c.name)}</option>`
+            )
+            .join("");
+      }
+
+      function formatDate(iso) {
+        if (!iso) return "";
+        const d = new Date(iso);
+        return d.toLocaleDateString("pt-BR", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        });
+      }
+
+      function escapeHtml(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      document.getElementById("btn-new").addEventListener("click", () => {
+        openModal(document.getElementById("modal-new"));
+      });
+      document.getElementById("nf-cancel").addEventListener("click", () => {
+        closeModal(document.getElementById("modal-new"));
+      });
+
+      document.getElementById("form-new").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const name = document.getElementById("nf-name").value.trim();
+        const niche = document.getElementById("nf-niche").value.trim();
+        if (!name) return;
+        const res = await api("/api/clients", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, niche: niche || null }),
+        });
+        if (!res.ok) {
+          alert("Não foi possível criar o cliente.");
+          return;
+        }
+        closeModal(document.getElementById("modal-new"));
+        e.target.reset();
+        await loadClients();
+      });
+
+      document.getElementById("btn-invite").addEventListener("click", () => {
+        openInviteModal(null);
+      });
+
+      function openInviteModal(preselectId) {
+        document.getElementById("inv-toast").style.display = "none";
+        document.getElementById("form-invite").reset();
+        const sel = document.getElementById("inv-client");
+        if (preselectId) {
+          sel.value = preselectId;
+        }
+        openModal(document.getElementById("modal-invite"));
+      }
+
+      document.getElementById("inv-cancel").addEventListener("click", () => {
+        closeModal(document.getElementById("modal-invite"));
+      });
+
+      document.getElementById("form-invite").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const clientId = document.getElementById("inv-client").value;
+        const email = document.getElementById("inv-email").value.trim();
+        if (!clientId || !email) return;
+        const res = await api(`/api/clients/${clientId}/invite`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        });
+        const toast = document.getElementById("inv-toast");
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          toast.style.display = "block";
+          toast.className = "toast";
+          toast.textContent = data.error || "Falha ao convidar.";
+          return;
+        }
+        const link = `${window.location.origin}/login.html?inviteToken=${encodeURIComponent(data.token)}`;
+        toast.style.display = "block";
+        toast.className = "toast success";
+        toast.textContent = "Link de convite: " + link;
+      });
+
+      document.querySelectorAll(".overlay").forEach((ov) => {
+        ov.addEventListener("click", (e) => {
+          if (e.target === ov) closeModal(ov);
+        });
+      });
+
+      document.getElementById("list").addEventListener("click", async (e) => {
+        const card = e.target.closest(".card");
+        if (!card) return;
+        const id = card.getAttribute("data-id");
+        if (!id) return;
+
+        if (e.target.closest("[data-open-dash]")) {
+          window.location.href = `/dashboard.html?client=${encodeURIComponent(id)}`;
+          return;
+        }
+        if (e.target.closest("[data-invite-one]")) {
+          openInviteModal(id);
+          return;
+        }
+        const syncBtn = e.target.closest("[data-sync]");
+        if (syncBtn) {
+          syncBtn.disabled = true;
+          try {
+            const r = await api(`/api/instagram/sync/${id}`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: "{}",
+            });
+            if (!r.ok) {
+              const errBody = await r.json().catch(() => ({}));
+              alert(errBody.error || "Falha ao sincronizar.");
+              return;
+            }
+            alert("Sincronizado.");
+          } catch {
+            alert("Erro de rede.");
+          } finally {
+            syncBtn.disabled = false;
+          }
+        }
+      });
+
+      (async () => {
+        const me = await ensureSession();
+        if (!me) return;
+        await loadClients();
+      })();
+    </script>
+  </body>
+</html>
