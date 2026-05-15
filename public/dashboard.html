@@ -306,6 +306,34 @@
         padding: 1rem;
         text-align: center;
       }
+      .posts-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.82rem;
+      }
+      .posts-table th {
+        text-align: left;
+        padding: 0.4rem 0.6rem;
+        color: var(--muted);
+        font-weight: 500;
+        border-bottom: 1px solid var(--border);
+      }
+      .posts-table td {
+        padding: 0.4rem 0.6rem;
+        border-bottom: 1px solid rgba(42, 50, 68, 0.5);
+        vertical-align: middle;
+      }
+      .posts-table tr:hover td {
+        background: rgba(255, 255, 255, 0.03);
+        cursor: pointer;
+      }
+      .posts-table .tthumb {
+        width: 48px;
+        height: 48px;
+        object-fit: cover;
+        border-radius: 4px;
+        display: block;
+      }
     </style>
   </head>
   <body>
@@ -314,7 +342,7 @@
         <div>
           <a class="back" href="/index.html" id="back-link">← Admin</a>
           <h1>Dashboard</h1>
-          <p class="sub" id="subtitle">Carregando…</p>
+          <p class="sub" id="subtitle" style="display: none">Carregando…</p>
         </div>
         <div class="range">
           <label>Início <input type="date" id="start" /></label>
@@ -369,6 +397,11 @@
             <button type="button" class="pill" data-fmt="VIDEO">Vídeo</button>
             <button type="button" class="pill" data-fmt="CAROUSEL_ALBUM">Carrossel</button>
           </div>
+          <div class="toolbar">
+            <span class="h">Visualização</span>
+            <button type="button" class="pill active" data-view="grid">▦ Grade</button>
+            <button type="button" class="pill" data-view="list">☰ Lista</button>
+          </div>
           <h2 style="margin-top: 0.5rem">Posts</h2>
           <div class="posts" id="posts"></div>
         </div>
@@ -388,6 +421,8 @@
       let chartEng = null;
       let sortKey = "likes";
       let formatKey = "";
+      let viewKey = "grid";
+      let lastPosts = [];
 
       function qs(name) {
         const u = new URL(window.location.href);
@@ -464,6 +499,12 @@
         document.querySelectorAll(".presets [data-preset]").forEach((b) => b.classList.remove("active"));
       }
 
+      function setPresetActive(key) {
+        clearPresetActive();
+        const btn = document.querySelector(`.presets [data-preset="${key}"]`);
+        if (btn) btn.classList.add("active");
+      }
+
       function wirePresets() {
         document.querySelectorAll(".presets [data-preset]").forEach((btn) => {
           btn.addEventListener("click", () => {
@@ -475,6 +516,7 @@
             loadAll();
           });
         });
+        setPresetActive("30");
       }
 
       function rangeParams() {
@@ -546,6 +588,7 @@
 
       function renderPosts(posts) {
         const el = document.getElementById("posts");
+        el.style.display = "grid";
         if (!posts.length) {
           el.innerHTML = "<p class=\"sub\">Nenhum post no período.</p>";
           return;
@@ -587,6 +630,49 @@
             return article;
           })
           .join("");
+      }
+
+      function renderPostsList(posts) {
+        const el = document.getElementById("posts");
+        el.style.display = "block";
+        if (!posts.length) {
+          el.innerHTML = "<p class='sub'>Nenhum post no período.</p>";
+          return;
+        }
+        const rows = posts
+          .map((p) => {
+            const src = p.local_media_path ? esc(p.local_media_path) : "";
+            const thumb = src
+              ? `<img class="tthumb" src="${src}" alt="" loading="lazy" />`
+              : `<div class="tthumb" style="background:#0a0c10"></div>`;
+            const date = p.timestamp ? new Date(p.timestamp).toLocaleDateString("pt-BR") : "—";
+            const tipo = translateMediaType(p.media_type);
+            const permalink = p.permalink ? escapeHtml(p.permalink) : "";
+            const onclick = permalink ? `onclick="window.open('${permalink}','_blank')"` : "";
+            return `<tr ${onclick}>
+        <td>${thumb}</td>
+        <td>${tipo}</td>
+        <td>${date}</td>
+        <td>${fmtNum(Number(p.likes) || 0)}</td>
+        <td>${fmtNum(Number(p.comments) || 0)}</td>
+        <td>${fmtNum(Number(p.shares) || 0)}</td>
+        <td>${fmtNum(Number(p.saved) || 0)}</td>
+        <td>${fmtNum(Number(p.reach) || 0)}</td>
+      </tr>`;
+          })
+          .join("");
+        el.innerHTML = `<div style="overflow-x:auto"><table class="posts-table">
+      <thead><tr>
+        <th></th><th>Tipo</th><th>Data</th><th>Curtidas</th>
+        <th>Comentários</th><th>Compartilhamentos</th><th>Salvamentos</th><th>Alcance</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>`;
+      }
+
+      function renderCurrentPosts() {
+        if (viewKey === "list") renderPostsList(lastPosts);
+        else renderPosts(lastPosts);
       }
 
       function renderTop5(posts) {
@@ -707,14 +793,16 @@
         });
 
         const posts = postsRes.ok ? await postsRes.json() : [];
+        lastPosts = posts;
         document.getElementById("k-posts").textContent = String(posts.length);
 
         const totalEng = posts.reduce((s, p) => s + engagementScore(p), 0);
         const totalReachPosts = posts.reduce((s, p) => s + (Number(p.reach) || 0), 0);
         const engRatio =
           totalReachPosts > 0 ? totalEng / totalReachPosts : totalEng > 0 ? null : 0;
+        const engPct = engRatio === null ? null : engRatio * 100;
         document.getElementById("k-eng").textContent =
-          engRatio === null ? "—" : fmtNum(engRatio);
+          engPct === null ? "—" : fmtNum(engPct) + "%";
 
         const byCount = new Map();
         for (const row of posts) {
@@ -746,7 +834,7 @@
           options: commonOpts,
         });
 
-        renderPosts(posts);
+        renderCurrentPosts();
         renderTop5(posts);
 
         if (!postsRes.ok) {
@@ -769,6 +857,14 @@
             b.classList.add("active");
             formatKey = b.getAttribute("data-fmt") || "";
             loadAll();
+          });
+        });
+        document.querySelectorAll("[data-view]").forEach((b) => {
+          b.addEventListener("click", () => {
+            document.querySelectorAll("[data-view]").forEach((x) => x.classList.remove("active"));
+            b.classList.add("active");
+            viewKey = b.getAttribute("data-view") || "grid";
+            renderCurrentPosts();
           });
         });
       }
@@ -798,7 +894,7 @@
         const dr = defaultRange();
         document.getElementById("start").value = dr.start;
         document.getElementById("end").value = dr.end;
-        document.getElementById("subtitle").textContent = "Cliente · " + clientId;
+        document.getElementById("subtitle").textContent = "";
 
         document.getElementById("start").addEventListener("change", () => {
           clearPresetActive();
