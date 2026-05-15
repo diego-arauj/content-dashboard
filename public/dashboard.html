@@ -291,18 +291,18 @@
         <div class="panel">
           <div class="toolbar">
             <span class="h">Ordenar</span>
-            <button type="button" class="pill active" data-sort="likes">likes</button>
-            <button type="button" class="pill" data-sort="reach">reach</button>
-            <button type="button" class="pill" data-sort="comments">comments</button>
-            <button type="button" class="pill" data-sort="shares">shares</button>
-            <button type="button" class="pill" data-sort="saved">saved</button>
+            <button type="button" class="pill active" data-sort="likes">Curtidas</button>
+            <button type="button" class="pill" data-sort="reach">Alcance</button>
+            <button type="button" class="pill" data-sort="comments">Comentários</button>
+            <button type="button" class="pill" data-sort="shares">Compartilhamentos</button>
+            <button type="button" class="pill" data-sort="saved">Salvamentos</button>
           </div>
           <div class="toolbar">
             <span class="h">Formato</span>
             <button type="button" class="pill active" data-fmt="">todos</button>
-            <button type="button" class="pill" data-fmt="IMAGE">IMAGE</button>
-            <button type="button" class="pill" data-fmt="VIDEO">VIDEO</button>
-            <button type="button" class="pill" data-fmt="CAROUSEL_ALBUM">CAROUSEL</button>
+            <button type="button" class="pill" data-fmt="IMAGE">Imagem</button>
+            <button type="button" class="pill" data-fmt="VIDEO">Vídeo</button>
+            <button type="button" class="pill" data-fmt="CAROUSEL_ALBUM">Carrossel</button>
           </div>
           <h2 style="margin-top: 0.5rem">Posts</h2>
           <div class="posts" id="posts"></div>
@@ -421,7 +421,7 @@
             const mt = p.media_type || "—";
             const lc = Number(p.likes) || 0;
             const r = Number(p.reach) || 0;
-            return `<article class="post">${img}<div class="meta">${escapeHtml(mt)} · ♥ ${lc} · reach ${fmtNum(r)}</div></article>`;
+            return `<article class="post">${img}<div class="meta">${escapeHtml(mt)} · ♥ ${lc} · Alcance ${fmtNum(r)}</div></article>`;
           })
           .join("");
       }
@@ -440,7 +440,7 @@
             const thumb = src
               ? `<div class="thumb"><img src="${src}" alt="" /></div>`
               : `<div class="thumb"></div>`;
-            return `<li class="side-item">${thumb}<div class="txt"><strong>${fmtNum(score)} pts</strong><br />reach ${fmtNum(
+            return `<li class="side-item">${thumb}<div class="txt"><strong>${fmtNum(score)} pts</strong><br />Alcance ${fmtNum(
               Number(p.reach) || 0
             )} · ${escapeHtml(p.media_type || "")}</div></li>`;
           })
@@ -574,10 +574,10 @@
           data: {
             labels: dayLabels,
             datasets: [
-              { label: "likes", data: likesD, borderColor: "#f472b6", tension: 0.2, fill: false },
-              { label: "comments", data: commentsD, borderColor: "#22d3ee", tension: 0.2, fill: false },
-              { label: "shares", data: sharesD, borderColor: "#a78bfa", tension: 0.2, fill: false },
-              { label: "saved", data: savedD, borderColor: "#4ade80", tension: 0.2, fill: false },
+              { label: "Curtidas", data: likesD, borderColor: "#f472b6", tension: 0.2, fill: false },
+              { label: "Comentários", data: commentsD, borderColor: "#22d3ee", tension: 0.2, fill: false },
+              { label: "Compartilhamentos", data: sharesD, borderColor: "#a78bfa", tension: 0.2, fill: false },
+              { label: "Salvamentos", data: savedD, borderColor: "#4ade80", tension: 0.2, fill: false },
             ],
           },
           options: commonOpts,
