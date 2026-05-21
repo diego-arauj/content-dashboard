@@ -261,6 +261,14 @@ app.get("/api/auth/instagram/callback", async (req, res) => {
       expiresIn != null ? new Date(Date.now() + expiresIn * 1000) : null;
 
     const pages = await getFacebookPages(longToken);
+    console.log(
+      "[IG OAuth] pages returned:",
+      JSON.stringify(
+        pages?.data?.map((p) => ({ id: p.id, name: p.name })),
+        null,
+        2
+      )
+    );
     let igUserId = null;
     let username = "";
 
@@ -273,6 +281,8 @@ app.get("/api/auth/instagram/callback", async (req, res) => {
         break;
       }
     }
+
+    console.log("[IG OAuth] igUserId found:", igUserId, "username:", username);
 
     if (!igUserId) {
       return redirect("oauth_error=no_instagram_account");
