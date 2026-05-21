@@ -79,6 +79,14 @@
         padding: 0.35rem 0.65rem;
         font-size: 0.85rem;
       }
+      button.danger {
+        background: #3a1a1a;
+        border-color: #7a2020;
+        color: #f87171;
+      }
+      button.danger:hover {
+        background: #4a2020;
+      }
       .grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -285,6 +293,8 @@
               <button type="button" class="small primary" data-open-dash>Abrir dashboard</button>
               <button type="button" class="small" data-sync>Sincronizar</button>
               <button type="button" class="small" data-invite-one>Convidar</button>
+              <button type="button" class="small" data-connect-ig>Conectar Instagram</button>
+              <button type="button" class="small danger" data-delete>Apagar</button>
             </div>
           </article>
         `
@@ -410,6 +420,25 @@
         }
         if (e.target.closest("[data-invite-one]")) {
           openInviteModal(id);
+          return;
+        }
+        if (e.target.closest("[data-connect-ig]")) {
+          window.location.href = "/api/auth/instagram/start/" + id;
+          return;
+        }
+        if (e.target.closest("[data-delete]")) {
+          if (!confirm("Apagar este cliente e todos os seus dados?")) return;
+          try {
+            const r = await api("/api/clients/" + id, { method: "DELETE" });
+            if (!r.ok) {
+              const errBody = await r.json().catch(() => ({}));
+              alert(errBody.error || "Não foi possível apagar o cliente.");
+              return;
+            }
+            await loadClients();
+          } catch {
+            alert("Erro de rede.");
+          }
           return;
         }
         const syncBtn = e.target.closest("[data-sync]");
