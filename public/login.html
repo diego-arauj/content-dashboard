@@ -161,7 +161,7 @@
       <h1>Entrar</h1>
       <p class="sub">Bem-vindo de volta. Acesse sua conta.</p>
       <div class="error-msg" id="err" role="alert" aria-live="polite"></div>
-      <form id="form" novalidate>
+      <form id="form" method="post" action="#" novalidate>
         <div class="field">
           <label for="email">E-mail</label>
           <input id="email" name="email" type="email" autocomplete="username" placeholder="seu@email.com" required />
@@ -225,36 +225,35 @@
             btn.textContent = "Criar conta";
           }
         });
-        return;
-      }
-
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        err.textContent = "";
-        const email = document.getElementById("email").value.trim();
-        const password = document.getElementById("password").value;
-        btn.disabled = true;
-        btn.textContent = "Entrando…";
-        try {
-          const res = await fetch("/api/auth/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ email, password }),
-          });
-          if (!res.ok) {
-            const data = await res.json().catch(() => ({}));
-            err.textContent = data.error || "Credenciais inválidas.";
-            return;
+      } else {
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          err.textContent = "";
+          const email = document.getElementById("email").value.trim();
+          const password = document.getElementById("password").value;
+          btn.disabled = true;
+          btn.textContent = "Entrando…";
+          try {
+            const res = await fetch("/api/auth/login", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              body: JSON.stringify({ email, password }),
+            });
+            if (!res.ok) {
+              const data = await res.json().catch(() => ({}));
+              err.textContent = data.error || "Credenciais inválidas.";
+              return;
+            }
+            window.location.href = "/index.html";
+          } catch {
+            err.textContent = "Erro de rede. Tente de novo.";
+          } finally {
+            btn.disabled = false;
+            btn.textContent = "Entrar";
           }
-          window.location.href = "/index.html";
-        } catch {
-          err.textContent = "Erro de rede. Tente de novo.";
-        } finally {
-          btn.disabled = false;
-          btn.textContent = "Entrar";
-        }
-      });
+        });
+      }
     </script>
   </body>
 </html>
