@@ -338,6 +338,17 @@
         overflow: hidden;
       }
       .post img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .ph-empty {
+        position: absolute;
+        inset: 0;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.65rem;
+        color: var(--text-3);
+        text-align: center;
+        padding: 0.5rem;
+        line-height: 1.3;
+      }
       .post .badge {
         position: absolute;
         top: 0.4rem;
@@ -532,64 +543,74 @@
         display: flex;
         flex-direction: column;
       }
-      /* Cover */
-      .rpt-cover { justify-content: space-between; }
-      .rpt-cover-header {
-        background: linear-gradient(135deg, #4c1d95 0%, #7c3aed 40%, #a78bfa 100%);
-        padding: 3.5rem 3rem 2.5rem;
-        color: #fff;
-      }
-      .rpt-agency {
-        font-size: 0.7rem;
-        font-weight: 700;
-        letter-spacing: 0.15em;
-        text-transform: uppercase;
-        opacity: 0.75;
-        margin-bottom: 2rem;
-      }
-      .rpt-cover-title {
-        font-size: 2rem;
-        font-weight: 700;
-        letter-spacing: -0.03em;
-        line-height: 1.15;
-        margin-bottom: 0.35rem;
-      }
-      .rpt-cover-platform {
-        font-size: 1.1rem;
-        font-weight: 500;
-        opacity: 0.8;
-      }
+      /* Cover — simples */
+      .rpt-cover { justify-content: center; }
+      .rpt-cover-accent { height: 4px; background: linear-gradient(90deg, #5b3fd6, #7c5af3, #a78bfa); flex-shrink: 0; }
       .rpt-cover-body {
-        padding: 2.5rem 3rem;
+        padding: 3.5rem 3rem;
         flex: 1;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
+        justify-content: center;
       }
-      .rpt-cover-client-label {
-        font-size: 0.7rem;
-        font-weight: 600;
+      .rpt-cover-agency {
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
         text-transform: uppercase;
-        letter-spacing: 0.12em;
-        color: #7c5af3;
+        color: #c0c0d8;
+        margin-bottom: 2.5rem;
+      }
+      .rpt-cover-title {
+        font-size: 2.75rem;
+        font-weight: 700;
+        letter-spacing: -0.04em;
+        line-height: 1.05;
+        color: #1a1a2e;
         margin-bottom: 0.4rem;
       }
-      .rpt-cover-client-name {
-        font-size: 1.75rem;
-        font-weight: 700;
-        letter-spacing: -0.025em;
-        color: #1a1a2e;
-      }
-      .rpt-cover-period {
+      .rpt-cover-subtitle {
         font-size: 1rem;
-        color: #5b5b80;
-        margin-top: 0.3rem;
+        color: #7c5af3;
+        font-weight: 500;
+        margin-bottom: 3rem;
       }
-      .rpt-cover-footer {
-        font-size: 0.75rem;
-        color: #9898b4;
+      .rpt-cover-profile {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        padding-top: 2rem;
         border-top: 1px solid #e5e5f0;
-        padding-top: 1.25rem;
+      }
+      .rpt-cover-avatar {
+        width: 64px; height: 64px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #ede9fe;
+        flex-shrink: 0;
+      }
+      .rpt-cover-avatar-placeholder {
+        width: 64px; height: 64px;
+        border-radius: 50%;
+        background: #ede9fe;
+        flex-shrink: 0;
+      }
+      .rpt-cover-name {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #1a1a2e;
+        letter-spacing: -0.02em;
+      }
+      .rpt-cover-handle {
+        font-size: 0.9rem;
+        color: #7c5af3;
+        font-weight: 500;
+        margin-top: 0.15rem;
+      }
+      .rpt-cover-period-txt {
+        font-size: 0.85rem;
+        color: #9898b4;
+        margin-top: 0.35rem;
       }
 
       /* Section header */
@@ -613,17 +634,17 @@
         font-weight: 500;
       }
 
-      /* KPI grid */
+      /* KPI grid — compacto */
       .rpt-kpis {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 1rem;
-        margin-bottom: 2rem;
+        gap: 0.65rem;
+        margin-bottom: 1.5rem;
       }
       .rpt-kpi {
         border: 1px solid #e5e5f0;
-        border-radius: 10px;
-        padding: 1.15rem 1.2rem;
+        border-radius: 8px;
+        padding: 0.85rem 1rem;
         position: relative;
         overflow: hidden;
       }
@@ -647,14 +668,14 @@
         margin-bottom: 0.5rem;
       }
       .rpt-kpi-value {
-        font-size: 1.8rem;
+        font-size: 1.5rem;
         font-weight: 700;
         letter-spacing: -0.03em;
         color: #1a1a2e;
         line-height: 1;
-        margin-bottom: 0.2rem;
+        margin-bottom: 0.15rem;
       }
-      .rpt-kpi-sub { font-size: 0.75rem; color: #9898b4; }
+      .rpt-kpi-sub { font-size: 0.7rem; color: #9898b4; }
 
       /* Daily table */
       .rpt-table {
@@ -685,70 +706,22 @@
       .rpt-table .neg { color: #ef4444; font-weight: 600; }
       .rpt-table .date-col { color: #5b5b80; }
 
-      /* Post cards in report */
-      .rpt-posts-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.85rem;
-        margin-bottom: 1.5rem;
-      }
-      .rpt-post {
-        display: flex;
-        gap: 0.75rem;
-        border: 1px solid #e5e5f0;
-        border-radius: 10px;
-        overflow: hidden;
-        padding: 0.75rem;
-        background: #fff;
-      }
-      .rpt-post-img-wrap {
-        width: 64px;
-        height: 64px;
-        border-radius: 7px;
-        overflow: hidden;
-        flex-shrink: 0;
-        background: #f5f3ff;
-      }
-      .rpt-post-img-wrap img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-      }
-      .rpt-post-no-img {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.65rem;
-        color: #9898b4;
-        text-align: center;
-        padding: 0.25rem;
-      }
-      .rpt-post-info { flex: 1; min-width: 0; }
-      .rpt-post-type-badge {
+      /* Tabela compacta de posts no relatório */
+      .rpt-table-sm thead th { padding: 0.4rem 0.65rem; font-size: 0.65rem; }
+      .rpt-table-sm tbody td { padding: 0.35rem 0.65rem; font-size: 0.78rem; }
+      .rpt-type-chip {
         display: inline-block;
-        font-size: 0.6rem;
+        font-size: 0.58rem;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.06em;
-        padding: 0.15rem 0.45rem;
+        letter-spacing: 0.04em;
+        padding: 0.1rem 0.4rem;
         border-radius: 999px;
-        margin-bottom: 0.35rem;
+        white-space: nowrap;
       }
-      .rpt-badge-video { background: #ede9fe; color: #7c3aed; }
-      .rpt-badge-carousel { background: #fff3e0; color: #ea6c00; }
-      .rpt-badge-image { background: #e0f7fa; color: #0097a7; }
-      .rpt-post-date { font-size: 0.72rem; color: #9898b4; margin-bottom: 0.4rem; }
-      .rpt-post-stats {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.3rem 0.6rem;
-        font-size: 0.72rem;
-        color: #5b5b80;
-      }
-      .rpt-post-stats strong { color: #1a1a2e; }
+      .rpt-chip-video    { background: #ede9fe; color: #7c3aed; }
+      .rpt-chip-carousel { background: #fff3e0; color: #ea6c00; }
+      .rpt-chip-image    { background: #e0f7fa; color: #0097a7; }
 
       /* Subsection title in report */
       .rpt-sub-title {
@@ -768,17 +741,8 @@
         background: #e5e5f0;
       }
 
-      /* Page footer in report */
-      .rpt-page-footer {
-        margin-top: auto;
-        padding-top: 1.5rem;
-        border-top: 1px solid #e5e5f0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 0.7rem;
-        color: #c0c0d8;
-      }
+      /* Page footer — oculto (deixar o browser gerenciar ou não ter) */
+      .rpt-page-footer { display: none; }
     </style>
   </head>
   <body>
@@ -873,7 +837,7 @@
     <div class="overlay" id="modal-report" role="dialog" aria-modal="true" aria-labelledby="modal-report-title">
       <div class="modal">
         <h3 id="modal-report-title">Gerar Relatório PDF</h3>
-        <p class="modal-sub">Escolha o período e clique em gerar. O relatório abrirá a janela de impressão — salve como PDF.</p>
+        <p class="modal-sub">Escolha o período e clique em gerar. O relatório abrirá a janela de impressão — salve como PDF.<br><strong style="color:var(--accent-2)">Dica:</strong> no Chrome, desmarque <em>"Cabeçalhos e rodapés"</em> para um PDF mais limpo.</p>
         <form id="form-report" novalidate>
           <label for="rep-start">Data de início</label>
           <input type="date" id="rep-start" required />
@@ -1062,8 +1026,8 @@
           const tipoLabel = translateMediaType(p.media_type);
           const badge = `<span class="badge ${bc}">${tipoLabel}</span>`;
           const img = src
-            ? `<div class="ph">${badge}<img src="${esc(src)}" alt="" loading="lazy" onerror="this.style.display='none'" /></div>`
-            : `<div class="ph">${badge}sem mídia</div>`;
+            ? `<div class="ph">${badge}<img src="${esc(src)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><span class="ph-empty" style="display:none">Sync para carregar</span></div>`
+            : `<div class="ph">${badge}<span class="ph-empty" style="display:flex">Sem mídia</span></div>`;
           const rows = [
             ["Curtidas",            Number(p.likes)||0],
             ["Comentários",         Number(p.comments)||0],
@@ -1250,39 +1214,34 @@
       /* ═══════════════════════════════════════
          REPORT GENERATION
       ═══════════════════════════════════════ */
-      function buildPostCardHtml(p) {
-        const src = postImageSrc(p);
-        const imgHtml = src
-          ? `<img src="${esc(src)}" alt="" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.parentNode.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:0.6rem;color:#9898b4;text-align:center;padding:0.25rem\\'>sem imagem</div>'" />`
-          : `<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:0.62rem;color:#9898b4;text-align:center;padding:0.25rem">sem imagem</div>`;
-
-        const typeLabel = translateMediaType(p.media_type);
-        const typeClass = p.media_type === "VIDEO" ? "rpt-badge-video"
-          : p.media_type === "CAROUSEL_ALBUM" ? "rpt-badge-carousel"
-          : "rpt-badge-image";
-        const date = p.timestamp ? fmtDateBR(p.timestamp.slice(0, 10)) : "—";
-        const eng = engagementScore(p);
-
-        return `<div class="rpt-post">
-          <div class="rpt-post-img-wrap">${imgHtml}</div>
-          <div class="rpt-post-info">
-            <span class="rpt-post-type-badge ${typeClass}">${typeLabel}</span>
-            <div class="rpt-post-date">${date}</div>
-            <div class="rpt-post-stats">
-              <span>Alcance: <strong>${fmtNum(Number(p.reach)||0)}</strong></span>
-              <span>Engaj.: <strong>${fmtNum(eng)}</strong></span>
-              <span>❤ ${fmtNum(Number(p.likes)||0)}</span>
-              <span>💬 ${fmtNum(Number(p.comments)||0)}</span>
-              <span>🔖 ${fmtNum(Number(p.saved)||0)}</span>
-            </div>
-          </div>
-        </div>`;
-      }
-
       function buildPostsSection(title, posts) {
-        if (!posts.length) return `<div class="rpt-sub-title">${title}</div><p style="color:#9898b4;font-size:0.82rem;margin-bottom:1rem">Nenhum post encontrado.</p>`;
-        const cards = posts.map(buildPostCardHtml).join("");
-        return `<div class="rpt-sub-title">${title}</div><div class="rpt-posts-grid">${cards}</div>`;
+        if (!posts.length) return `<div class="rpt-sub-title">${title}</div><p style="color:#9898b4;font-size:0.78rem;margin-bottom:0.75rem">Nenhum post encontrado.</p>`;
+        const rows = posts.map((p, i) => {
+          const type = translateMediaType(p.media_type);
+          const chipClass = p.media_type === "VIDEO" ? "rpt-chip-video"
+            : p.media_type === "CAROUSEL_ALBUM" ? "rpt-chip-carousel"
+            : "rpt-chip-image";
+          const date = p.timestamp ? new Date(p.timestamp).toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"}) : "—";
+          const eng = engagementScore(p);
+          return `<tr>
+            <td style="color:#c0c0d8;font-weight:600;width:20px">${i+1}</td>
+            <td><span class="rpt-type-chip ${chipClass}">${type}</span></td>
+            <td style="color:#9898b4">${date}</td>
+            <td style="font-weight:700;color:#1a1a2e">${fmtNum(Number(p.reach)||0)}</td>
+            <td>${fmtNum(Number(p.likes)||0)}</td>
+            <td>${fmtNum(Number(p.comments)||0)}</td>
+            <td>${fmtNum(Number(p.saved)||0)}</td>
+            <td style="font-weight:700;color:#7c5af3">${fmtNum(eng)}</td>
+          </tr>`;
+        }).join("");
+        return `<div class="rpt-sub-title">${title}</div>
+<table class="rpt-table rpt-table-sm" style="margin-bottom:1.1rem">
+  <thead><tr>
+    <th>#</th><th>Tipo</th><th>Data</th>
+    <th>Alcance</th><th>Curtidas</th><th>Comentários</th><th>Salvamentos</th><th>Engaj.</th>
+  </tr></thead>
+  <tbody>${rows}</tbody>
+</table>`;
       }
 
       function buildReportHtml(overview, profile, allPosts, startStr, endStr, clientName) {
@@ -1334,133 +1293,100 @@
         }).join("");
 
         const periodLabel = `${fmtDateBR(startStr)} – ${fmtDateBR(endStr)}`;
-        const today = fmtDateBR(localDateKey(new Date()));
-        const displayName = clientName || username || "Cliente";
+        const displayName = clientName || profile.username || "Cliente";
+        const avatarUrl   = profile.profile_picture_url || "";
 
         return `<div class="rpt">
 
-          <!-- ░░ CAPA ░░ -->
+          <!-- ░░ CAPA — simples ░░ -->
           <div class="rpt-page rpt-cover">
-            <div class="rpt-cover-header">
-              <div class="rpt-agency">TGIF &amp; Co — Content Dashboard</div>
-              <div class="rpt-cover-title">Relatório de Desempenho</div>
-              <div class="rpt-cover-platform">Instagram Analytics</div>
-            </div>
+            <div class="rpt-cover-accent"></div>
             <div class="rpt-cover-body">
-              <div>
-                <div class="rpt-cover-client-label">Cliente</div>
-                <div class="rpt-cover-client-name">${escapeHtml(displayName)}</div>
-                ${username ? `<div style="font-size:0.88rem;color:#7c5af3;font-weight:500;margin-top:0.2rem">${escapeHtml(username)}</div>` : ""}
-                <div class="rpt-cover-period" style="margin-top:1rem">${periodLabel}</div>
-              </div>
-              <div class="rpt-cover-footer">
-                Gerado em ${today} &nbsp;·&nbsp; Content Dashboard
+              <div class="rpt-cover-agency">TGIF &amp; Co</div>
+              <div class="rpt-cover-title">Relatório de<br>Desempenho</div>
+              <div class="rpt-cover-subtitle">Instagram Analytics</div>
+              <div class="rpt-cover-profile">
+                ${avatarUrl
+                  ? `<img class="rpt-cover-avatar" src="${esc(avatarUrl)}" alt="" />`
+                  : `<div class="rpt-cover-avatar-placeholder"></div>`}
+                <div>
+                  <div class="rpt-cover-name">${escapeHtml(displayName)}</div>
+                  ${username ? `<div class="rpt-cover-handle">${escapeHtml(username)}</div>` : ""}
+                  <div class="rpt-cover-period-txt">${periodLabel}</div>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- ░░ RESUMO ░░ -->
+          <!-- ░░ RESUMO + EVOLUÇÃO DIÁRIA (página única) ░░ -->
           <div class="rpt-page">
-            <div class="rpt-page-inner">
-              <div class="rpt-section-header">
-                <span class="rpt-section-title">Resumo do Período</span>
-                <span class="rpt-section-period">${periodLabel}</span>
+            <div class="rpt-section-header">
+              <span class="rpt-section-title">Resumo do Período</span>
+              <span class="rpt-section-period">${periodLabel}</span>
+            </div>
+            <div class="rpt-kpis">
+              <div class="rpt-kpi c1">
+                <div class="rpt-kpi-label">Seguidores</div>
+                <div class="rpt-kpi-value">${fmtNum(followers)}</div>
+                <div class="rpt-kpi-sub">Conta atual</div>
               </div>
-              <div class="rpt-kpis">
-                <div class="rpt-kpi c1">
-                  <div class="rpt-kpi-label">Seguidores Atuais</div>
-                  <div class="rpt-kpi-value">${fmtNum(followers)}</div>
-                  <div class="rpt-kpi-sub">Conta total</div>
-                </div>
-                <div class="rpt-kpi c2">
-                  <div class="rpt-kpi-label">Alcance Médio Diário</div>
-                  <div class="rpt-kpi-value">${fmtNum(avgReach)}</div>
-                  <div class="rpt-kpi-sub">Média do período</div>
-                </div>
-                <div class="rpt-kpi c3">
-                  <div class="rpt-kpi-label">Taxa de Engajamento</div>
-                  <div class="rpt-kpi-value">${engRate > 0 ? engRate.toFixed(1).replace(".",",")+"%": "—"}</div>
-                  <div class="rpt-kpi-sub">Eng. / Alcance</div>
-                </div>
-                <div class="rpt-kpi c4">
-                  <div class="rpt-kpi-label">Ganho de Seguidores</div>
-                  <div class="rpt-kpi-value" style="color:${totalFollowerGain>=0?"#1a1a2e":"#ef4444"}">${totalFollowerGain>=0?"+":""}${fmtNum(totalFollowerGain)}</div>
-                  <div class="rpt-kpi-sub">No período</div>
-                </div>
-                <div class="rpt-kpi c5">
-                  <div class="rpt-kpi-label">Total de Posts</div>
-                  <div class="rpt-kpi-value">${allPosts.length}</div>
-                  <div class="rpt-kpi-sub">No período</div>
-                </div>
-                <div class="rpt-kpi c1" style="--c1:#a78bfa">
-                  <div class="rpt-kpi-label">Alcance Total</div>
-                  <div class="rpt-kpi-value">${fmtNum(totalReach)}</div>
-                  <div class="rpt-kpi-sub">Soma do período</div>
-                </div>
+              <div class="rpt-kpi c2">
+                <div class="rpt-kpi-label">Alcance médio</div>
+                <div class="rpt-kpi-value">${fmtNum(avgReach)}</div>
+                <div class="rpt-kpi-sub">Por dia</div>
+              </div>
+              <div class="rpt-kpi c3">
+                <div class="rpt-kpi-label">Engajamento</div>
+                <div class="rpt-kpi-value">${engRate > 0 ? engRate.toFixed(1).replace(".",",")+"%": "—"}</div>
+                <div class="rpt-kpi-sub">Eng. / Alcance</div>
+              </div>
+              <div class="rpt-kpi c4">
+                <div class="rpt-kpi-label">Seguidores ganhos</div>
+                <div class="rpt-kpi-value" style="color:${totalFollowerGain>=0?"#1a1a2e":"#ef4444"}">${totalFollowerGain>=0?"+":""}${fmtNum(totalFollowerGain)}</div>
+                <div class="rpt-kpi-sub">No período</div>
+              </div>
+              <div class="rpt-kpi c5">
+                <div class="rpt-kpi-label">Posts</div>
+                <div class="rpt-kpi-value">${allPosts.length}</div>
+                <div class="rpt-kpi-sub">No período</div>
+              </div>
+              <div class="rpt-kpi c1">
+                <div class="rpt-kpi-label">Alcance total</div>
+                <div class="rpt-kpi-value">${fmtNum(totalReach)}</div>
+                <div class="rpt-kpi-sub">Soma</div>
               </div>
             </div>
-            <div class="rpt-page-footer">
-              <span>TGIF &amp; Co — Content Dashboard</span>
-              <span>${periodLabel}</span>
-            </div>
-          </div>
 
-          <!-- ░░ EVOLUÇÃO DIÁRIA ░░ -->
-          <div class="rpt-page">
-            <div class="rpt-page-inner">
-              <div class="rpt-section-header">
-                <span class="rpt-section-title">Evolução Diária</span>
-                <span class="rpt-section-period">${periodLabel}</span>
-              </div>
-              <table class="rpt-table">
-                <thead>
-                  <tr>
-                    <th>Data</th>
-                    <th>Alcance</th>
-                    <th>Seguidores</th>
-                    <th>Engajamento</th>
-                  </tr>
-                </thead>
-                <tbody>${tableRows || '<tr><td colspan="4" style="color:#9898b4;padding:1rem">Sem dados para este período.</td></tr>'}</tbody>
-              </table>
+            <div class="rpt-section-header" style="margin-top:1.5rem">
+              <span class="rpt-section-title">Evolução Diária</span>
             </div>
-            <div class="rpt-page-footer">
-              <span>TGIF &amp; Co — Content Dashboard</span>
-              <span>${periodLabel}</span>
-            </div>
+            <table class="rpt-table rpt-table-sm">
+              <thead><tr>
+                <th>Data</th><th>Alcance</th><th>Seguidores</th><th>Engajamento</th>
+              </tr></thead>
+              <tbody>${tableRows || '<tr><td colspan="4" style="color:#9898b4;padding:0.75rem">Sem dados para este período.</td></tr>'}</tbody>
+            </table>
           </div>
 
           <!-- ░░ MELHORES POSTS ░░ -->
           <div class="rpt-page">
-            <div class="rpt-page-inner">
-              <div class="rpt-section-header">
-                <span class="rpt-section-title">Melhores Posts</span>
-                <span class="rpt-section-period">${periodLabel}</span>
-              </div>
-              ${buildPostsSection("Top 5 por Alcance", byReach)}
-              ${buildPostsSection("Top 5 por Engajamento", byEng)}
+            <div class="rpt-section-header">
+              <span class="rpt-section-title">Melhores Posts</span>
+              <span class="rpt-section-period">${periodLabel}</span>
             </div>
-            <div class="rpt-page-footer">
-              <span>TGIF &amp; Co — Content Dashboard</span>
-              <span>${periodLabel}</span>
-            </div>
+            ${buildPostsSection("Top 5 por Alcance", byReach)}
+            ${buildPostsSection("Top 5 por Engajamento", byEng)}
           </div>
 
           <!-- ░░ POR FORMATO ░░ -->
           <div class="rpt-page">
-            <div class="rpt-page-inner">
-              <div class="rpt-section-header">
-                <span class="rpt-section-title">Análise por Formato</span>
-                <span class="rpt-section-period">${periodLabel}</span>
-              </div>
-              ${buildPostsSection("Vídeos / Reels", videos)}
-              ${buildPostsSection("Carrosséis", carousels)}
-              ${buildPostsSection("Estáticos (Imagens)", images)}
+            <div class="rpt-section-header">
+              <span class="rpt-section-title">Análise por Formato</span>
+              <span class="rpt-section-period">${periodLabel}</span>
             </div>
-            <div class="rpt-page-footer">
-              <span>TGIF &amp; Co — Content Dashboard</span>
-              <span>${periodLabel}</span>
-            </div>
+            ${buildPostsSection("Vídeos / Reels", videos)}
+            ${buildPostsSection("Carrosséis", carousels)}
+            ${buildPostsSection("Estáticos (Imagens)", images)}
           </div>
 
         </div>`;
