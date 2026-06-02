@@ -8,17 +8,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <style>
       :root {
-        --bg: #09090e;
-        --surface: #0f0f18;
-        --surface-2: #15151f;
-        --border: #22223a;
-        --text: #f0f0f8;
-        --text-2: #9898b4;
-        --text-3: #64647a;
-        --accent: #7c5af3;
-        --accent-2: #a78bfa;
-        --accent-3: #5b3fd6;
-        --danger: #ef4444;
+        --bg: #120e0a;
+        --surface: #1c1510;
+        --surface-2: #261e16;
+        --border: #3f3228;
+        --text: #f5f0eb;
+        --text-2: #b5a898;
+        --text-3: #7d7268;
+        --accent: #c9a87a;
+        --accent-2: #dbbf91;
+        --accent-3: #a88952;
+        --danger: #c88080;
         --radius: 12px;
         --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         --shadow-lg: 0 32px 80px rgba(0, 0, 0, 0.55);
@@ -29,8 +29,8 @@
         font-family: var(--font);
         background: var(--bg);
         background-image:
-          radial-gradient(ellipse 180% 90% at 50% -10%, rgba(100, 60, 230, 0.2) 0%, transparent 55%),
-          radial-gradient(ellipse 80% 50% at 80% 110%, rgba(60, 20, 180, 0.08) 0%, transparent 50%);
+          radial-gradient(ellipse 180% 90% at 50% -10%, rgba(150, 110, 60, 0.18) 0%, transparent 55%),
+          radial-gradient(ellipse 80% 50% at 80% 110%, rgba(100, 70, 30, 0.08) 0%, transparent 50%);
         color: var(--text);
         display: flex;
         align-items: center;
@@ -115,8 +115,8 @@
       }
       input::placeholder { color: var(--text-3); }
       input:focus {
-        border-color: rgba(124, 90, 243, 0.55);
-        box-shadow: 0 0 0 3px rgba(124, 90, 243, 0.1);
+        border-color: rgba(201, 168, 122, 0.5);
+        box-shadow: 0 0 0 3px rgba(201, 168, 122, 0.1);
       }
       .error-msg {
         color: var(--danger);
@@ -136,13 +136,13 @@
         font-weight: 600;
         cursor: pointer;
         transition: filter 0.15s, transform 0.1s, box-shadow 0.15s;
-        box-shadow: 0 4px 16px rgba(124, 90, 243, 0.3);
+        box-shadow: 0 4px 16px rgba(201, 168, 122, 0.25);
         letter-spacing: 0.01em;
         margin-top: 0.25rem;
       }
       button[type="submit"]:hover {
         filter: brightness(1.08);
-        box-shadow: 0 6px 24px rgba(124, 90, 243, 0.4);
+        box-shadow: 0 6px 24px rgba(201, 168, 122, 0.35);
       }
       button[type="submit"]:active { transform: translateY(1px); }
       button[type="submit"]:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }

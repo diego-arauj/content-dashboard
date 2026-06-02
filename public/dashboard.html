@@ -12,27 +12,27 @@
          DESIGN TOKENS
       ═══════════════════════════════════════ */
       :root {
-        --bg: #09090e;
-        --surface: #0f0f18;
-        --surface-2: #15151f;
-        --surface-3: #1c1c2a;
-        --border: #22223a;
-        --border-hover: #2e2e50;
-        --text: #f0f0f8;
-        --text-2: #9898b4;
-        --text-3: #64647a;
-        --accent: #7c5af3;
-        --accent-2: #a78bfa;
-        --accent-3: #5b3fd6;
-        --accent-bg: rgba(124, 90, 243, 0.08);
-        --accent-border: rgba(124, 90, 243, 0.25);
-        --success: #22c55e;
-        --danger: #ef4444;
-        --c1: #7c5af3;
-        --c2: #ec4899;
-        --c3: #06b6d4;
-        --c4: #22c55e;
-        --c5: #f59e0b;
+        --bg: #120e0a;
+        --surface: #1c1510;
+        --surface-2: #261e16;
+        --surface-3: #32261c;
+        --border: #3f3228;
+        --border-hover: #524236;
+        --text: #f5f0eb;
+        --text-2: #b5a898;
+        --text-3: #7d7268;
+        --accent: #c9a87a;
+        --accent-2: #dbbf91;
+        --accent-3: #a88952;
+        --accent-bg: rgba(201, 168, 122, 0.1);
+        --accent-border: rgba(201, 168, 122, 0.25);
+        --success: #7db87c;
+        --danger: #c88080;
+        --c1: #c9a87a;   /* warm gold */
+        --c2: #c48090;   /* warm rose */
+        --c3: #6ab4b8;   /* warm teal */
+        --c4: #8ab87c;   /* sage */
+        --c5: #c4a858;   /* amber */
         --radius: 12px;
         --radius-sm: 8px;
         --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -47,7 +47,7 @@
       body {
         font-family: var(--font);
         background: var(--bg);
-        background-image: radial-gradient(ellipse 200% 70% at 50% -5%, rgba(100, 60, 230, 0.14) 0%, transparent 55%);
+        background-image: radial-gradient(ellipse 200% 70% at 50% -5%, rgba(150, 110, 60, 0.1) 0%, transparent 55%);
         color: var(--text);
         min-height: 100vh;
         font-size: 0.93rem;
@@ -123,12 +123,12 @@
         border-color: transparent;
         color: #fff;
         font-weight: 600;
-        box-shadow: 0 3px 12px rgba(124, 90, 243, 0.28);
+        box-shadow: 0 3px 12px rgba(201, 168, 122, 0.22);
       }
-      .btn.primary:hover { filter: brightness(1.08); box-shadow: 0 4px 18px rgba(124, 90, 243, 0.38); }
+      .btn.primary:hover { filter: brightness(1.08); box-shadow: 0 4px 18px rgba(201, 168, 122, 0.32); }
       .btn.report {
-        background: rgba(124, 90, 243, 0.1);
-        border-color: rgba(124, 90, 243, 0.28);
+        background: rgba(201, 168, 122, 0.1);
+        border-color: rgba(201, 168, 122, 0.22);
         color: var(--accent-2);
         font-weight: 500;
       }
@@ -363,7 +363,7 @@
         text-transform: uppercase;
         letter-spacing: 0.04em;
       }
-      .badge-video   { background: rgba(124, 90, 243, 0.25); color: var(--accent-2); }
+      .badge-video   { background: rgba(201, 168, 122, 0.25); color: var(--accent-2); }
       .badge-carousel { background: rgba(249, 115, 22, 0.2); color: #fb923c; }
       .badge-image   { background: rgba(6, 182, 212, 0.2); color: #22d3ee; }
       .badge-default { background: rgba(255, 255, 255, 0.1); color: var(--text-2); }
@@ -394,7 +394,7 @@
       }
       .posts-table td {
         padding: 0.4rem 0.65rem;
-        border-bottom: 1px solid rgba(34, 34, 58, 0.6);
+        border-bottom: 1px solid rgba(63, 50, 40, 0.6);
         vertical-align: middle;
         color: var(--text-2);
       }
@@ -507,8 +507,8 @@
         transition: border-color 0.15s, box-shadow 0.15s;
       }
       .modal input[type="date"]:focus {
-        border-color: rgba(124, 90, 243, 0.55);
-        box-shadow: 0 0 0 3px rgba(124, 90, 243, 0.1);
+        border-color: rgba(201, 168, 122, 0.5);
+        box-shadow: 0 0 0 3px rgba(201, 168, 122, 0.1);
       }
       .modal-actions {
         display: flex;
@@ -527,7 +527,7 @@
         @page { margin: 1.5cm; size: A4; }
         body > .shell,
         body > .overlay { display: none !important; }
-        #print-view { display: block !important; font-family: "Inter", Arial, sans-serif; color: #1a1a2e; }
+        #print-view { display: block !important; font-family: "Inter", Arial, sans-serif; color: #2a2520; }
 
         .rpt-page { page-break-after: always; break-after: page; }
         .rpt-page:last-child { page-break-after: avoid; break-after: avoid; }
@@ -538,14 +538,14 @@
       .rpt { font-family: var(--font); }
       .rpt-page {
         background: #fff;
-        color: #1a1a2e;
+        color: #2a2520;
         min-height: 100vh;
         display: flex;
         flex-direction: column;
       }
       /* Cover — simples */
       .rpt-cover { justify-content: center; }
-      .rpt-cover-accent { height: 4px; background: linear-gradient(90deg, #5b3fd6, #7c5af3, #a78bfa); flex-shrink: 0; }
+      .rpt-cover-accent { height: 4px; background: linear-gradient(90deg, #7a6032, #c9a87a, #dbbf91); flex-shrink: 0; }
       .rpt-cover-body {
         padding: 3.5rem 3rem;
         flex: 1;
@@ -558,7 +558,7 @@
         font-weight: 700;
         letter-spacing: 0.14em;
         text-transform: uppercase;
-        color: #c0c0d8;
+        color: #9b9088;
         margin-bottom: 2.5rem;
       }
       .rpt-cover-title {
@@ -566,12 +566,12 @@
         font-weight: 700;
         letter-spacing: -0.04em;
         line-height: 1.05;
-        color: #1a1a2e;
+        color: #2a2520;
         margin-bottom: 0.4rem;
       }
       .rpt-cover-subtitle {
         font-size: 1rem;
-        color: #7c5af3;
+        color: #a88952;
         font-weight: 500;
         margin-bottom: 3rem;
       }
@@ -586,37 +586,37 @@
         width: 64px; height: 64px;
         border-radius: 50%;
         object-fit: cover;
-        border: 2px solid #ede9fe;
+        border: 2px solid #e8e0d4;
         flex-shrink: 0;
       }
       .rpt-cover-avatar-placeholder {
         width: 64px; height: 64px;
         border-radius: 50%;
-        background: #ede9fe;
+        background: #e8e0d4;
         flex-shrink: 0;
       }
       .rpt-cover-name {
         font-size: 1.4rem;
         font-weight: 700;
-        color: #1a1a2e;
+        color: #2a2520;
         letter-spacing: -0.02em;
       }
       .rpt-cover-handle {
         font-size: 0.9rem;
-        color: #7c5af3;
+        color: #a88952;
         font-weight: 500;
         margin-top: 0.15rem;
       }
       .rpt-cover-period-txt {
         font-size: 0.85rem;
-        color: #9898b4;
+        color: #9b9088;
         margin-top: 0.35rem;
       }
 
       /* Section header */
       .rpt-section-header {
         padding: 0 0 1rem;
-        border-bottom: 2px solid #7c5af3;
+        border-bottom: 2px solid #c9a87a;
         margin-bottom: 1.5rem;
         display: flex;
         align-items: baseline;
@@ -625,12 +625,12 @@
       .rpt-section-title {
         font-size: 1.1rem;
         font-weight: 700;
-        color: #1a1a2e;
+        color: #2a2520;
         letter-spacing: -0.02em;
       }
       .rpt-section-period {
         font-size: 0.78rem;
-        color: #7c5af3;
+        color: #a88952;
         font-weight: 500;
       }
 
@@ -654,28 +654,28 @@
         top: 0; left: 0; right: 0;
         height: 3px;
       }
-      .rpt-kpi.c1::before { background: #7c5af3; }
-      .rpt-kpi.c2::before { background: #06b6d4; }
-      .rpt-kpi.c3::before { background: #ec4899; }
-      .rpt-kpi.c4::before { background: #22c55e; }
-      .rpt-kpi.c5::before { background: #f59e0b; }
+      .rpt-kpi.c1::before { background: #c9a87a; }
+      .rpt-kpi.c2::before { background: #6ab4b8; }
+      .rpt-kpi.c3::before { background: #c48090; }
+      .rpt-kpi.c4::before { background: #8ab87c; }
+      .rpt-kpi.c5::before { background: #c4a858; }
       .rpt-kpi-label {
         font-size: 0.68rem;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.07em;
-        color: #9898b4;
+        color: #9b9088;
         margin-bottom: 0.5rem;
       }
       .rpt-kpi-value {
         font-size: 1.5rem;
         font-weight: 700;
         letter-spacing: -0.03em;
-        color: #1a1a2e;
+        color: #2a2520;
         line-height: 1;
         margin-bottom: 0.15rem;
       }
-      .rpt-kpi-sub { font-size: 0.7rem; color: #9898b4; }
+      .rpt-kpi-sub { font-size: 0.7rem; color: #9b9088; }
 
       /* Daily table */
       .rpt-table {
@@ -684,27 +684,27 @@
         font-size: 0.83rem;
       }
       .rpt-table thead th {
-        background: #f5f3ff;
+        background: #f5f0eb;
         padding: 0.6rem 0.8rem;
         text-align: left;
         font-size: 0.7rem;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.07em;
-        color: #7c5af3;
-        border-bottom: 2px solid #e5e5f0;
+        color: #a88952;
+        border-bottom: 2px solid #e8e0d4;
       }
       .rpt-table tbody td {
         padding: 0.5rem 0.8rem;
-        border-bottom: 1px solid #f0f0f8;
-        color: #3a3a5c;
+        border-bottom: 1px solid #f0ece4;
+        color: #3a3028;
         font-variant-numeric: tabular-nums;
       }
-      .rpt-table tbody tr:nth-child(even) td { background: #faf9ff; }
+      .rpt-table tbody tr:nth-child(even) td { background: #faf7f2; }
       .rpt-table tbody tr:last-child td { border-bottom: none; }
-      .rpt-table .pos { color: #22c55e; font-weight: 600; }
-      .rpt-table .neg { color: #ef4444; font-weight: 600; }
-      .rpt-table .date-col { color: #5b5b80; }
+      .rpt-table .pos { color: #5a8a58; font-weight: 600; }
+      .rpt-table .neg { color: #a85858; font-weight: 600; }
+      .rpt-table .date-col { color: #7d7268; }
 
       /* Tabela compacta de posts no relatório */
       .rpt-table-sm thead th { padding: 0.4rem 0.65rem; font-size: 0.65rem; }
@@ -719,15 +719,15 @@
         border-radius: 999px;
         white-space: nowrap;
       }
-      .rpt-chip-video    { background: #ede9fe; color: #7c3aed; }
-      .rpt-chip-carousel { background: #fff3e0; color: #ea6c00; }
-      .rpt-chip-image    { background: #e0f7fa; color: #0097a7; }
+      .rpt-chip-video    { background: #f0ece4; color: #7a6032; }
+      .rpt-chip-carousel { background: #f5ede0; color: #8a5a28; }
+      .rpt-chip-image    { background: #e8f0e8; color: #3a6a38; }
 
       /* Subsection title in report */
       .rpt-sub-title {
         font-size: 0.88rem;
         font-weight: 700;
-        color: #3a3a5c;
+        color: #2a2520;
         letter-spacing: -0.01em;
         margin: 1.25rem 0 0.75rem;
         display: flex;
@@ -738,7 +738,7 @@
         content: "";
         flex: 1;
         height: 1px;
-        background: #e5e5f0;
+        background: #e8e0d4;
       }
 
       /* Page footer — oculto (deixar o browser gerenciar ou não ter) */
@@ -971,9 +971,9 @@
         if (chartEng)   { chartEng.destroy();   chartEng = null;   }
       }
 
-      const TICK_COLOR  = "#64647a";
-      const GRID_COLOR  = "rgba(34, 34, 58, 0.8)";
-      const LABEL_COLOR = "#9898b4";
+      const TICK_COLOR  = "#7d7268";
+      const GRID_COLOR  = "rgba(63, 50, 40, 0.8)";
+      const LABEL_COLOR = "#b5a898";
 
       function chartDefaults() {
         return {
@@ -994,11 +994,11 @@
           plugins: {
             legend: { labels: { color: LABEL_COLOR, font: { size: 11, family: "'Inter', sans-serif" }, boxWidth: 10, padding: 14 } },
             tooltip: {
-              backgroundColor: "#0f0f18",
-              borderColor: "#22223a",
+              backgroundColor: "#1c1510",
+              borderColor: "#3f3228",
               borderWidth: 1,
-              titleColor: "#f0f0f8",
-              bodyColor: "#9898b4",
+              titleColor: "#f5f0eb",
+              bodyColor: "#b5a898",
               padding: 10,
             },
           },
@@ -1158,8 +1158,8 @@
             datasets: [{
               label: "Alcance",
               data: reachVals,
-              borderColor: "#7c5af3",
-              backgroundColor: "rgba(124, 90, 243, 0.12)",
+              borderColor: "#c9a87a",
+              backgroundColor: "rgba(201, 168, 122, 0.12)",
               tension: 0.3,
               fill: true,
               pointRadius: 2,
@@ -1197,10 +1197,10 @@
           data: {
             labels: dayLabels,
             datasets: [
-              { label:"Curtidas",           data: dayLabels.map(d=>byCount.get(d)?.likes??0),    borderColor:"#ec4899", tension:0.2, fill:false, pointRadius:2, borderWidth:2 },
-              { label:"Comentários",         data: dayLabels.map(d=>byCount.get(d)?.comments??0), borderColor:"#06b6d4", tension:0.2, fill:false, pointRadius:2, borderWidth:2 },
-              { label:"Compartilhamentos",   data: dayLabels.map(d=>byCount.get(d)?.shares??0),   borderColor:"#a78bfa", tension:0.2, fill:false, pointRadius:2, borderWidth:2 },
-              { label:"Salvamentos",         data: dayLabels.map(d=>byCount.get(d)?.saved??0),    borderColor:"#22c55e", tension:0.2, fill:false, pointRadius:2, borderWidth:2 },
+              { label:"Curtidas",           data: dayLabels.map(d=>byCount.get(d)?.likes??0),    borderColor:"#c48090", tension:0.2, fill:false, pointRadius:2, borderWidth:2 },
+              { label:"Comentários",         data: dayLabels.map(d=>byCount.get(d)?.comments??0), borderColor:"#6ab4b8", tension:0.2, fill:false, pointRadius:2, borderWidth:2 },
+              { label:"Compartilhamentos",   data: dayLabels.map(d=>byCount.get(d)?.shares??0),   borderColor:"#dbbf91", tension:0.2, fill:false, pointRadius:2, borderWidth:2 },
+              { label:"Salvamentos",         data: dayLabels.map(d=>byCount.get(d)?.saved??0),    borderColor:"#8ab87c", tension:0.2, fill:false, pointRadius:2, borderWidth:2 },
             ],
           },
           options: cOpts,
@@ -1215,7 +1215,7 @@
          REPORT GENERATION
       ═══════════════════════════════════════ */
       function buildPostsSection(title, posts) {
-        if (!posts.length) return `<div class="rpt-sub-title">${title}</div><p style="color:#9898b4;font-size:0.78rem;margin-bottom:0.75rem">Nenhum post encontrado.</p>`;
+        if (!posts.length) return `<div class="rpt-sub-title">${title}</div><p style="color:#9b9088;font-size:0.78rem;margin-bottom:0.75rem">Nenhum post encontrado.</p>`;
         const rows = posts.map((p, i) => {
           const type = translateMediaType(p.media_type);
           const chipClass = p.media_type === "VIDEO" ? "rpt-chip-video"
@@ -1226,12 +1226,12 @@
           return `<tr>
             <td style="color:#c0c0d8;font-weight:600;width:20px">${i+1}</td>
             <td><span class="rpt-type-chip ${chipClass}">${type}</span></td>
-            <td style="color:#9898b4">${date}</td>
-            <td style="font-weight:700;color:#1a1a2e">${fmtNum(Number(p.reach)||0)}</td>
+            <td style="color:#9b9088">${date}</td>
+            <td style="font-weight:700;color:#2a2520">${fmtNum(Number(p.reach)||0)}</td>
             <td>${fmtNum(Number(p.likes)||0)}</td>
             <td>${fmtNum(Number(p.comments)||0)}</td>
             <td>${fmtNum(Number(p.saved)||0)}</td>
-            <td style="font-weight:700;color:#7c5af3">${fmtNum(eng)}</td>
+            <td style="font-weight:700;color:#a88952">${fmtNum(eng)}</td>
           </tr>`;
         }).join("");
         return `<div class="rpt-sub-title">${title}</div>
@@ -1281,7 +1281,7 @@
             ? `<span class="pos">+${fmtNum(followersGain)}</span>`
             : followersGain < 0
               ? `<span class="neg">${fmtNum(followersGain)}</span>`
-              : `<span style="color:#9898b4">0</span>`;
+              : `<span style="color:#9b9088">0</span>`;
           const dm = new Date(d+"T12:00:00");
           const shortDate = dm.toLocaleDateString("pt-BR",{day:"2-digit",month:"short"});
           return `<tr>
@@ -1342,7 +1342,7 @@
               </div>
               <div class="rpt-kpi c4">
                 <div class="rpt-kpi-label">Seguidores ganhos</div>
-                <div class="rpt-kpi-value" style="color:${totalFollowerGain>=0?"#1a1a2e":"#ef4444"}">${totalFollowerGain>=0?"+":""}${fmtNum(totalFollowerGain)}</div>
+                <div class="rpt-kpi-value" style="color:${totalFollowerGain>=0?"#2a2520":"#a85858"}">${totalFollowerGain>=0?"+":""}${fmtNum(totalFollowerGain)}</div>
                 <div class="rpt-kpi-sub">No período</div>
               </div>
               <div class="rpt-kpi c5">
@@ -1364,7 +1364,7 @@
               <thead><tr>
                 <th>Data</th><th>Alcance</th><th>Seguidores</th><th>Engajamento</th>
               </tr></thead>
-              <tbody>${tableRows || '<tr><td colspan="4" style="color:#9898b4;padding:0.75rem">Sem dados para este período.</td></tr>'}</tbody>
+              <tbody>${tableRows || '<tr><td colspan="4" style="color:#9b9088;padding:0.75rem">Sem dados para este período.</td></tr>'}</tbody>
             </table>
           </div>
 
