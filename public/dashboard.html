@@ -4,35 +4,66 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Dashboard — Content Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <style>
+      /* ═══════════════════════════════════════
+         DESIGN TOKENS
+      ═══════════════════════════════════════ */
       :root {
-        --bg: #0c0e12;
-        --surface: #141820;
-        --surface-2: #1c2230;
-        --border: #2a3244;
-        --text: #e8edf5;
-        --muted: #8b97ad;
-        --accent: #6c8cff;
-        --accent-hover: #8aa3ff;
-        --chart-grid: rgba(139, 151, 173, 0.12);
-        --radius: 10px;
-        --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        --bg: #09090e;
+        --surface: #0f0f18;
+        --surface-2: #15151f;
+        --surface-3: #1c1c2a;
+        --border: #22223a;
+        --border-hover: #2e2e50;
+        --text: #f0f0f8;
+        --text-2: #9898b4;
+        --text-3: #64647a;
+        --accent: #7c5af3;
+        --accent-2: #a78bfa;
+        --accent-3: #5b3fd6;
+        --accent-bg: rgba(124, 90, 243, 0.08);
+        --accent-border: rgba(124, 90, 243, 0.25);
+        --success: #22c55e;
+        --danger: #ef4444;
+        --c1: #7c5af3;
+        --c2: #ec4899;
+        --c3: #06b6d4;
+        --c4: #22c55e;
+        --c5: #f59e0b;
+        --radius: 12px;
+        --radius-sm: 8px;
+        --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        --shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+        --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.5);
       }
-      * {
-        box-sizing: border-box;
-      }
+
+      /* ═══════════════════════════════════════
+         BASE
+      ═══════════════════════════════════════ */
+      * { box-sizing: border-box; margin: 0; padding: 0; }
       body {
-        margin: 0;
         font-family: var(--font);
-        background: radial-gradient(ellipse 120% 80% at 50% -20%, #1a2240 0%, var(--bg) 50%);
+        background: var(--bg);
+        background-image: radial-gradient(ellipse 200% 70% at 50% -5%, rgba(100, 60, 230, 0.14) 0%, transparent 55%);
         color: var(--text);
         min-height: 100vh;
+        font-size: 0.93rem;
+        line-height: 1.5;
       }
+      ::-webkit-scrollbar { width: 6px; }
+      ::-webkit-scrollbar-track { background: var(--bg); }
+      ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+      /* ═══════════════════════════════════════
+         LAYOUT
+      ═══════════════════════════════════════ */
       .shell {
-        max-width: 1240px;
+        max-width: 1280px;
         margin: 0 auto;
-        padding: 1.5rem clamp(1rem, 4vw, 2rem) 3rem;
+        padding: 1.75rem clamp(1rem, 4vw, 2.5rem) 4rem;
       }
       header {
         display: flex;
@@ -40,19 +71,69 @@
         align-items: flex-end;
         justify-content: space-between;
         gap: 1rem;
-        margin-bottom: 1.25rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.25rem;
+        border-bottom: 1px solid var(--border);
       }
+      .header-left { display: flex; flex-direction: column; gap: 0.2rem; }
+      .back {
+        font-size: 0.8rem;
+        color: var(--text-3);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        transition: color 0.15s;
+        margin-bottom: 0.1rem;
+      }
+      .back:hover { color: var(--accent-2); }
       h1 {
-        margin: 0;
-        font-size: 1.35rem;
+        font-size: 1.3rem;
+        font-weight: 700;
+        letter-spacing: -0.025em;
+        color: var(--text);
+      }
+      .sub { font-size: 0.83rem; color: var(--text-3); }
+      .header-right { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+
+      /* ═══════════════════════════════════════
+         BUTTONS & INPUTS
+      ═══════════════════════════════════════ */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font: inherit;
+        font-size: 0.83rem;
+        font-weight: 500;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+        background: var(--surface-2);
+        color: var(--text-2);
+        padding: 0.45rem 0.85rem;
+        cursor: pointer;
+        transition: background 0.15s, border-color 0.15s, color 0.15s;
+        white-space: nowrap;
+      }
+      .btn:hover { background: var(--surface-3); border-color: var(--border-hover); color: var(--text); }
+      .btn:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+      .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+      .btn.primary {
+        background: linear-gradient(135deg, var(--accent), var(--accent-3));
+        border-color: transparent;
+        color: #fff;
         font-weight: 600;
-        letter-spacing: -0.02em;
+        box-shadow: 0 3px 12px rgba(124, 90, 243, 0.28);
       }
-      .sub {
-        margin: 0.25rem 0 0;
-        color: var(--muted);
-        font-size: 0.88rem;
+      .btn.primary:hover { filter: brightness(1.08); box-shadow: 0 4px 18px rgba(124, 90, 243, 0.38); }
+      .btn.report {
+        background: rgba(124, 90, 243, 0.1);
+        border-color: rgba(124, 90, 243, 0.28);
+        color: var(--accent-2);
+        font-weight: 500;
       }
+      .btn.report:hover { background: rgba(124, 90, 243, 0.17); border-color: rgba(124, 90, 243, 0.5); color: var(--accent-2); }
+
       .range {
         display: flex;
         flex-wrap: wrap;
@@ -60,143 +141,186 @@
         gap: 0.5rem;
       }
       .range label {
-        font-size: 0.75rem;
-        color: var(--muted);
+        font-size: 0.73rem;
+        color: var(--text-3);
         display: flex;
         flex-direction: column;
         gap: 0.2rem;
       }
       .range input[type="date"] {
-        padding: 0.45rem 0.55rem;
-        border-radius: 8px;
+        padding: 0.42rem 0.6rem;
+        border-radius: var(--radius-sm);
         border: 1px solid var(--border);
         background: var(--surface-2);
         color: var(--text);
         font: inherit;
+        font-size: 0.83rem;
+        outline: none;
+        transition: border-color 0.15s;
       }
+      .range input[type="date"]:focus { border-color: var(--accent-border); }
+
+      /* ═══════════════════════════════════════
+         PRESETS (PILL ROW)
+      ═══════════════════════════════════════ */
       .presets {
-        width: 100%;
         display: flex;
         flex-wrap: wrap;
         gap: 0.4rem;
+        margin-bottom: 1.5rem;
+      }
+      .pill {
+        font: inherit;
+        font-size: 0.78rem;
+        font-weight: 500;
+        padding: 0.3rem 0.75rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--surface-2);
+        color: var(--text-3);
+        cursor: pointer;
+        transition: background 0.15s, border-color 0.15s, color 0.15s;
+      }
+      .pill:hover { border-color: var(--border-hover); color: var(--text-2); background: var(--surface-3); }
+      .pill.active {
+        border-color: var(--accent-border);
+        background: var(--accent-bg);
+        color: var(--accent-2);
+        font-weight: 600;
+      }
+
+      /* ═══════════════════════════════════════
+         ERROR BANNER
+      ═══════════════════════════════════════ */
+      .err {
+        color: var(--danger);
+        padding: 0.75rem 1rem;
+        background: rgba(239, 68, 68, 0.07);
+        border: 1px solid rgba(239, 68, 68, 0.18);
+        border-radius: var(--radius-sm);
+        font-size: 0.88rem;
         margin-bottom: 1.25rem;
       }
-      .back {
-        font-size: 0.85rem;
-        color: var(--accent);
-        text-decoration: none;
-      }
-      .back:hover {
-        text-decoration: underline;
-      }
+
+      /* ═══════════════════════════════════════
+         KPI CARDS
+      ═══════════════════════════════════════ */
       .kpis {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        gap: 0.75rem;
-        margin-bottom: 1.25rem;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 0.85rem;
+        margin-bottom: 1.5rem;
       }
       .kpi {
         background: var(--surface);
         border: 1px solid var(--border);
         border-radius: var(--radius);
-        padding: 1rem;
+        padding: 1.15rem 1.2rem;
+        position: relative;
+        overflow: hidden;
+        transition: border-color 0.2s;
       }
+      .kpi:hover { border-color: var(--border-hover); }
+      .kpi::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 2.5px;
+      }
+      .kpi:nth-child(1)::before { background: var(--c1); }
+      .kpi:nth-child(2)::before { background: var(--c3); }
+      .kpi:nth-child(3)::before { background: var(--c2); }
+      .kpi:nth-child(4)::before { background: var(--c4); }
       .kpi .k {
-        font-size: 0.75rem;
-        color: var(--muted);
+        font-size: 0.72rem;
+        font-weight: 500;
+        color: var(--text-3);
         text-transform: uppercase;
-        letter-spacing: 0.06em;
+        letter-spacing: 0.07em;
+        margin-bottom: 0.55rem;
       }
       .kpi .v {
-        font-size: 1.5rem;
-        font-weight: 600;
-        margin-top: 0.25rem;
+        font-size: 1.75rem;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        color: var(--text);
+        line-height: 1;
       }
+
+      /* ═══════════════════════════════════════
+         CHART PANELS
+      ═══════════════════════════════════════ */
       .charts {
         display: grid;
         grid-template-columns: 1fr;
         gap: 1rem;
-        margin-bottom: 1.25rem;
+        margin-bottom: 1.5rem;
       }
-      @media (min-width: 960px) {
-        .charts {
-          grid-template-columns: 1fr 1fr;
-        }
-      }
+      @media (min-width: 960px) { .charts { grid-template-columns: 1fr 1fr; } }
       .panel {
         background: var(--surface);
         border: 1px solid var(--border);
         border-radius: var(--radius);
-        padding: 1rem;
+        padding: 1.25rem;
       }
       .panel h2 {
-        margin: 0 0 0.75rem;
-        font-size: 0.95rem;
+        font-size: 0.88rem;
         font-weight: 600;
+        color: var(--text-2);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 1rem;
       }
-      .chart-wrap {
-        position: relative;
-        height: 280px;
-      }
+      .chart-wrap { position: relative; height: 260px; }
+
+      /* ═══════════════════════════════════════
+         POSTS SECTION
+      ═══════════════════════════════════════ */
       .layout {
         display: grid;
         grid-template-columns: 1fr;
         gap: 1rem;
       }
-      @media (min-width: 1000px) {
-        .layout {
-          grid-template-columns: 1fr 300px;
-          align-items: start;
-        }
-      }
+      @media (min-width: 1060px) { .layout { grid-template-columns: 1fr 300px; align-items: start; } }
+
       .toolbar {
         display: flex;
         flex-wrap: wrap;
         align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 0.75rem;
+        gap: 0.4rem;
+        margin-bottom: 0.65rem;
       }
-      .toolbar span.h {
-        font-size: 0.75rem;
-        color: var(--muted);
-        margin-right: 0.25rem;
+      .toolbar .lbl {
+        font-size: 0.72rem;
+        font-weight: 500;
+        color: var(--text-3);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-right: 0.1rem;
+        flex-shrink: 0;
       }
-      .pill {
-        font: inherit;
-        padding: 0.35rem 0.65rem;
-        border-radius: 999px;
-        border: 1px solid var(--border);
-        background: var(--surface-2);
-        color: var(--text);
-        cursor: pointer;
-        font-size: 0.82rem;
+      .panel-title {
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: var(--text-2);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin: 0.75rem 0 0.85rem;
       }
-      .pill.active {
-        border-color: var(--accent);
-        background: rgba(108, 140, 255, 0.15);
-        color: var(--accent-hover);
-      }
+
+      /* Post grid */
       .posts {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
         gap: 0.75rem;
       }
-      .post-wrap {
-        display: block;
-        text-decoration: none;
-        color: inherit;
-      }
-      .post-wrap.post-wrap--link .post {
-        cursor: pointer;
-        transition: border-color 0.15s ease;
-      }
-      .post-wrap.post-wrap--link:hover .post {
-        border-color: var(--accent);
-      }
+      .post-wrap { display: block; text-decoration: none; color: inherit; }
+      .post-wrap.linked .post { transition: border-color 0.15s; }
+      .post-wrap.linked:hover .post { border-color: var(--accent-border); }
       .post {
         background: var(--surface-2);
         border: 1px solid var(--border);
-        border-radius: 8px;
+        border-radius: var(--radius-sm);
         overflow: hidden;
         display: flex;
         flex-direction: column;
@@ -204,150 +328,480 @@
       .post .ph {
         position: relative;
         aspect-ratio: 1;
-        min-height: 160px;
-        background: #0a0c10;
+        min-height: 155px;
+        background: var(--surface-3);
         display: flex;
         align-items: center;
         justify-content: center;
-        color: var(--muted);
-        font-size: 0.75rem;
+        color: var(--text-3);
+        font-size: 0.73rem;
         overflow: hidden;
       }
-      .post .tipo-badge {
+      .post img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .post .badge {
         position: absolute;
-        top: 0.35rem;
-        right: 0.35rem;
+        top: 0.4rem;
+        right: 0.4rem;
         z-index: 1;
-        background: rgba(0, 0, 0, 0.6);
-        font-size: 0.65rem;
-        padding: 0.2rem 0.45rem;
+        font-size: 0.62rem;
+        font-weight: 600;
+        padding: 0.18rem 0.5rem;
         border-radius: 999px;
-        color: #fff;
-        line-height: 1.2;
+        line-height: 1.3;
         pointer-events: none;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
       }
-      .post img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-      }
-      .post .meta {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
-      }
+      .badge-video   { background: rgba(124, 90, 243, 0.25); color: var(--accent-2); }
+      .badge-carousel { background: rgba(249, 115, 22, 0.2); color: #fb923c; }
+      .badge-image   { background: rgba(6, 182, 212, 0.2); color: #22d3ee; }
+      .badge-default { background: rgba(255, 255, 255, 0.1); color: var(--text-2); }
+      .post .meta { flex: 1; display: flex; flex-direction: column; }
       .post .mr {
         display: flex;
         justify-content: space-between;
         align-items: baseline;
         gap: 0.5rem;
-        padding: 0.3rem 0.55rem;
-        font-size: 0.73rem;
-        color: var(--muted);
+        padding: 0.28rem 0.55rem;
+        font-size: 0.72rem;
+        color: var(--text-3);
       }
-      .post .mr:nth-child(even) {
-        background: rgba(255, 255, 255, 0.03);
-      }
-      .post .ml {
-        flex-shrink: 0;
-      }
-      .post .mv {
-        color: var(--text);
-        text-align: right;
-        font-variant-numeric: tabular-nums;
-      }
-      aside h2 {
-        margin: 0 0 0.65rem;
-        font-size: 0.95rem;
-      }
-      .side-list {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-      }
-      .side-item {
-        display: flex;
-        gap: 0.5rem;
-        align-items: flex-start;
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 0.45rem;
-        background: var(--surface-2);
-      }
-      .side-item .thumb {
-        width: 46px;
-        height: 46px;
-        border-radius: 6px;
-        overflow: hidden;
-        flex-shrink: 0;
-        background: #0a0c10;
-      }
-      .side-item .thumb img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-      .side-item .txt {
-        font-size: 0.78rem;
-        color: var(--muted);
-        line-height: 1.35;
-      }
-      .side-item strong {
-        color: var(--text);
-        font-size: 0.82rem;
-      }
-      .err {
-        color: #f87171;
-        padding: 1rem;
-        text-align: center;
-      }
-      .posts-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.82rem;
-      }
+      .post .mr:nth-child(even) { background: rgba(255, 255, 255, 0.025); }
+      .post .mv { color: var(--text-2); text-align: right; font-variant-numeric: tabular-nums; }
+
+      /* Post list (table view) */
+      .posts-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
       .posts-table th {
         text-align: left;
-        padding: 0.4rem 0.6rem;
-        color: var(--muted);
+        padding: 0.4rem 0.65rem;
+        color: var(--text-3);
         font-weight: 500;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
         border-bottom: 1px solid var(--border);
       }
       .posts-table td {
-        padding: 0.4rem 0.6rem;
-        border-bottom: 1px solid rgba(42, 50, 68, 0.5);
+        padding: 0.4rem 0.65rem;
+        border-bottom: 1px solid rgba(34, 34, 58, 0.6);
         vertical-align: middle;
+        color: var(--text-2);
       }
-      .posts-table tr:hover td {
-        background: rgba(255, 255, 255, 0.03);
-        cursor: pointer;
-      }
+      .posts-table tr:hover td { background: rgba(255, 255, 255, 0.025); cursor: pointer; }
       .posts-table .tthumb {
-        width: 48px;
-        height: 48px;
+        width: 46px; height: 46px;
         object-fit: cover;
-        border-radius: 4px;
+        border-radius: 6px;
         display: block;
+        background: var(--surface-3);
+      }
+      .tnum { font-variant-numeric: tabular-nums; color: var(--text); }
+
+      /* Aside: top 5 */
+      aside .panel h2 {
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: var(--text-2);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.85rem;
+      }
+      .side-list { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+      .side-item {
+        display: flex;
+        gap: 0.6rem;
+        align-items: flex-start;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 0.5rem;
+        background: var(--surface-2);
+        transition: border-color 0.15s;
+      }
+      .side-item:hover { border-color: var(--border-hover); }
+      .side-item .thumb {
+        width: 44px; height: 44px;
+        border-radius: 6px;
+        overflow: hidden;
+        flex-shrink: 0;
+        background: var(--surface-3);
+      }
+      .side-item .thumb img { width: 100%; height: 100%; object-fit: cover; }
+      .side-item .txt { font-size: 0.76rem; color: var(--text-3); line-height: 1.4; }
+      .side-item strong { color: var(--text); font-size: 0.8rem; display: block; margin-bottom: 0.1rem; }
+
+      /* ═══════════════════════════════════════
+         MODAL
+      ═══════════════════════════════════════ */
+      .overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.65);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        z-index: 50;
+      }
+      .overlay.open { display: flex; }
+      .modal {
+        width: min(440px, 100%);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        box-shadow: var(--shadow-lg);
+        position: relative;
+        overflow: hidden;
+      }
+      .modal::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--accent-3), var(--accent), var(--accent-2));
+      }
+      .modal h3 {
+        font-size: 1.05rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.35rem;
+      }
+      .modal .modal-sub {
+        font-size: 0.83rem;
+        color: var(--text-3);
+        margin-bottom: 1.35rem;
+        line-height: 1.45;
+      }
+      .modal label {
+        display: block;
+        font-size: 0.77rem;
+        font-weight: 500;
+        color: var(--text-2);
+        margin-bottom: 0.35rem;
+        letter-spacing: 0.02em;
+      }
+      .modal input[type="date"] {
+        width: 100%;
+        padding: 0.6rem 0.8rem;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+        background: var(--surface-2);
+        color: var(--text);
+        font: inherit;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        outline: none;
+        transition: border-color 0.15s, box-shadow 0.15s;
+      }
+      .modal input[type="date"]:focus {
+        border-color: rgba(124, 90, 243, 0.55);
+        box-shadow: 0 0 0 3px rgba(124, 90, 243, 0.1);
+      }
+      .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+      }
+
+      /* ═══════════════════════════════════════
+         PRINT / REPORT STYLES
+      ═══════════════════════════════════════ */
+      #print-view { display: none; }
+
+      @media print {
+        * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        @page { margin: 1.5cm; size: A4; }
+        body > .shell,
+        body > .overlay { display: none !important; }
+        #print-view { display: block !important; font-family: "Inter", Arial, sans-serif; color: #1a1a2e; }
+
+        .rpt-page { page-break-after: always; break-after: page; }
+        .rpt-page:last-child { page-break-after: avoid; break-after: avoid; }
+        .rpt-page-inner { padding: 0; }
+      }
+
+      /* Report: screen preview (hidden) */
+      .rpt { font-family: var(--font); }
+      .rpt-page {
+        background: #fff;
+        color: #1a1a2e;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      /* Cover */
+      .rpt-cover { justify-content: space-between; }
+      .rpt-cover-header {
+        background: linear-gradient(135deg, #4c1d95 0%, #7c3aed 40%, #a78bfa 100%);
+        padding: 3.5rem 3rem 2.5rem;
+        color: #fff;
+      }
+      .rpt-agency {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        opacity: 0.75;
+        margin-bottom: 2rem;
+      }
+      .rpt-cover-title {
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        line-height: 1.15;
+        margin-bottom: 0.35rem;
+      }
+      .rpt-cover-platform {
+        font-size: 1.1rem;
+        font-weight: 500;
+        opacity: 0.8;
+      }
+      .rpt-cover-body {
+        padding: 2.5rem 3rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .rpt-cover-client-label {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: #7c5af3;
+        margin-bottom: 0.4rem;
+      }
+      .rpt-cover-client-name {
+        font-size: 1.75rem;
+        font-weight: 700;
+        letter-spacing: -0.025em;
+        color: #1a1a2e;
+      }
+      .rpt-cover-period {
+        font-size: 1rem;
+        color: #5b5b80;
+        margin-top: 0.3rem;
+      }
+      .rpt-cover-footer {
+        font-size: 0.75rem;
+        color: #9898b4;
+        border-top: 1px solid #e5e5f0;
+        padding-top: 1.25rem;
+      }
+
+      /* Section header */
+      .rpt-section-header {
+        padding: 0 0 1rem;
+        border-bottom: 2px solid #7c5af3;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+      }
+      .rpt-section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1a1a2e;
+        letter-spacing: -0.02em;
+      }
+      .rpt-section-period {
+        font-size: 0.78rem;
+        color: #7c5af3;
+        font-weight: 500;
+      }
+
+      /* KPI grid */
+      .rpt-kpis {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+      .rpt-kpi {
+        border: 1px solid #e5e5f0;
+        border-radius: 10px;
+        padding: 1.15rem 1.2rem;
+        position: relative;
+        overflow: hidden;
+      }
+      .rpt-kpi::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+      }
+      .rpt-kpi.c1::before { background: #7c5af3; }
+      .rpt-kpi.c2::before { background: #06b6d4; }
+      .rpt-kpi.c3::before { background: #ec4899; }
+      .rpt-kpi.c4::before { background: #22c55e; }
+      .rpt-kpi.c5::before { background: #f59e0b; }
+      .rpt-kpi-label {
+        font-size: 0.68rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: #9898b4;
+        margin-bottom: 0.5rem;
+      }
+      .rpt-kpi-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        color: #1a1a2e;
+        line-height: 1;
+        margin-bottom: 0.2rem;
+      }
+      .rpt-kpi-sub { font-size: 0.75rem; color: #9898b4; }
+
+      /* Daily table */
+      .rpt-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.83rem;
+      }
+      .rpt-table thead th {
+        background: #f5f3ff;
+        padding: 0.6rem 0.8rem;
+        text-align: left;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: #7c5af3;
+        border-bottom: 2px solid #e5e5f0;
+      }
+      .rpt-table tbody td {
+        padding: 0.5rem 0.8rem;
+        border-bottom: 1px solid #f0f0f8;
+        color: #3a3a5c;
+        font-variant-numeric: tabular-nums;
+      }
+      .rpt-table tbody tr:nth-child(even) td { background: #faf9ff; }
+      .rpt-table tbody tr:last-child td { border-bottom: none; }
+      .rpt-table .pos { color: #22c55e; font-weight: 600; }
+      .rpt-table .neg { color: #ef4444; font-weight: 600; }
+      .rpt-table .date-col { color: #5b5b80; }
+
+      /* Post cards in report */
+      .rpt-posts-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.85rem;
+        margin-bottom: 1.5rem;
+      }
+      .rpt-post {
+        display: flex;
+        gap: 0.75rem;
+        border: 1px solid #e5e5f0;
+        border-radius: 10px;
+        overflow: hidden;
+        padding: 0.75rem;
+        background: #fff;
+      }
+      .rpt-post-img-wrap {
+        width: 64px;
+        height: 64px;
+        border-radius: 7px;
+        overflow: hidden;
+        flex-shrink: 0;
+        background: #f5f3ff;
+      }
+      .rpt-post-img-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .rpt-post-no-img {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.65rem;
+        color: #9898b4;
+        text-align: center;
+        padding: 0.25rem;
+      }
+      .rpt-post-info { flex: 1; min-width: 0; }
+      .rpt-post-type-badge {
+        display: inline-block;
+        font-size: 0.6rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        padding: 0.15rem 0.45rem;
+        border-radius: 999px;
+        margin-bottom: 0.35rem;
+      }
+      .rpt-badge-video { background: #ede9fe; color: #7c3aed; }
+      .rpt-badge-carousel { background: #fff3e0; color: #ea6c00; }
+      .rpt-badge-image { background: #e0f7fa; color: #0097a7; }
+      .rpt-post-date { font-size: 0.72rem; color: #9898b4; margin-bottom: 0.4rem; }
+      .rpt-post-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.3rem 0.6rem;
+        font-size: 0.72rem;
+        color: #5b5b80;
+      }
+      .rpt-post-stats strong { color: #1a1a2e; }
+
+      /* Subsection title in report */
+      .rpt-sub-title {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #3a3a5c;
+        letter-spacing: -0.01em;
+        margin: 1.25rem 0 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .rpt-sub-title::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: #e5e5f0;
+      }
+
+      /* Page footer in report */
+      .rpt-page-footer {
+        margin-top: auto;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e5e5f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.7rem;
+        color: #c0c0d8;
       }
     </style>
   </head>
   <body>
     <div class="shell">
       <header>
-        <div>
-          <a class="back" href="/index.html" id="back-link">← Admin</a>
+        <div class="header-left">
+          <a class="back" href="/index.html" id="back-link">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+            Admin
+          </a>
           <h1>Dashboard</h1>
-          <p class="sub" id="subtitle" style="display: none">Carregando…</p>
+          <p class="sub" id="subtitle" style="display:none">Carregando…</p>
         </div>
-        <div class="range">
-          <label>Início <input type="date" id="start" /></label>
-          <label>Fim <input type="date" id="end" /></label>
-          <button type="button" class="pill" id="btn-refresh">Atualizar</button>
+        <div class="header-right">
+          <div class="range">
+            <label>Início <input type="date" id="start" /></label>
+            <label>Fim <input type="date" id="end" /></label>
+            <button type="button" class="btn" id="btn-refresh">Atualizar</button>
+          </div>
+          <button type="button" class="btn report" id="btn-report">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            Gerar Relatório
+          </button>
         </div>
       </header>
 
@@ -361,30 +815,30 @@
         <button type="button" class="pill" data-preset="all">Todo período</button>
       </div>
 
-      <div id="error" class="err" style="display: none"></div>
+      <div id="error" class="err" style="display:none" role="alert"></div>
 
-      <section class="kpis" id="kpis">
+      <section class="kpis" id="kpis" aria-label="Métricas principais">
         <div class="kpi"><div class="k">Seguidores</div><div class="v" id="k-follow">—</div></div>
         <div class="kpi"><div class="k">Alcance médio</div><div class="v" id="k-reach">—</div></div>
-        <div class="kpi"><div class="k">Engajamento médio</div><div class="v" id="k-eng">—</div></div>
+        <div class="kpi"><div class="k">Engajamento</div><div class="v" id="k-eng">—</div></div>
         <div class="kpi"><div class="k">Posts no período</div><div class="v" id="k-posts">—</div></div>
       </section>
 
       <div class="charts">
         <div class="panel">
-          <h2>Evolução de alcance</h2>
-          <div class="chart-wrap"><canvas id="c-reach"></canvas></div>
+          <h2>Evolução de Alcance</h2>
+          <div class="chart-wrap"><canvas id="c-reach" aria-label="Gráfico de alcance diário"></canvas></div>
         </div>
         <div class="panel">
-          <h2>Engajamento diário</h2>
-          <div class="chart-wrap"><canvas id="c-eng"></canvas></div>
+          <h2>Engajamento Diário</h2>
+          <div class="chart-wrap"><canvas id="c-eng" aria-label="Gráfico de engajamento diário"></canvas></div>
         </div>
       </div>
 
       <div class="layout">
         <div class="panel">
           <div class="toolbar">
-            <span class="h">Ordenar</span>
+            <span class="lbl">Ordenar</span>
             <button type="button" class="pill active" data-sort="likes">Curtidas</button>
             <button type="button" class="pill" data-sort="reach">Alcance</button>
             <button type="button" class="pill" data-sort="comments">Comentários</button>
@@ -392,200 +846,84 @@
             <button type="button" class="pill" data-sort="saved">Salvamentos</button>
           </div>
           <div class="toolbar">
-            <span class="h">Formato</span>
-            <button type="button" class="pill active" data-fmt="">todos</button>
+            <span class="lbl">Formato</span>
+            <button type="button" class="pill active" data-fmt="">Todos</button>
             <button type="button" class="pill" data-fmt="IMAGE">Imagem</button>
             <button type="button" class="pill" data-fmt="VIDEO">Vídeo</button>
             <button type="button" class="pill" data-fmt="CAROUSEL_ALBUM">Carrossel</button>
           </div>
           <div class="toolbar">
-            <span class="h">Visualização</span>
-            <button type="button" class="pill active" data-view="grid">▦ Grade</button>
-            <button type="button" class="pill" data-view="list">☰ Lista</button>
+            <span class="lbl">Visualização</span>
+            <button type="button" class="pill active" data-view="grid">Grade</button>
+            <button type="button" class="pill" data-view="list">Lista</button>
           </div>
-          <h2 style="margin-top: 0.5rem">Posts</h2>
+          <h2 class="panel-title">Posts</h2>
           <div class="posts" id="posts"></div>
         </div>
-        <aside class="panel">
-          <h2>Top 5 — engajamento</h2>
-          <ol class="side-list" id="top5"></ol>
+        <aside>
+          <div class="panel">
+            <h2>Top 5 — Engajamento</h2>
+            <ol class="side-list" id="top5"></ol>
+          </div>
         </aside>
       </div>
     </div>
 
+    <!-- Modal: Gerar Relatório -->
+    <div class="overlay" id="modal-report" role="dialog" aria-modal="true" aria-labelledby="modal-report-title">
+      <div class="modal">
+        <h3 id="modal-report-title">Gerar Relatório PDF</h3>
+        <p class="modal-sub">Escolha o período e clique em gerar. O relatório abrirá a janela de impressão — salve como PDF.</p>
+        <form id="form-report" novalidate>
+          <label for="rep-start">Data de início</label>
+          <input type="date" id="rep-start" required />
+          <label for="rep-end">Data de fim</label>
+          <input type="date" id="rep-end" required />
+          <div class="modal-actions">
+            <button type="button" class="btn" id="rep-cancel">Cancelar</button>
+            <button type="submit" class="btn primary" id="rep-submit">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+              Gerar PDF
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Print view: populated by JS -->
+    <div id="print-view" aria-hidden="true"></div>
+
     <script>
-      const api = (path, opts) =>
-        fetch(path, { credentials: "include", ...opts });
+      /* ═══════════════════════════════════════
+         UTILS
+      ═══════════════════════════════════════ */
+      const api = (path, opts) => fetch(path, { credentials: "include", ...opts });
 
-      let clientId = "";
-      let chartReach = null;
-      let chartEng = null;
-      let sortKey = "likes";
-      let formatKey = "";
-      let viewKey = "grid";
-      let lastPosts = [];
-
-      function qs(name) {
-        const u = new URL(window.location.href);
-        return u.searchParams.get(name) || "";
-      }
-
-      function pad2(n) {
-        return String(n).padStart(2, "0");
-      }
-
-      function localDateKey(d) {
-        return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
-      }
-
-      function computePresetRange(key) {
-        const end = new Date();
-        const endStr = localDateKey(end);
-        let startStr;
-        switch (key) {
-          case "7": {
-            const s = new Date(end);
-            s.setDate(s.getDate() - 7);
-            startStr = localDateKey(s);
-            break;
-          }
-          case "14": {
-            const s = new Date(end);
-            s.setDate(s.getDate() - 14);
-            startStr = localDateKey(s);
-            break;
-          }
-          case "30": {
-            const s = new Date(end);
-            s.setDate(s.getDate() - 30);
-            startStr = localDateKey(s);
-            break;
-          }
-          case "90": {
-            const s = new Date(end);
-            s.setDate(s.getDate() - 90);
-            startStr = localDateKey(s);
-            break;
-          }
-          case "week": {
-            const s = new Date(end.getFullYear(), end.getMonth(), end.getDate());
-            const dow = s.getDay();
-            const offset = dow === 0 ? -6 : 1 - dow;
-            s.setDate(s.getDate() + offset);
-            startStr = localDateKey(s);
-            break;
-          }
-          case "month": {
-            const s = new Date(end.getFullYear(), end.getMonth(), 1);
-            startStr = localDateKey(s);
-            break;
-          }
-          case "all":
-            startStr = "2020-01-01";
-            break;
-          default: {
-            const s = new Date(end);
-            s.setDate(s.getDate() - 30);
-            startStr = localDateKey(s);
-          }
-        }
-        return { start: startStr, end: endStr };
-      }
-
-      function defaultRange() {
-        return computePresetRange("30");
-      }
-
-      function clearPresetActive() {
-        document.querySelectorAll(".presets [data-preset]").forEach((b) => b.classList.remove("active"));
-      }
-
-      function setPresetActive(key) {
-        clearPresetActive();
-        const btn = document.querySelector(`.presets [data-preset="${key}"]`);
-        if (btn) btn.classList.add("active");
-      }
-
-      function wirePresets() {
-        document.querySelectorAll(".presets [data-preset]").forEach((btn) => {
-          btn.addEventListener("click", () => {
-            clearPresetActive();
-            btn.classList.add("active");
-            const r = computePresetRange(btn.getAttribute("data-preset"));
-            document.getElementById("start").value = r.start;
-            document.getElementById("end").value = r.end;
-            loadAll();
-          });
-        });
-        setPresetActive("30");
-      }
-
-      function rangeParams() {
-        const s = document.getElementById("start").value;
-        const e = document.getElementById("end").value;
-        const startDt = new Date(s + "T00:00:00");
-        const endDt = new Date(e + "T23:59:59.999");
-        return {
-          startIso: startDt.toISOString(),
-          endIso: endDt.toISOString(),
-          startDay: s,
-          endDay: e,
-        };
-      }
-
-      function enumerateDays(startStr, endStr) {
-        const out = [];
-        const a = new Date(startStr + "T12:00:00");
-        const b = new Date(endStr + "T12:00:00");
-        if (a > b) {
-          return out;
-        }
-        for (let t = a.getTime(); t <= b.getTime(); t += 86400000) {
-          out.push(localDateKey(new Date(t)));
-        }
-        return out;
-      }
-
-      function showErr(msg) {
-        const el = document.getElementById("error");
-        el.style.display = msg ? "block" : "none";
-        el.textContent = msg || "";
-      }
-
-      function destroyCharts() {
-        if (chartReach) {
-          chartReach.destroy();
-          chartReach = null;
-        }
-        if (chartEng) {
-          chartEng.destroy();
-          chartEng = null;
-        }
-      }
+      function qs(name) { return new URL(window.location.href).searchParams.get(name) || ""; }
+      function pad2(n) { return String(n).padStart(2, "0"); }
+      function localDateKey(d) { return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
 
       function fmtNum(n) {
         if (n == null || !Number.isFinite(n)) return "—";
         if (n >= 1e6) return (n / 1e6).toFixed(1) + "M";
         if (n >= 1e3) return (n / 1e3).toFixed(1) + "k";
-        return String(Math.round(n * 1000) / 1000);
+        return String(Math.round(n));
+      }
+
+      function fmtDateBR(isoStr) {
+        if (!isoStr) return "—";
+        const d = new Date(isoStr + (isoStr.length === 10 ? "T12:00:00" : ""));
+        return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
       }
 
       function engagementScore(p) {
-        return (
-          (Number(p.likes) || 0) +
-          (Number(p.comments) || 0) +
-          (Number(p.shares) || 0) +
-          (Number(p.saved) || 0)
-        );
+        return (Number(p.likes)||0) + (Number(p.comments)||0) + (Number(p.shares)||0) + (Number(p.saved)||0);
       }
 
       function postImageSrc(p) {
         const media = p.media_url && String(p.media_url).trim();
         const thumb = p.thumbnail_url && String(p.thumbnail_url).trim();
-        if (p.media_type === "VIDEO") {
-          return thumb || media || "";
-        }
-        return media || "";
+        return p.media_type === "VIDEO" ? (thumb || media || "") : (media || "");
       }
 
       function translateMediaType(mt) {
@@ -596,90 +934,191 @@
         return escapeHtml(mt);
       }
 
+      function badgeClass(mt) {
+        if (mt === "VIDEO") return "badge-video";
+        if (mt === "CAROUSEL_ALBUM") return "badge-carousel";
+        if (mt === "IMAGE") return "badge-image";
+        return "badge-default";
+      }
+
+      function escapeHtml(s) {
+        return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+      }
+      function esc(s) { return String(s).replace(/"/g,"&quot;"); }
+
+      function showErr(msg) {
+        const el = document.getElementById("error");
+        el.style.display = msg ? "block" : "none";
+        el.textContent = msg || "";
+      }
+
+      /* ═══════════════════════════════════════
+         DATE RANGE
+      ═══════════════════════════════════════ */
+      function computePresetRange(key) {
+        const end = new Date();
+        const endStr = localDateKey(end);
+        let startStr;
+        switch (key) {
+          case "7":  { const s=new Date(end); s.setDate(s.getDate()-7); startStr=localDateKey(s); break; }
+          case "14": { const s=new Date(end); s.setDate(s.getDate()-14); startStr=localDateKey(s); break; }
+          case "30": { const s=new Date(end); s.setDate(s.getDate()-30); startStr=localDateKey(s); break; }
+          case "90": { const s=new Date(end); s.setDate(s.getDate()-90); startStr=localDateKey(s); break; }
+          case "week": {
+            const s=new Date(end.getFullYear(),end.getMonth(),end.getDate());
+            const dow=s.getDay(); s.setDate(s.getDate()+(dow===0?-6:1-dow));
+            startStr=localDateKey(s); break;
+          }
+          case "month": { startStr=localDateKey(new Date(end.getFullYear(),end.getMonth(),1)); break; }
+          case "all": startStr="2020-01-01"; break;
+          default: { const s=new Date(end); s.setDate(s.getDate()-30); startStr=localDateKey(s); }
+        }
+        return { start: startStr, end: endStr };
+      }
+
+      function defaultRange() { return computePresetRange("30"); }
+
+      function rangeParams() {
+        const s = document.getElementById("start").value;
+        const e = document.getElementById("end").value;
+        return {
+          startIso: new Date(s+"T00:00:00").toISOString(),
+          endIso: new Date(e+"T23:59:59.999").toISOString(),
+          startDay: s, endDay: e,
+        };
+      }
+
+      function enumerateDays(startStr, endStr) {
+        const out = [];
+        const a = new Date(startStr+"T12:00:00");
+        const b = new Date(endStr+"T12:00:00");
+        if (a > b) return out;
+        for (let t = a.getTime(); t <= b.getTime(); t += 86400000) out.push(localDateKey(new Date(t)));
+        return out;
+      }
+
+      /* ═══════════════════════════════════════
+         CHARTS
+      ═══════════════════════════════════════ */
+      let chartReach = null, chartEng = null;
+
+      function destroyCharts() {
+        if (chartReach) { chartReach.destroy(); chartReach = null; }
+        if (chartEng)   { chartEng.destroy();   chartEng = null;   }
+      }
+
+      const TICK_COLOR  = "#64647a";
+      const GRID_COLOR  = "rgba(34, 34, 58, 0.8)";
+      const LABEL_COLOR = "#9898b4";
+
+      function chartDefaults() {
+        return {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: "index", intersect: false },
+          scales: {
+            x: {
+              ticks: { color: TICK_COLOR, font: { size: 10, family: "'Inter', sans-serif" }, maxTicksLimit: 10 },
+              grid: { color: GRID_COLOR },
+            },
+            y: {
+              ticks: { color: TICK_COLOR, font: { size: 10, family: "'Inter', sans-serif" } },
+              grid: { color: GRID_COLOR },
+              beginAtZero: true,
+            },
+          },
+          plugins: {
+            legend: { labels: { color: LABEL_COLOR, font: { size: 11, family: "'Inter', sans-serif" }, boxWidth: 10, padding: 14 } },
+            tooltip: {
+              backgroundColor: "#0f0f18",
+              borderColor: "#22223a",
+              borderWidth: 1,
+              titleColor: "#f0f0f8",
+              bodyColor: "#9898b4",
+              padding: 10,
+            },
+          },
+        };
+      }
+
+      /* ═══════════════════════════════════════
+         RENDER POSTS
+      ═══════════════════════════════════════ */
+      let clientId = "";
+      let sortKey = "likes", formatKey = "", viewKey = "grid";
+      let lastPosts = [];
+
       function renderPosts(posts) {
         const el = document.getElementById("posts");
         el.style.display = "grid";
+        el.className = "posts";
         if (!posts.length) {
-          el.innerHTML = "<p class=\"sub\">Nenhum post no período.</p>";
+          el.innerHTML = '<p style="color:var(--text-3);font-size:0.85rem;grid-column:1/-1;padding:1rem 0">Nenhum post no período.</p>';
           return;
         }
-        const metricRow = (label, valueHtml) =>
-          `<div class="mr"><span class="ml">${label}</span><span class="mv">${valueHtml}</span></div>`;
-        el.innerHTML = posts
-          .map((p) => {
-            const srcRaw = postImageSrc(p);
-            const src = srcRaw ? esc(srcRaw) : "";
-            const tipoLabel = translateMediaType(p.media_type);
-            const badge = `<span class="tipo-badge">${tipoLabel}</span>`;
-            const img = src
-              ? `<div class="ph">${badge}<img src="${src}" alt="" loading="lazy" onerror="this.style.display='none'" /></div>`
-              : `<div class="ph">${badge}sem mídia</div>`;
-            const likes = Number(p.likes) || 0;
-            const comments = Number(p.comments) || 0;
-            const shares = Number(p.shares) || 0;
-            const saved = Number(p.saved) || 0;
-            const reach = Number(p.reach);
-            const linkClicks = Number(p.link_clicks) || 0;
-
-            const rows = [
-              metricRow("Curtidas", escapeHtml(fmtNum(likes))),
-              metricRow("Comentários", escapeHtml(fmtNum(comments))),
-              metricRow("Compartilhamentos", escapeHtml(fmtNum(shares))),
-              metricRow("Salvamentos", escapeHtml(fmtNum(saved))),
-              metricRow("Alcance", escapeHtml(fmtNum(reach))),
-            ];
-            if (linkClicks > 0) {
-              rows.push(metricRow("Link clicks", escapeHtml(fmtNum(linkClicks))));
-            }
-
-            const meta = `<div class="meta">${rows.join("")}</div>`;
-            const article = `<article class="post">${img}${meta}</article>`;
-            const permalink = p.permalink && String(p.permalink).trim();
-            if (permalink) {
-              return `<a class="post-wrap post-wrap--link" href="${escapeHtml(permalink)}" target="_blank" rel="noopener noreferrer">${article}</a>`;
-            }
-            return article;
-          })
-          .join("");
+        el.innerHTML = posts.map((p) => {
+          const src = postImageSrc(p);
+          const bc = badgeClass(p.media_type);
+          const tipoLabel = translateMediaType(p.media_type);
+          const badge = `<span class="badge ${bc}">${tipoLabel}</span>`;
+          const img = src
+            ? `<div class="ph">${badge}<img src="${esc(src)}" alt="" loading="lazy" onerror="this.style.display='none'" /></div>`
+            : `<div class="ph">${badge}sem mídia</div>`;
+          const rows = [
+            ["Curtidas",            Number(p.likes)||0],
+            ["Comentários",         Number(p.comments)||0],
+            ["Compartilhamentos",    Number(p.shares)||0],
+            ["Salvamentos",         Number(p.saved)||0],
+            ["Alcance",             Number(p.reach)||0],
+          ];
+          if ((Number(p.link_clicks)||0) > 0) rows.push(["Link clicks", Number(p.link_clicks)||0]);
+          const metaHtml = rows.map(([l,v]) =>
+            `<div class="mr"><span>${escapeHtml(l)}</span><span class="mv">${escapeHtml(fmtNum(v))}</span></div>`
+          ).join("");
+          const article = `<article class="post">${img}<div class="meta">${metaHtml}</div></article>`;
+          const pl = p.permalink && String(p.permalink).trim();
+          return pl
+            ? `<a class="post-wrap linked" href="${esc(pl)}" target="_blank" rel="noopener noreferrer">${article}</a>`
+            : `<div class="post-wrap">${article}</div>`;
+        }).join("");
       }
 
       function renderPostsList(posts) {
         const el = document.getElementById("posts");
         el.style.display = "block";
+        el.className = "";
         if (!posts.length) {
-          el.innerHTML = "<p class='sub'>Nenhum post no período.</p>";
+          el.innerHTML = '<p style="color:var(--text-3);font-size:0.85rem;padding:1rem 0">Nenhum post no período.</p>';
           return;
         }
-        const rows = posts
-          .map((p) => {
-            const srcRaw = postImageSrc(p);
-            const src = srcRaw ? esc(srcRaw) : "";
-            const thumb = src
-              ? `<img class="tthumb" src="${src}" alt="" loading="lazy" onerror="this.style.display='none'" />`
-              : `<div class="tthumb" style="background:#0a0c10"></div>`;
-            const date = p.timestamp ? new Date(p.timestamp).toLocaleDateString("pt-BR") : "—";
-            const tipo = translateMediaType(p.media_type);
-            const permalink = p.permalink ? escapeHtml(p.permalink) : "";
-            const onclick = permalink ? `onclick="window.open('${permalink}','_blank')"` : "";
-            return `<tr ${onclick}>
-        <td>${thumb}</td>
-        <td>${tipo}</td>
-        <td>${date}</td>
-        <td>${fmtNum(Number(p.likes) || 0)}</td>
-        <td>${fmtNum(Number(p.comments) || 0)}</td>
-        <td>${fmtNum(Number(p.shares) || 0)}</td>
-        <td>${fmtNum(Number(p.saved) || 0)}</td>
-        <td>${fmtNum(Number(p.reach) || 0)}</td>
-      </tr>`;
-          })
-          .join("");
-        el.innerHTML = `<div style="overflow-x:auto"><table class="posts-table">
-      <thead><tr>
-        <th></th><th>Tipo</th><th>Data</th><th>Curtidas</th>
-        <th>Comentários</th><th>Compartilhamentos</th><th>Salvamentos</th><th>Alcance</th>
-      </tr></thead>
-      <tbody>${rows}</tbody>
-    </table></div>`;
+        const rows = posts.map((p) => {
+          const src = postImageSrc(p);
+          const thumb = src
+            ? `<img class="tthumb" src="${esc(src)}" alt="" loading="lazy" onerror="this.style.display='none'" />`
+            : `<div class="tthumb"></div>`;
+          const date = p.timestamp ? new Date(p.timestamp).toLocaleDateString("pt-BR") : "—";
+          const tipo = translateMediaType(p.media_type);
+          const pl = p.permalink ? esc(p.permalink) : "";
+          const onclick = pl ? `onclick="window.open('${pl}','_blank')" style="cursor:pointer"` : "";
+          return `<tr ${onclick}>
+            <td>${thumb}</td>
+            <td style="color:var(--text-2)">${tipo}</td>
+            <td>${date}</td>
+            <td class="tnum">${fmtNum(Number(p.likes)||0)}</td>
+            <td class="tnum">${fmtNum(Number(p.comments)||0)}</td>
+            <td class="tnum">${fmtNum(Number(p.shares)||0)}</td>
+            <td class="tnum">${fmtNum(Number(p.saved)||0)}</td>
+            <td class="tnum">${fmtNum(Number(p.reach)||0)}</td>
+          </tr>`;
+        }).join("");
+        el.innerHTML = `<div style="overflow-x:auto">
+          <table class="posts-table">
+            <thead><tr>
+              <th></th><th>Tipo</th><th>Data</th><th>Curtidas</th>
+              <th>Comentários</th><th>Compartilhamentos</th><th>Salvamentos</th><th>Alcance</th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+          </table></div>`;
       }
 
       function renderCurrentPosts() {
@@ -690,52 +1129,31 @@
       function renderTop5(posts) {
         const el = document.getElementById("top5");
         const sorted = [...posts].sort((a, b) => engagementScore(b) - engagementScore(a)).slice(0, 5);
-        if (!sorted.length) {
-          el.innerHTML = "<li class=\"txt\">—</li>";
-          return;
-        }
-        el.innerHTML = sorted
-          .map((p) => {
-            const score = engagementScore(p);
-            const srcRaw = postImageSrc(p);
-            const src = srcRaw ? esc(srcRaw) : "";
-            const thumb = src
-              ? `<div class="thumb"><img src="${src}" alt="" loading="lazy" onerror="this.style.display='none'" /></div>`
-              : `<div class="thumb"></div>`;
-            return `<li class="side-item">${thumb}<div class="txt"><strong>${fmtNum(score)} pts</strong><br />Alcance ${fmtNum(
-              Number(p.reach) || 0
-            )} · ${escapeHtml(p.media_type || "")}</div></li>`;
-          })
-          .join("");
+        if (!sorted.length) { el.innerHTML = '<li style="color:var(--text-3);font-size:0.83rem;padding:0.5rem 0">Sem posts.</li>'; return; }
+        el.innerHTML = sorted.map((p) => {
+          const score = engagementScore(p);
+          const src = postImageSrc(p);
+          const thumb = src
+            ? `<div class="thumb"><img src="${esc(src)}" alt="" loading="lazy" onerror="this.style.display='none'" /></div>`
+            : `<div class="thumb"></div>`;
+          return `<li class="side-item">${thumb}
+            <div class="txt">
+              <strong>${fmtNum(score)} pts</strong>
+              Alcance ${fmtNum(Number(p.reach)||0)} · ${escapeHtml(translateMediaType(p.media_type))}
+            </div></li>`;
+        }).join("");
       }
 
-      function esc(s) {
-        return String(s).replace(/"/g, "&quot;");
-      }
-
-      function escapeHtml(s) {
-        return String(s)
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")
-          .replace(/"/g, "&quot;");
-      }
-
+      /* ═══════════════════════════════════════
+         LOAD ALL DATA
+      ═══════════════════════════════════════ */
       async function loadAll() {
         showErr("");
         const p = rangeParams();
-        const overviewUrl = `/api/dashboard/${encodeURIComponent(
-          clientId
-        )}/overview?start=${encodeURIComponent(p.startDay)}&end=${encodeURIComponent(p.endDay)}`;
-        const postsParams = new URLSearchParams({
-          start: p.startIso,
-          end: p.endIso,
-          sort: sortKey,
-        });
-        if (formatKey) {
-          postsParams.set("format", formatKey);
-        }
-        const postsUrl = `/api/dashboard/${encodeURIComponent(clientId)}/posts?${postsParams.toString()}`;
+        const overviewUrl = `/api/dashboard/${encodeURIComponent(clientId)}/overview?start=${encodeURIComponent(p.startDay)}&end=${encodeURIComponent(p.endDay)}`;
+        const postsParams = new URLSearchParams({ start: p.startIso, end: p.endIso, sort: sortKey });
+        if (formatKey) postsParams.set("format", formatKey);
+        const postsUrl = `/api/dashboard/${encodeURIComponent(clientId)}/posts?${postsParams}`;
 
         const [ovRes, profRes, postsRes] = await Promise.all([
           api(overviewUrl),
@@ -743,66 +1161,49 @@
           api(postsUrl),
         ]);
 
-        if (ovRes.status === 401 || profRes.status === 401 || postsRes.status === 401) {
-          window.location.href = "/login.html";
-          return;
-        }
-        if (ovRes.status === 403 || profRes.status === 403 || postsRes.status === 403) {
-          showErr("Sem permissão para este cliente.");
-          return;
-        }
+        if ([ovRes, profRes, postsRes].some(r => r.status === 401)) { window.location.href = "/login.html"; return; }
+        if ([ovRes, profRes, postsRes].some(r => r.status === 403)) { showErr("Sem permissão para este cliente."); return; }
+
         if (!profRes.ok) {
           document.getElementById("k-follow").textContent = "—";
         } else {
           const prof = await profRes.json();
-          document.getElementById("k-follow").textContent = fmtNum(Number(prof.followers_count) || 0);
+          document.getElementById("k-follow").textContent = fmtNum(Number(prof.followers_count)||0);
         }
 
         const overview = ovRes.ok ? await ovRes.json() : [];
         const dayLabels = enumerateDays(p.startDay, p.endDay);
         const byDayReach = new Map();
         for (const row of overview) {
-          if (row.date) {
-            byDayReach.set(row.date.slice(0, 10), Number(row.reach) || 0);
-          }
+          if (row.date) byDayReach.set(row.date.slice(0,10), Number(row.reach)||0);
         }
-        const reachVals = dayLabels.map((d) => byDayReach.get(d) ?? 0);
-        const reachAvg =
-          overview.length > 0
-            ? overview.reduce((s, r) => s + (Number(r.reach) || 0), 0) / overview.length
-            : null;
+        const reachVals = dayLabels.map(d => byDayReach.get(d) ?? 0);
+        const reachAvg = overview.length > 0
+          ? overview.reduce((s,r) => s+(Number(r.reach)||0), 0) / overview.length
+          : null;
         document.getElementById("k-reach").textContent = reachAvg != null ? fmtNum(reachAvg) : "—";
 
         destroyCharts();
-        const tickColor = "#8b97ad";
-        const gridColor = "rgba(139, 151, 173, 0.12)";
-        const commonOpts = {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: { ticks: { color: tickColor }, grid: { color: gridColor } },
-            y: { ticks: { color: tickColor }, grid: { color: gridColor }, beginAtZero: true },
-          },
-          plugins: { legend: { labels: { color: tickColor } } },
-        };
-
         const ChartCtor = window.Chart;
+        const cOpts = chartDefaults();
+
         chartReach = new ChartCtor(document.getElementById("c-reach"), {
           type: "line",
           data: {
             labels: dayLabels,
-            datasets: [
-              {
-                label: "Alcance",
-                data: reachVals,
-                borderColor: "#6c8cff",
-                backgroundColor: "rgba(108, 140, 255, 0.2)",
-                tension: 0.25,
-                fill: true,
-              },
-            ],
+            datasets: [{
+              label: "Alcance",
+              data: reachVals,
+              borderColor: "#7c5af3",
+              backgroundColor: "rgba(124, 90, 243, 0.12)",
+              tension: 0.3,
+              fill: true,
+              pointRadius: 2,
+              pointHoverRadius: 5,
+              borderWidth: 2,
+            }],
           },
-          options: commonOpts,
+          options: cOpts,
         });
 
         const posts = postsRes.ok ? await postsRes.json() : [];
@@ -810,55 +1211,329 @@
         document.getElementById("k-posts").textContent = String(posts.length);
 
         const totalEng = posts.reduce((s, p) => s + engagementScore(p), 0);
-        const totalReachPosts = posts.reduce((s, p) => s + (Number(p.reach) || 0), 0);
-        const engRatio =
-          totalReachPosts > 0 ? totalEng / totalReachPosts : totalEng > 0 ? null : 0;
-        const engPct = engRatio === null ? null : engRatio * 100;
-        document.getElementById("k-eng").textContent =
-          engPct === null ? "—" : engPct.toFixed(1).replace(".", ",") + "%";
+        const totalReachPosts = posts.reduce((s, p) => s + (Number(p.reach)||0), 0);
+        const engRatio = totalReachPosts > 0 ? totalEng / totalReachPosts : (totalEng > 0 ? null : 0);
+        document.getElementById("k-eng").textContent = engRatio === null ? "—"
+          : (engRatio * 100).toFixed(1).replace(".", ",") + "%";
 
         const byCount = new Map();
         for (const row of posts) {
           if (!row.timestamp) continue;
           const k = localDateKey(new Date(row.timestamp));
-          const cur = byCount.get(k) || { likes: 0, comments: 0, shares: 0, saved: 0 };
-          cur.likes += Number(row.likes) || 0;
-          cur.comments += Number(row.comments) || 0;
-          cur.shares += Number(row.shares) || 0;
-          cur.saved += Number(row.saved) || 0;
+          const cur = byCount.get(k) || { likes:0, comments:0, shares:0, saved:0 };
+          cur.likes   += Number(row.likes)||0;
+          cur.comments += Number(row.comments)||0;
+          cur.shares  += Number(row.shares)||0;
+          cur.saved   += Number(row.saved)||0;
           byCount.set(k, cur);
         }
-        const likesD = dayLabels.map((d) => (byCount.get(d)?.likes ?? 0));
-        const commentsD = dayLabels.map((d) => (byCount.get(d)?.comments ?? 0));
-        const sharesD = dayLabels.map((d) => (byCount.get(d)?.shares ?? 0));
-        const savedD = dayLabels.map((d) => (byCount.get(d)?.saved ?? 0));
 
         chartEng = new ChartCtor(document.getElementById("c-eng"), {
           type: "line",
           data: {
             labels: dayLabels,
             datasets: [
-              { label: "Curtidas", data: likesD, borderColor: "#f472b6", tension: 0.2, fill: false },
-              { label: "Comentários", data: commentsD, borderColor: "#22d3ee", tension: 0.2, fill: false },
-              { label: "Compartilhamentos", data: sharesD, borderColor: "#a78bfa", tension: 0.2, fill: false },
-              { label: "Salvamentos", data: savedD, borderColor: "#4ade80", tension: 0.2, fill: false },
+              { label:"Curtidas",           data: dayLabels.map(d=>byCount.get(d)?.likes??0),    borderColor:"#ec4899", tension:0.2, fill:false, pointRadius:2, borderWidth:2 },
+              { label:"Comentários",         data: dayLabels.map(d=>byCount.get(d)?.comments??0), borderColor:"#06b6d4", tension:0.2, fill:false, pointRadius:2, borderWidth:2 },
+              { label:"Compartilhamentos",   data: dayLabels.map(d=>byCount.get(d)?.shares??0),   borderColor:"#a78bfa", tension:0.2, fill:false, pointRadius:2, borderWidth:2 },
+              { label:"Salvamentos",         data: dayLabels.map(d=>byCount.get(d)?.saved??0),    borderColor:"#22c55e", tension:0.2, fill:false, pointRadius:2, borderWidth:2 },
             ],
           },
-          options: commonOpts,
+          options: cOpts,
         });
 
         renderCurrentPosts();
         renderTop5(posts);
+        if (!postsRes.ok) showErr("Não foi possível carregar posts.");
+      }
 
-        if (!postsRes.ok) {
-          showErr("Não foi possível carregar posts.");
+      /* ═══════════════════════════════════════
+         REPORT GENERATION
+      ═══════════════════════════════════════ */
+      function buildPostCardHtml(p) {
+        const src = postImageSrc(p);
+        const imgHtml = src
+          ? `<img src="${esc(src)}" alt="" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.parentNode.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:0.6rem;color:#9898b4;text-align:center;padding:0.25rem\\'>sem imagem</div>'" />`
+          : `<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:0.62rem;color:#9898b4;text-align:center;padding:0.25rem">sem imagem</div>`;
+
+        const typeLabel = translateMediaType(p.media_type);
+        const typeClass = p.media_type === "VIDEO" ? "rpt-badge-video"
+          : p.media_type === "CAROUSEL_ALBUM" ? "rpt-badge-carousel"
+          : "rpt-badge-image";
+        const date = p.timestamp ? fmtDateBR(p.timestamp.slice(0, 10)) : "—";
+        const eng = engagementScore(p);
+
+        return `<div class="rpt-post">
+          <div class="rpt-post-img-wrap">${imgHtml}</div>
+          <div class="rpt-post-info">
+            <span class="rpt-post-type-badge ${typeClass}">${typeLabel}</span>
+            <div class="rpt-post-date">${date}</div>
+            <div class="rpt-post-stats">
+              <span>Alcance: <strong>${fmtNum(Number(p.reach)||0)}</strong></span>
+              <span>Engaj.: <strong>${fmtNum(eng)}</strong></span>
+              <span>❤ ${fmtNum(Number(p.likes)||0)}</span>
+              <span>💬 ${fmtNum(Number(p.comments)||0)}</span>
+              <span>🔖 ${fmtNum(Number(p.saved)||0)}</span>
+            </div>
+          </div>
+        </div>`;
+      }
+
+      function buildPostsSection(title, posts) {
+        if (!posts.length) return `<div class="rpt-sub-title">${title}</div><p style="color:#9898b4;font-size:0.82rem;margin-bottom:1rem">Nenhum post encontrado.</p>`;
+        const cards = posts.map(buildPostCardHtml).join("");
+        return `<div class="rpt-sub-title">${title}</div><div class="rpt-posts-grid">${cards}</div>`;
+      }
+
+      function buildReportHtml(overview, profile, allPosts, startStr, endStr, clientName) {
+        /* ── Aggregate data ── */
+        const totalReach = overview.reduce((s, r) => s + (Number(r.reach)||0), 0);
+        const avgReach   = overview.length > 0 ? totalReach / overview.length : 0;
+        const totalFollowerGain = overview.reduce((s, r) => s + (Number(r.followers)||0), 0);
+        const totalEng   = allPosts.reduce((s, p) => s + engagementScore(p), 0);
+        const totalReachPosts = allPosts.reduce((s, p) => s + (Number(p.reach)||0), 0);
+        const engRate = totalReachPosts > 0 ? (totalEng / totalReachPosts * 100) : 0;
+        const followers = Number(profile.followers_count)||0;
+        const username  = profile.username ? "@" + profile.username : "";
+
+        /* ── Sort posts ── */
+        const byReach = [...allPosts].sort((a,b)=>(Number(b.reach)||0)-(Number(a.reach)||0)).slice(0,5);
+        const byEng   = [...allPosts].sort((a,b)=>engagementScore(b)-engagementScore(a)).slice(0,5);
+        const videos   = allPosts.filter(p=>p.media_type==="VIDEO").sort((a,b)=>(Number(b.reach)||0)-(Number(a.reach)||0)).slice(0,5);
+        const carousels= allPosts.filter(p=>p.media_type==="CAROUSEL_ALBUM").sort((a,b)=>(Number(b.reach)||0)-(Number(a.reach)||0)).slice(0,5);
+        const images   = allPosts.filter(p=>p.media_type==="IMAGE").sort((a,b)=>(Number(b.reach)||0)-(Number(a.reach)||0)).slice(0,5);
+
+        /* ── Daily table ── */
+        const days = enumerateDays(startStr, endStr);
+        const ovByDay = new Map();
+        for (const row of overview) { if (row.date) ovByDay.set(row.date.slice(0,10), row); }
+        const engByDay = new Map();
+        for (const p of allPosts) {
+          if (!p.timestamp) continue;
+          const d = localDateKey(new Date(p.timestamp));
+          engByDay.set(d, (engByDay.get(d)||0) + engagementScore(p));
         }
+        const tableRows = days.map(d => {
+          const ov  = ovByDay.get(d) || {};
+          const reach = Number(ov.reach)||0;
+          const followersGain = Number(ov.followers)||0;
+          const eng = engByDay.get(d)||0;
+          const fGain = followersGain > 0
+            ? `<span class="pos">+${fmtNum(followersGain)}</span>`
+            : followersGain < 0
+              ? `<span class="neg">${fmtNum(followersGain)}</span>`
+              : `<span style="color:#9898b4">0</span>`;
+          const dm = new Date(d+"T12:00:00");
+          const shortDate = dm.toLocaleDateString("pt-BR",{day:"2-digit",month:"short"});
+          return `<tr>
+            <td class="date-col">${shortDate}</td>
+            <td>${fmtNum(reach)}</td>
+            <td>${fGain}</td>
+            <td>${fmtNum(eng)}</td>
+          </tr>`;
+        }).join("");
+
+        const periodLabel = `${fmtDateBR(startStr)} – ${fmtDateBR(endStr)}`;
+        const today = fmtDateBR(localDateKey(new Date()));
+        const displayName = clientName || username || "Cliente";
+
+        return `<div class="rpt">
+
+          <!-- ░░ CAPA ░░ -->
+          <div class="rpt-page rpt-cover">
+            <div class="rpt-cover-header">
+              <div class="rpt-agency">TGIF &amp; Co — Content Dashboard</div>
+              <div class="rpt-cover-title">Relatório de Desempenho</div>
+              <div class="rpt-cover-platform">Instagram Analytics</div>
+            </div>
+            <div class="rpt-cover-body">
+              <div>
+                <div class="rpt-cover-client-label">Cliente</div>
+                <div class="rpt-cover-client-name">${escapeHtml(displayName)}</div>
+                ${username ? `<div style="font-size:0.88rem;color:#7c5af3;font-weight:500;margin-top:0.2rem">${escapeHtml(username)}</div>` : ""}
+                <div class="rpt-cover-period" style="margin-top:1rem">${periodLabel}</div>
+              </div>
+              <div class="rpt-cover-footer">
+                Gerado em ${today} &nbsp;·&nbsp; Content Dashboard
+              </div>
+            </div>
+          </div>
+
+          <!-- ░░ RESUMO ░░ -->
+          <div class="rpt-page">
+            <div class="rpt-page-inner">
+              <div class="rpt-section-header">
+                <span class="rpt-section-title">Resumo do Período</span>
+                <span class="rpt-section-period">${periodLabel}</span>
+              </div>
+              <div class="rpt-kpis">
+                <div class="rpt-kpi c1">
+                  <div class="rpt-kpi-label">Seguidores Atuais</div>
+                  <div class="rpt-kpi-value">${fmtNum(followers)}</div>
+                  <div class="rpt-kpi-sub">Conta total</div>
+                </div>
+                <div class="rpt-kpi c2">
+                  <div class="rpt-kpi-label">Alcance Médio Diário</div>
+                  <div class="rpt-kpi-value">${fmtNum(avgReach)}</div>
+                  <div class="rpt-kpi-sub">Média do período</div>
+                </div>
+                <div class="rpt-kpi c3">
+                  <div class="rpt-kpi-label">Taxa de Engajamento</div>
+                  <div class="rpt-kpi-value">${engRate > 0 ? engRate.toFixed(1).replace(".",",")+"%": "—"}</div>
+                  <div class="rpt-kpi-sub">Eng. / Alcance</div>
+                </div>
+                <div class="rpt-kpi c4">
+                  <div class="rpt-kpi-label">Ganho de Seguidores</div>
+                  <div class="rpt-kpi-value" style="color:${totalFollowerGain>=0?"#1a1a2e":"#ef4444"}">${totalFollowerGain>=0?"+":""}${fmtNum(totalFollowerGain)}</div>
+                  <div class="rpt-kpi-sub">No período</div>
+                </div>
+                <div class="rpt-kpi c5">
+                  <div class="rpt-kpi-label">Total de Posts</div>
+                  <div class="rpt-kpi-value">${allPosts.length}</div>
+                  <div class="rpt-kpi-sub">No período</div>
+                </div>
+                <div class="rpt-kpi c1" style="--c1:#a78bfa">
+                  <div class="rpt-kpi-label">Alcance Total</div>
+                  <div class="rpt-kpi-value">${fmtNum(totalReach)}</div>
+                  <div class="rpt-kpi-sub">Soma do período</div>
+                </div>
+              </div>
+            </div>
+            <div class="rpt-page-footer">
+              <span>TGIF &amp; Co — Content Dashboard</span>
+              <span>${periodLabel}</span>
+            </div>
+          </div>
+
+          <!-- ░░ EVOLUÇÃO DIÁRIA ░░ -->
+          <div class="rpt-page">
+            <div class="rpt-page-inner">
+              <div class="rpt-section-header">
+                <span class="rpt-section-title">Evolução Diária</span>
+                <span class="rpt-section-period">${periodLabel}</span>
+              </div>
+              <table class="rpt-table">
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Alcance</th>
+                    <th>Seguidores</th>
+                    <th>Engajamento</th>
+                  </tr>
+                </thead>
+                <tbody>${tableRows || '<tr><td colspan="4" style="color:#9898b4;padding:1rem">Sem dados para este período.</td></tr>'}</tbody>
+              </table>
+            </div>
+            <div class="rpt-page-footer">
+              <span>TGIF &amp; Co — Content Dashboard</span>
+              <span>${periodLabel}</span>
+            </div>
+          </div>
+
+          <!-- ░░ MELHORES POSTS ░░ -->
+          <div class="rpt-page">
+            <div class="rpt-page-inner">
+              <div class="rpt-section-header">
+                <span class="rpt-section-title">Melhores Posts</span>
+                <span class="rpt-section-period">${periodLabel}</span>
+              </div>
+              ${buildPostsSection("Top 5 por Alcance", byReach)}
+              ${buildPostsSection("Top 5 por Engajamento", byEng)}
+            </div>
+            <div class="rpt-page-footer">
+              <span>TGIF &amp; Co — Content Dashboard</span>
+              <span>${periodLabel}</span>
+            </div>
+          </div>
+
+          <!-- ░░ POR FORMATO ░░ -->
+          <div class="rpt-page">
+            <div class="rpt-page-inner">
+              <div class="rpt-section-header">
+                <span class="rpt-section-title">Análise por Formato</span>
+                <span class="rpt-section-period">${periodLabel}</span>
+              </div>
+              ${buildPostsSection("Vídeos / Reels", videos)}
+              ${buildPostsSection("Carrosséis", carousels)}
+              ${buildPostsSection("Estáticos (Imagens)", images)}
+            </div>
+            <div class="rpt-page-footer">
+              <span>TGIF &amp; Co — Content Dashboard</span>
+              <span>${periodLabel}</span>
+            </div>
+          </div>
+
+        </div>`;
+      }
+
+      async function generateReport(startStr, endStr) {
+        const submitBtn = document.getElementById("rep-submit");
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Preparando…`;
+
+        try {
+          const startIso = new Date(startStr+"T00:00:00").toISOString();
+          const endIso   = new Date(endStr+"T23:59:59.999").toISOString();
+
+          const [ovRes, profRes, postsRes] = await Promise.all([
+            api(`/api/dashboard/${encodeURIComponent(clientId)}/overview?start=${encodeURIComponent(startStr)}&end=${encodeURIComponent(endStr)}`),
+            api(`/api/dashboard/${encodeURIComponent(clientId)}/profile`),
+            api(`/api/dashboard/${encodeURIComponent(clientId)}/posts?start=${encodeURIComponent(startIso)}&end=${encodeURIComponent(endIso)}&sort=reach`),
+          ]);
+
+          const overview = ovRes.ok  ? await ovRes.json()   : [];
+          const profile  = profRes.ok ? await profRes.json() : {};
+          const allPosts = postsRes.ok ? await postsRes.json(): [];
+
+          const clientName = document.getElementById("subtitle").textContent || profile.username || "";
+          const html = buildReportHtml(overview, profile, allPosts, startStr, endStr, clientName);
+
+          document.getElementById("print-view").innerHTML = html;
+          closeModal(document.getElementById("modal-report"));
+          window.print();
+
+        } catch (e) {
+          console.error(e);
+          alert("Erro ao gerar relatório. Tente novamente.");
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Gerar PDF`;
+        }
+      }
+
+      /* ═══════════════════════════════════════
+         MODALS
+      ═══════════════════════════════════════ */
+      function openModal(el) {
+        el.classList.add("open");
+        el.setAttribute("aria-hidden", "false");
+        el.querySelector("input, select, button")?.focus();
+      }
+      function closeModal(el) {
+        el.classList.remove("open");
+        el.setAttribute("aria-hidden", "true");
+      }
+
+      /* ═══════════════════════════════════════
+         WIRE UP
+      ═══════════════════════════════════════ */
+      function wirePresets() {
+        document.querySelectorAll(".presets [data-preset]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            document.querySelectorAll(".presets [data-preset]").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            const r = computePresetRange(btn.getAttribute("data-preset"));
+            document.getElementById("start").value = r.start;
+            document.getElementById("end").value   = r.end;
+            loadAll();
+          });
+        });
       }
 
       function wireToolbar() {
         document.querySelectorAll("[data-sort]").forEach((b) => {
           b.addEventListener("click", () => {
-            document.querySelectorAll("[data-sort]").forEach((x) => x.classList.remove("active"));
+            document.querySelectorAll("[data-sort]").forEach(x => x.classList.remove("active"));
             b.classList.add("active");
             sortKey = b.getAttribute("data-sort") || "likes";
             loadAll();
@@ -866,7 +1541,7 @@
         });
         document.querySelectorAll("[data-fmt]").forEach((b) => {
           b.addEventListener("click", () => {
-            document.querySelectorAll("[data-fmt]").forEach((x) => x.classList.remove("active"));
+            document.querySelectorAll("[data-fmt]").forEach(x => x.classList.remove("active"));
             b.classList.add("active");
             formatKey = b.getAttribute("data-fmt") || "";
             loadAll();
@@ -874,7 +1549,7 @@
         });
         document.querySelectorAll("[data-view]").forEach((b) => {
           b.addEventListener("click", () => {
-            document.querySelectorAll("[data-view]").forEach((x) => x.classList.remove("active"));
+            document.querySelectorAll("[data-view]").forEach(x => x.classList.remove("active"));
             b.classList.add("active");
             viewKey = b.getAttribute("data-view") || "grid";
             renderCurrentPosts();
@@ -882,20 +1557,45 @@
         });
       }
 
+      function wireReport() {
+        document.getElementById("btn-report").addEventListener("click", () => {
+          const p = rangeParams();
+          document.getElementById("rep-start").value = p.startDay;
+          document.getElementById("rep-end").value   = p.endDay;
+          openModal(document.getElementById("modal-report"));
+        });
+        document.getElementById("rep-cancel").addEventListener("click", () =>
+          closeModal(document.getElementById("modal-report"))
+        );
+        document.getElementById("form-report").addEventListener("submit", (e) => {
+          e.preventDefault();
+          const s = document.getElementById("rep-start").value;
+          const en = document.getElementById("rep-end").value;
+          if (!s || !en) return;
+          generateReport(s, en);
+        });
+        document.getElementById("modal-report").addEventListener("click", (e) => {
+          if (e.target === document.getElementById("modal-report")) closeModal(document.getElementById("modal-report"));
+        });
+        document.addEventListener("keydown", (ev) => {
+          if (ev.key === "Escape") closeModal(document.getElementById("modal-report"));
+        });
+      }
+
+      /* ═══════════════════════════════════════
+         INIT
+      ═══════════════════════════════════════ */
       (async function init() {
         clientId = qs("client");
         if (!clientId) {
           showErr("Parâmetro client ausente.");
-          document.getElementById("subtitle").textContent = "Defina ?client=";
           return;
         }
 
         const meRes = await api("/api/auth/me");
-        if (meRes.status === 401) {
-          window.location.href = "/login.html";
-          return;
-        }
+        if (meRes.status === 401) { window.location.href = "/login.html"; return; }
         const me = await meRes.json();
+
         if (me.role === "client") {
           if (me.clientId && String(me.clientId) !== String(clientId)) {
             window.location.href = `/dashboard.html?client=${encodeURIComponent(me.clientId)}`;
@@ -906,15 +1606,31 @@
 
         const dr = defaultRange();
         document.getElementById("start").value = dr.start;
-        document.getElementById("end").value = dr.end;
-        document.getElementById("subtitle").textContent = "";
+        document.getElementById("end").value   = dr.end;
+        document.getElementById("subtitle").style.display = "none";
 
         document.getElementById("btn-refresh").addEventListener("click", () => {
-          clearPresetActive();
+          document.querySelectorAll(".presets [data-preset]").forEach(b => b.classList.remove("active"));
           loadAll();
         });
+
         wireToolbar();
         wirePresets();
+        wireReport();
+
+        /* Fetch client name for report cover */
+        try {
+          const clientsRes = await api("/api/clients");
+          if (clientsRes.ok) {
+            const clients = await clientsRes.json();
+            const thisClient = clients.find(c => String(c.id) === String(clientId));
+            if (thisClient) {
+              document.getElementById("subtitle").textContent = thisClient.name;
+              document.getElementById("subtitle").style.display = "block";
+              document.querySelector("h1").textContent = thisClient.name;
+            }
+          }
+        } catch { /* non-critical */ }
 
         try {
           await loadAll();
@@ -924,5 +1640,9 @@
         }
       })();
     </script>
+
+    <style>
+      @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
   </body>
 </html>
