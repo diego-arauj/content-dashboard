@@ -342,6 +342,47 @@ app.get("/api/instagram/sync/:clientId", requireClientAccess, async (req, res) =
   }
 });
 
+/* ——— INSTAGRAM TOKEN STATUS ——— */
+
+/** Returns token status for all instagram accounts (admin only). */
+app.get("/api/instagram/token-status", requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT ia.client_id, c.name AS client_name, ia.username,
+              ia.token_expires_at, ia.connected_at
+       FROM instagram_accounts ia
+       JOIN clients c ON c.id = ia.client_id
+       ORDER BY c.name ASC`
+    );
+    const rows = result.rows.map((r) => {
+      const expiresAt = r.token_expires_at ? new Date(r.token_expires_at) : null;
+      const daysRemaining = expiresAt
+        ? Math.round((expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+        : null;
+      let status = "unknown";
+      if (expiresAt) {
+        if (daysRemaining <= 0)  status = "expired";
+        else if (daysRemaining <= 10) status = "critical";
+        else if (daysRemaining <= 30) status = "warning";
+        else status = "ok";
+      }
+      return {
+        client_id: r.client_id,
+        client_name: r.client_name,
+        username: r.username,
+        token_expires_at: r.token_expires_at,
+        days_remaining: daysRemaining,
+        status,
+        connected_at: r.connected_at,
+      };
+    });
+    return res.json(rows);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Failed to fetch token status." });
+  }
+});
+
 /* ——— DASHBOARD DATA ——— */
 
 app.get(

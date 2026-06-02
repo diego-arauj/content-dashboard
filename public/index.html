@@ -4,39 +4,72 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Clientes — Content Dashboard</title>
+    <!-- Anti-flash: apply saved theme before render -->
+    <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <style>
+      /* ── Dark theme (default) ── */
       :root {
-        --bg: #120e0a;
-        --surface: #1c1510;
-        --surface-2: #261e16;
-        --surface-3: #32261c;
-        --border: #3f3228;
-        --border-hover: #524236;
-        --text: #f5f0eb;
-        --text-2: #b5a898;
-        --text-3: #7d7268;
+        --bg: #0c0c0c;
+        --surface: #161616;
+        --surface-2: #1c1c1c;
+        --surface-3: #222222;
+        --border: #282828;
+        --border-hover: #3a3a3a;
+        --text: #ededed;
+        --text-2: #a1a1a1;
+        --text-3: #6b6b6b;
         --accent: #c9a87a;
         --accent-2: #dbbf91;
         --accent-3: #a88952;
-        --accent-bg: rgba(201, 168, 122, 0.1);
-        --accent-border: rgba(201, 168, 122, 0.25);
-        --success: #7db87c;
-        --success-bg: rgba(125, 184, 124, 0.08);
-        --danger: #c88080;
-        --danger-bg: rgba(200, 128, 128, 0.08);
+        --accent-bg: rgba(201, 168, 122, 0.08);
+        --accent-border: rgba(201, 168, 122, 0.2);
+        --success: #4ade80;
+        --success-bg: rgba(74, 222, 128, 0.08);
+        --warning: #fbbf24;
+        --warning-bg: rgba(251, 191, 36, 0.08);
+        --danger: #f87171;
+        --danger-bg: rgba(248, 113, 113, 0.07);
         --radius: 12px;
         --radius-sm: 8px;
         --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        --shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
-        --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.5);
+        --shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+        --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.55);
+        --glow: rgba(201, 168, 122, 0.04);
       }
+      /* ── Light theme ── */
+      [data-theme="light"] {
+        --bg: #f5f5f5;
+        --surface: #ffffff;
+        --surface-2: #f0f0f0;
+        --surface-3: #e8e8e8;
+        --border: #e2e2e2;
+        --border-hover: #c8c8c8;
+        --text: #111111;
+        --text-2: #4b5563;
+        --text-3: #9ca3af;
+        --accent: #b8903f;
+        --accent-2: #c9a87a;
+        --accent-3: #9a7430;
+        --accent-bg: rgba(185, 144, 63, 0.09);
+        --accent-border: rgba(185, 144, 63, 0.3);
+        --success: #16a34a;
+        --success-bg: rgba(22, 163, 74, 0.07);
+        --warning: #d97706;
+        --warning-bg: rgba(217, 119, 6, 0.07);
+        --danger: #dc2626;
+        --danger-bg: rgba(220, 38, 38, 0.07);
+        --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.12);
+        --glow: rgba(201, 168, 122, 0.06);
+      }
+
       * { box-sizing: border-box; margin: 0; padding: 0; }
       body {
         font-family: var(--font);
         background: var(--bg);
-        background-image: radial-gradient(ellipse 180% 70% at 50% -5%, rgba(150, 110, 60, 0.12) 0%, transparent 55%);
+        background-image: radial-gradient(ellipse 180% 70% at 50% -5%, var(--glow) 0%, transparent 55%);
         color: var(--text);
         min-height: 100vh;
         font-size: 0.93rem;
@@ -61,16 +94,11 @@
         padding-bottom: 1.5rem;
         border-bottom: 1px solid var(--border);
       }
-      .header-left {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-      }
+      .header-left { display: flex; align-items: center; gap: 0.75rem; }
       .brand-dot {
         width: 8px; height: 8px;
         border-radius: 50%;
         background: linear-gradient(135deg, var(--accent), var(--accent-2));
-        box-shadow: 0 0 8px rgba(124, 90, 243, 0.5);
         flex-shrink: 0;
       }
       h1 {
@@ -79,7 +107,7 @@
         letter-spacing: -0.025em;
         color: var(--text);
       }
-      .actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+      .actions { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
 
       /* ── Buttons ── */
       .btn {
@@ -99,11 +127,7 @@
         text-decoration: none;
         white-space: nowrap;
       }
-      .btn:hover {
-        background: var(--surface-3);
-        border-color: var(--border-hover);
-        color: var(--text);
-      }
+      .btn:hover { background: var(--surface-3); border-color: var(--border-hover); color: var(--text); }
       .btn:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
       .btn.primary {
         background: linear-gradient(135deg, var(--accent), var(--accent-3));
@@ -123,16 +147,31 @@
         border-color: rgba(239, 68, 68, 0.2);
         color: var(--danger);
       }
-      .btn.danger:hover {
-        background: rgba(239, 68, 68, 0.14);
-        border-color: rgba(239, 68, 68, 0.35);
-      }
+      .btn.danger:hover { background: rgba(239, 68, 68, 0.14); border-color: rgba(239, 68, 68, 0.35); }
       .btn:disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
+
+      /* Theme toggle */
+      .theme-btn {
+        background: none;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        color: var(--text-3);
+        cursor: pointer;
+        padding: 0.45rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 0.15s, border-color 0.15s, background 0.15s;
+      }
+      .theme-btn:hover { color: var(--text-2); border-color: var(--accent); background: var(--surface-2); }
+      .icon-moon, .icon-sun { display: none; }
+      :root[data-theme="dark"]  .icon-moon { display: block; }
+      :root[data-theme="light"] .icon-sun  { display: block; }
 
       /* ── Grid ── */
       .grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
         gap: 1rem;
       }
       .card {
@@ -156,27 +195,18 @@
         opacity: 0;
         transition: opacity 0.2s;
       }
-      .card:hover {
-        border-color: var(--border-hover);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-      }
+      .card:hover { border-color: var(--border-hover); box-shadow: var(--shadow); }
       .card:hover::before { opacity: 1; }
+      .card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; }
       .card h2 {
         font-size: 1rem;
         font-weight: 600;
         color: var(--text);
         letter-spacing: -0.015em;
+        flex: 1;
       }
-      .card .niche {
-        font-size: 0.82rem;
-        color: var(--text-3);
-        min-height: 1.2rem;
-      }
-      .card .meta {
-        font-size: 0.78rem;
-        color: var(--text-3);
-        margin-top: 0.15rem;
-      }
+      .card .niche { font-size: 0.82rem; color: var(--text-3); min-height: 1.2rem; }
+      .card .meta { font-size: 0.78rem; color: var(--text-3); margin-top: 0.15rem; }
       .card-actions {
         display: flex;
         flex-wrap: wrap;
@@ -185,6 +215,35 @@
         padding-top: 0.9rem;
         border-top: 1px solid var(--border);
       }
+
+      /* Token status badge */
+      .token-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.28rem;
+        font-size: 0.68rem;
+        font-weight: 600;
+        padding: 0.18rem 0.5rem;
+        border-radius: 999px;
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .token-badge .dot {
+        width: 5px; height: 5px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .badge-ok      { background: var(--success-bg); color: var(--success); }
+      .badge-ok .dot { background: var(--success); }
+      .badge-warning      { background: var(--warning-bg); color: var(--warning); }
+      .badge-warning .dot { background: var(--warning); }
+      .badge-critical      { background: var(--danger-bg); color: var(--danger); }
+      .badge-critical .dot { background: var(--danger); }
+      .badge-expired      { background: var(--danger-bg); color: var(--danger); }
+      .badge-expired .dot { background: var(--danger); }
+      .badge-unknown      { background: var(--surface-3); color: var(--text-3); }
+      .badge-unknown .dot { background: var(--text-3); }
 
       /* ── Modal ── */
       .overlay {
@@ -232,8 +291,7 @@
         margin-bottom: 0.35rem;
         letter-spacing: 0.02em;
       }
-      .modal input,
-      .modal select {
+      .modal input, .modal select {
         width: 100%;
         padding: 0.6rem 0.8rem;
         border-radius: var(--radius-sm);
@@ -247,18 +305,12 @@
         transition: border-color 0.15s, box-shadow 0.15s;
       }
       .modal input::placeholder { color: var(--text-3); }
-      .modal input:focus,
-      .modal select:focus {
+      .modal input:focus, .modal select:focus {
         border-color: rgba(201, 168, 122, 0.5);
         box-shadow: 0 0 0 3px rgba(201, 168, 122, 0.1);
       }
       .modal select option { background: var(--surface-2); }
-      .modal-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 0.5rem;
-        margin-top: 0.5rem;
-      }
+      .modal-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.5rem; }
       .toast {
         margin-top: 1rem;
         padding: 0.65rem 0.85rem;
@@ -270,31 +322,12 @@
         line-height: 1.45;
         color: var(--text-2);
       }
-      .toast.success {
-        background: var(--success-bg);
-        border-color: rgba(34, 197, 94, 0.2);
-        color: var(--success);
-      }
+      .toast.success { background: var(--success-bg); border-color: rgba(74, 222, 128, 0.2); color: var(--success); }
 
       /* ── States ── */
-      .loading {
-        color: var(--text-3);
-        padding: 3rem;
-        text-align: center;
-        font-size: 0.9rem;
-      }
-      .empty-state {
-        text-align: center;
-        padding: 3rem 1.5rem;
-        color: var(--text-3);
-        font-size: 0.88rem;
-      }
-      .empty-state strong {
-        display: block;
-        font-size: 1rem;
-        color: var(--text-2);
-        margin-bottom: 0.35rem;
-      }
+      .loading { color: var(--text-3); padding: 3rem; text-align: center; font-size: 0.9rem; }
+      .empty-state { text-align: center; padding: 3rem 1.5rem; color: var(--text-3); font-size: 0.88rem; }
+      .empty-state strong { display: block; font-size: 1rem; color: var(--text-2); margin-bottom: 0.35rem; }
 
       /* ── Logout ── */
       .header-right { display: flex; align-items: center; gap: 0.5rem; }
@@ -325,6 +358,10 @@
             Novo cliente
           </button>
           <button type="button" class="btn" id="btn-invite">Convidar cliente</button>
+          <button type="button" class="theme-btn" id="theme-toggle" aria-label="Alternar tema" title="Alternar tema claro/escuro">
+            <svg class="icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            <svg class="icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          </button>
           <button type="button" class="logout-btn" id="btn-logout">Sair</button>
         </div>
       </header>
@@ -372,16 +409,12 @@
       const api = (path, opts) => fetch(path, { credentials: "include", ...opts });
 
       function escapeHtml(s) {
-        return String(s)
-          .replace(/&/g, "&amp;").replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
       }
-
       function formatDate(iso) {
         if (!iso) return "";
         return new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
       }
-
       function openModal(el) {
         el.classList.add("open");
         el.setAttribute("aria-hidden", "false");
@@ -391,6 +424,14 @@
         el.classList.remove("open");
         el.setAttribute("aria-hidden", "true");
       }
+
+      /* Theme toggle */
+      document.getElementById("theme-toggle").addEventListener("click", function() {
+        const cur = document.documentElement.getAttribute("data-theme") || "dark";
+        const next = cur === "dark" ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", next);
+        localStorage.setItem("theme", next);
+      });
 
       async function ensureSession() {
         const res = await api("/api/auth/me");
@@ -406,23 +447,59 @@
         return me;
       }
 
+      /* Build token badge HTML */
+      function tokenBadgeHtml(tokenInfo) {
+        if (!tokenInfo) return '<span class="token-badge badge-unknown"><span class="dot"></span>Sem token</span>';
+        const { status, days_remaining } = tokenInfo;
+        if (status === "ok") {
+          return `<span class="token-badge badge-ok"><span class="dot"></span>${days_remaining}d</span>`;
+        }
+        if (status === "warning") {
+          return `<span class="token-badge badge-warning"><span class="dot"></span>${days_remaining}d</span>`;
+        }
+        if (status === "critical") {
+          return `<span class="token-badge badge-critical"><span class="dot"></span>${days_remaining}d</span>`;
+        }
+        if (status === "expired") {
+          return `<span class="token-badge badge-expired"><span class="dot"></span>Expirado</span>`;
+        }
+        return '<span class="token-badge badge-unknown"><span class="dot"></span>Sem token</span>';
+      }
+
       async function loadClients() {
-        const res = await api("/api/clients");
         const list = document.getElementById("list");
-        if (!res.ok) {
+        /* Fetch clients + token status in parallel */
+        const [clientsRes, tokenRes] = await Promise.all([
+          api("/api/clients"),
+          api("/api/instagram/token-status"),
+        ]);
+
+        if (!clientsRes.ok) {
           list.innerHTML = '<p class="empty-state"><strong>Erro ao carregar</strong>Não foi possível buscar os clientes.</p>';
           return;
         }
-        const clients = await res.json();
+        const clients = await clientsRes.json();
+        const tokenMap = new Map();
+        if (tokenRes.ok) {
+          const tokenData = await tokenRes.json();
+          for (const t of tokenData) tokenMap.set(String(t.client_id), t);
+        }
+
         if (!clients.length) {
           list.className = "";
           list.innerHTML = '<div class="empty-state"><strong>Nenhum cliente ainda</strong>Crie o primeiro cliente para começar.</div>';
           return;
         }
         list.className = "grid";
-        list.innerHTML = clients.map((c) => `
+        list.innerHTML = clients.map((c) => {
+          const ti = tokenMap.get(String(c.id));
+          const badge = tokenBadgeHtml(ti);
+          return `
           <article class="card" data-id="${c.id}">
-            <h2>${escapeHtml(c.name || "—")}</h2>
+            <div class="card-header">
+              <h2>${escapeHtml(c.name || "—")}</h2>
+              ${badge}
+            </div>
             <p class="niche">${escapeHtml(c.niche || "Sem nicho")}</p>
             <p class="meta">Criado em ${formatDate(c.created_at)}</p>
             <div class="card-actions">
@@ -432,7 +509,8 @@
               <button type="button" class="btn sm" data-connect-ig>Conectar Instagram</button>
               <button type="button" class="btn sm danger" data-delete>Apagar</button>
             </div>
-          </article>`).join("");
+          </article>`;
+        }).join("");
         populateInviteSelect(clients);
       }
 

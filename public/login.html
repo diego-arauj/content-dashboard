@@ -4,33 +4,49 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Entrar — Content Dashboard</title>
+    <!-- Anti-flash: apply saved theme before render -->
+    <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <style>
+      /* ── Dark theme (default) ── */
       :root {
-        --bg: #120e0a;
-        --surface: #1c1510;
-        --surface-2: #261e16;
-        --border: #3f3228;
-        --text: #f5f0eb;
-        --text-2: #b5a898;
-        --text-3: #7d7268;
+        --bg: #0c0c0c;
+        --surface: #161616;
+        --surface-2: #1c1c1c;
+        --border: #282828;
+        --text: #ededed;
+        --text-2: #a1a1a1;
+        --text-3: #6b6b6b;
         --accent: #c9a87a;
         --accent-2: #dbbf91;
         --accent-3: #a88952;
-        --danger: #c88080;
+        --danger: #f87171;
         --radius: 12px;
         --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        --shadow-lg: 0 32px 80px rgba(0, 0, 0, 0.55);
+        --shadow-lg: 0 32px 80px rgba(0, 0, 0, 0.6);
+        --glow: rgba(201, 168, 122, 0.05);
       }
+      /* ── Light theme ── */
+      [data-theme="light"] {
+        --bg: #f5f5f5;
+        --surface: #ffffff;
+        --surface-2: #f0f0f0;
+        --border: #e2e2e2;
+        --text: #111111;
+        --text-2: #4b5563;
+        --text-3: #9ca3af;
+        --danger: #dc2626;
+        --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.1);
+        --glow: rgba(201, 168, 122, 0.06);
+      }
+
       * { box-sizing: border-box; margin: 0; padding: 0; }
       html, body { height: 100%; }
       body {
         font-family: var(--font);
         background: var(--bg);
-        background-image:
-          radial-gradient(ellipse 180% 90% at 50% -10%, rgba(150, 110, 60, 0.18) 0%, transparent 55%),
-          radial-gradient(ellipse 80% 50% at 80% 110%, rgba(100, 70, 30, 0.08) 0%, transparent 50%);
+        background-image: radial-gradient(ellipse 180% 90% at 50% -10%, var(--glow) 0%, transparent 60%);
         color: var(--text);
         display: flex;
         align-items: center;
@@ -38,7 +54,6 @@
         min-height: 100vh;
         padding: 1.5rem;
       }
-      /* scrollbar */
       ::-webkit-scrollbar { width: 6px; }
       ::-webkit-scrollbar-track { background: var(--bg); }
       ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
@@ -70,15 +85,34 @@
         width: 8px; height: 8px;
         border-radius: 50%;
         background: linear-gradient(135deg, var(--accent), var(--accent-2));
-        box-shadow: 0 0 8px rgba(124, 90, 243, 0.5);
       }
       .brand-name {
         font-size: 0.82rem;
         font-weight: 600;
-        color: var(--text-2);
+        color: var(--text-3);
         letter-spacing: 0.08em;
         text-transform: uppercase;
+        flex: 1;
       }
+      /* Theme toggle */
+      .theme-btn {
+        background: none;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text-3);
+        cursor: pointer;
+        padding: 0.3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 0.15s, border-color 0.15s, background 0.15s;
+        flex-shrink: 0;
+      }
+      .theme-btn:hover { color: var(--text-2); border-color: var(--accent); background: var(--surface-2); }
+      .icon-moon, .icon-sun { display: none; }
+      :root[data-theme="dark"]  .icon-moon { display: block; }
+      :root[data-theme="light"] .icon-sun  { display: block; }
+
       h1 {
         font-size: 1.5rem;
         font-weight: 700;
@@ -157,6 +191,12 @@
       <div class="brand">
         <div class="brand-dot"></div>
         <span class="brand-name">Content Dashboard</span>
+        <button type="button" class="theme-btn" id="theme-toggle" aria-label="Alternar tema" title="Alternar tema claro/escuro">
+          <!-- moon icon (shown in dark mode) -->
+          <svg class="icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <!-- sun icon (shown in light mode) -->
+          <svg class="icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </button>
       </div>
       <h1>Entrar</h1>
       <p class="sub">Bem-vindo de volta. Acesse sua conta.</p>
@@ -174,6 +214,14 @@
       </form>
     </div>
     <script>
+      /* Theme toggle */
+      document.getElementById("theme-toggle").addEventListener("click", function() {
+        const cur = document.documentElement.getAttribute("data-theme") || "dark";
+        const next = cur === "dark" ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", next);
+        localStorage.setItem("theme", next);
+      });
+
       const form = document.getElementById("form");
       const err = document.getElementById("err");
       const btn = document.getElementById("btn");
@@ -194,7 +242,6 @@
         const pwdLabel = document.querySelector("label[for='password']");
         pwdLabel.textContent = "Escolha uma senha (mín. 8 caracteres)";
         btn.textContent = "Criar conta";
-        btn.addEventListener("click", () => {}, { once: false });
         form.addEventListener("submit", async (e) => {
           e.preventDefault();
           err.textContent = "";
