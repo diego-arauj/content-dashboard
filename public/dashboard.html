@@ -618,6 +618,7 @@
         .rpt-page-oc,
         .rpt-analysis-oc { background: #000 !important; }
         .rpt-kpi-oc { background: #111 !important; }
+        .rpt-podium-card-oc { background: #1e1e1e !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       }
 
       /* Report: screen preview (hidden) */
@@ -1025,15 +1026,25 @@
         margin-bottom: 0.75rem;
       }
       .rpt-podium-card-oc {
-        background: #111 !important;
-        border-color: #333 !important;
+        background: #1e1e1e !important;
+        border-color: #3a3a3a !important;
+        box-shadow: 0 2px 14px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.05);
       }
       .rpt-podium-card-oc.rpt-rank-1 {
         border-color: #f8c339 !important;
         border-width: 2.5px !important;
+        box-shadow: 0 2px 18px rgba(248,195,57,0.18), 0 0 0 1px rgba(248,195,57,0.15);
       }
-      .rpt-podium-card-oc .rpt-rank-num { background: rgba(255,255,255,0.15); }
+      .rpt-podium-card-oc .rpt-rank-num { background: rgba(255,255,255,0.18); }
       .rpt-podium-card-oc.rpt-rank-1 .rpt-rank-num { background: #f8c339; color: #000; }
+      /* OC card text — bigger, lighter weight, easier to read */
+      .rpt-podium-card-oc .rpt-card-foot {
+        padding: 0.65rem 0.5rem 0.5rem;
+        background: linear-gradient(transparent, rgba(0,0,0,0.82));
+      }
+      .rpt-podium-card-oc .rpt-card-val  { font-size: 1.15rem; font-weight: 600; }
+      .rpt-podium-card-oc .rpt-card-lbl  { font-size: 0.64rem; font-weight: 500; letter-spacing: 0.04em; opacity: 0.9; }
+      .rpt-podium-card-oc .rpt-card-date { font-size: 0.58rem; opacity: 0.65; margin-top: 0.2rem; }
 
       /* Análise IA OC */
       .rpt-analysis-oc {
@@ -1067,6 +1078,27 @@
         line-height: 1.75;
         color: rgba(255,255,255,0.85);
         white-space: pre-wrap;
+      }
+
+      /* ── Analysis mode tabs ── */
+      .analysis-tabs { display: flex; gap: 0.4rem; margin-bottom: 0.65rem; }
+      .analysis-tab {
+        flex: 1;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.38rem 0.5rem;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+        background: var(--surface-2);
+        color: var(--text-2);
+        cursor: pointer;
+        transition: background 0.15s, border-color 0.15s, color 0.15s;
+      }
+      .analysis-tab:hover { border-color: var(--accent-border); color: var(--accent); }
+      .analysis-tab.active-tab {
+        background: var(--accent-bg);
+        border-color: var(--accent-border);
+        color: var(--accent);
       }
     </style>
   </head>
@@ -1182,15 +1214,37 @@
 
           <!-- Análise IA — só aparece para clientes com tema OC -->
           <div id="ai-analysis-section" style="display:none;margin-top:0.75rem">
-            <label style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem">
-              <span>O que funcionou e sugestões</span>
-              <button type="button" id="btn-gen-ai" class="btn" style="font-size:0.75rem;padding:0.3rem 0.7rem;gap:0.3rem">
+            <div style="font-size:0.83rem;font-weight:600;color:var(--text);margin-bottom:0.55rem">
+              O que funcionou e sugestões para o próximo mês
+            </div>
+
+            <!-- Seleção de modo: Manual vs IA -->
+            <div class="analysis-tabs">
+              <button type="button" id="tab-manual" class="analysis-tab active-tab">✍️ Escrever manualmente</button>
+              <button type="button" id="tab-ai"     class="analysis-tab">⭐ Gerar com IA</button>
+            </div>
+
+            <!-- Painel IA: prompt + botão gerar (oculto por padrão) -->
+            <div id="panel-ai-prompt" style="display:none">
+              <label style="font-size:0.75rem;color:var(--text-2);display:block;margin-bottom:0.25rem">
+                Instruções para a IA <span style="color:var(--text-3);font-weight:400">(opcional)</span>
+              </label>
+              <textarea id="rep-ai-prompt" rows="2"
+                placeholder="Ex: Destaque o bom desempenho dos Reels. Tom descontraído e direto."
+                style="width:100%;resize:vertical;padding:0.5rem 0.7rem;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface-2);color:var(--text);font:inherit;font-size:0.8rem;outline:none;transition:border-color 0.15s;line-height:1.4;margin-bottom:0.5rem"
+              ></textarea>
+              <button type="button" id="btn-gen-ai" class="btn" style="font-size:0.75rem;padding:0.38rem 0.85rem;gap:0.35rem;margin-bottom:0.6rem;width:100%;justify-content:center">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
-                Gerar com IA
+                Gerar análise com IA
               </button>
-            </label>
+              <label id="label-preview" style="font-size:0.75rem;color:var(--text-2);display:block;margin-bottom:0.25rem">
+                Prévia — edite antes de gerar o PDF
+              </label>
+            </div>
+
+            <!-- Textarea da análise (compartilhada entre Manual e IA) -->
             <textarea id="rep-analysis" rows="7"
-              placeholder="Clique em 'Gerar com IA' ou escreva sua análise manualmente."
+              placeholder="Escreva sua análise aqui…"
               style="width:100%;resize:vertical;padding:0.6rem 0.8rem;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface-2);color:var(--text);font:inherit;font-size:0.83rem;outline:none;transition:border-color 0.15s;line-height:1.5"
             ></textarea>
           </div>
@@ -2013,13 +2067,37 @@
           openModal(document.getElementById("modal-report"));
         });
 
-        /* Gerar análise com IA */
+        /* ── Tab switching: Manual vs IA ── */
+        const tabManual      = document.getElementById("tab-manual");
+        const tabAI          = document.getElementById("tab-ai");
+        const panelAIPrompt  = document.getElementById("panel-ai-prompt");
+        const repAnalysis    = document.getElementById("rep-analysis");
+
+        tabManual.addEventListener("click", () => {
+          tabManual.classList.add("active-tab");
+          tabAI.classList.remove("active-tab");
+          panelAIPrompt.style.display = "none";
+          repAnalysis.placeholder = "Escreva sua análise aqui…";
+          repAnalysis.rows = 7;
+        });
+
+        tabAI.addEventListener("click", () => {
+          tabAI.classList.add("active-tab");
+          tabManual.classList.remove("active-tab");
+          panelAIPrompt.style.display = "block";
+          repAnalysis.placeholder = "Clique em 'Gerar análise com IA' acima, ou edite diretamente aqui.";
+          repAnalysis.rows = 6;
+        });
+
+        /* ── Gerar análise com IA ── */
         document.getElementById("btn-gen-ai").addEventListener("click", async () => {
           const btn = document.getElementById("btn-gen-ai");
           const textarea = document.getElementById("rep-analysis");
           const s  = document.getElementById("rep-start").value;
           const en = document.getElementById("rep-end").value;
           if (!s || !en) { alert("Selecione o período antes de gerar."); return; }
+
+          const customPrompt = (document.getElementById("rep-ai-prompt")?.value || "").trim();
 
           btn.disabled = true;
           btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Gerando…`;
@@ -2043,6 +2121,7 @@
                 posts,
                 period: `${fmtDateBR(s)} – ${fmtDateBR(en)}`,
                 clientName: clientDisplayName || "Otaviano Costa",
+                customPrompt,
               }),
             });
             if (!aiRes.ok) {
@@ -2053,10 +2132,10 @@
             textarea.value = analysis;
           } catch (e) {
             alert("Erro ao gerar análise: " + e.message);
-            textarea.placeholder = "Clique em 'Gerar com IA' ou escreva manualmente.";
+            textarea.placeholder = "Clique em 'Gerar análise com IA' acima, ou edite diretamente aqui.";
           } finally {
             btn.disabled = false;
-            btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg> Gerar com IA`;
+            btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg> Gerar análise com IA`;
           }
         });
 

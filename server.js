@@ -670,7 +670,7 @@ app.post("/api/ai/analysis", requireClientAccess, async (req, res) => {
     return res.status(503).json({ error: "OPENROUTER_API_KEY não configurada no servidor." });
   }
 
-  const { overview = [], posts = [], period = "", clientName = "" } = req.body;
+  const { overview = [], posts = [], period = "", clientName = "", customPrompt = "" } = req.body;
 
   // Aggregates from the provided data
   const totalPosts    = posts.length;
@@ -708,7 +708,7 @@ O QUE FUNCIONOU:
 SUGESTÕES PARA O PRÓXIMO MÊS:
 (3 a 5 sugestões específicas e acionáveis baseadas nos dados)
 
-Seja direto. Máximo 180 palavras no total.`;
+Seja direto. Máximo 180 palavras no total.${customPrompt ? `\n\nInstruções adicionais do gestor: ${customPrompt}` : ""}`;
 
   try {
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
