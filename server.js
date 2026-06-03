@@ -446,6 +446,7 @@ const POSTS_SORT_COLUMNS = {
   comments: "comments",
   shares: "shares",
   saved: "saved",
+  date: "timestamp",
 };
 
 app.get("/api/dashboard/:clientId/posts", requireClientAccess, async (req, res) => {
@@ -462,6 +463,7 @@ app.get("/api/dashboard/:clientId/posts", requireClientAccess, async (req, res) 
       typeof sortKey === "string" && POSTS_SORT_COLUMNS[sortKey]
         ? POSTS_SORT_COLUMNS[sortKey]
         : "likes";
+    const sortDir = req.query.dir === "asc" ? "ASC" : "DESC";
 
     const fmt = req.query.format;
     const values = [clientId, start, end];
@@ -475,7 +477,7 @@ app.get("/api/dashboard/:clientId/posts", requireClientAccess, async (req, res) 
       `SELECT *
        FROM posts_cache
        WHERE client_id = $1 AND timestamp >= $2::timestamp AND timestamp <= $3::timestamp${formatClause}
-       ORDER BY ${sortCol} DESC NULLS LAST`,
+       ORDER BY ${sortCol} ${sortDir} NULLS LAST`,
       values
     );
     return res.json(result.rows);

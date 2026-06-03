@@ -945,6 +945,8 @@
             <button type="button" class="pill" data-sort="comments">Comentários</button>
             <button type="button" class="pill" data-sort="shares">Compartilhamentos</button>
             <button type="button" class="pill" data-sort="saved">Salvamentos</button>
+            <button type="button" class="pill" data-sort="date" data-dir="desc">Mais recentes</button>
+            <button type="button" class="pill" data-sort="date" data-dir="asc">Mais antigos</button>
           </div>
           <div class="toolbar">
             <span class="lbl">Formato</span>
@@ -1185,7 +1187,7 @@
          RENDER POSTS
       ═══════════════════════════════════════ */
       let clientId = "";
-      let sortKey = "likes", formatKey = "", viewKey = "grid";
+      let sortKey = "likes", sortDir = "desc", formatKey = "", viewKey = "grid";
       let lastPosts = [];
       let clientDisplayName = ""; /* used by report generation */
 
@@ -1292,7 +1294,7 @@
         showErr("");
         const p = rangeParams();
         const overviewUrl = `/api/dashboard/${encodeURIComponent(clientId)}/overview?start=${encodeURIComponent(p.startDay)}&end=${encodeURIComponent(p.endDay)}`;
-        const postsParams = new URLSearchParams({ start: p.startIso, end: p.endIso, sort: sortKey });
+        const postsParams = new URLSearchParams({ start: p.startIso, end: p.endIso, sort: sortKey, dir: sortDir });
         if (formatKey) postsParams.set("format", formatKey);
         const postsUrl = `/api/dashboard/${encodeURIComponent(clientId)}/posts?${postsParams}`;
 
@@ -1611,13 +1613,28 @@
           ].map(pod => `
           <div class="rpt-page" style="padding:2.5rem 3rem">
             <div class="rpt-section-header">
-              <span class="rpt-section-title">Melhores Criativos</span>
+              <span class="rpt-section-title">Melhores Conteúdos</span>
               <span class="rpt-section-period">${periodLabel}</span>
             </div>
             ${buildPodiumSection(pod.title, pod.posts, pod.fn, pod.lbl)}
           </div>`).join("")}
 
         </div>`;
+      }
+
+      /* Wait for all <img> inside a container to finish loading (or error),
+         so window.print() doesn't fire before thumbnails render. */
+      function waitForImages(container, timeoutMs) {
+        const imgs = Array.from(container.querySelectorAll("img"));
+        /* complete === true means loaded OR errored — either way it's done */
+        const pending = imgs.filter(im => !im.complete);
+        if (!pending.length) return Promise.resolve();
+        const loaded = Promise.all(pending.map(im => new Promise(resolve => {
+          im.addEventListener("load",  resolve, { once: true });
+          im.addEventListener("error", resolve, { once: true });
+        })));
+        const timeout = new Promise(resolve => setTimeout(resolve, timeoutMs || 12000));
+        return Promise.race([loaded, timeout]);
       }
 
       async function generateReport(startStr, endStr) {
@@ -1642,8 +1659,13 @@
           const clientName = clientDisplayName || profile.username || "";
           const html = buildReportHtml(overview, profile, allPosts, startStr, endStr, clientName);
 
-          document.getElementById("print-view").innerHTML = html;
+          const pv = document.getElementById("print-view");
+          pv.innerHTML = html;
           closeModal(document.getElementById("modal-report"));
+
+          submitBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Carregando imagens…`;
+          await waitForImages(pv, 15000);
+
           window.print();
 
         } catch (e) {
@@ -1690,6 +1712,7 @@
             document.querySelectorAll("[data-sort]").forEach(x => x.classList.remove("active"));
             b.classList.add("active");
             sortKey = b.getAttribute("data-sort") || "likes";
+            sortDir = b.getAttribute("data-dir") || "desc";
             loadAll();
           });
         });
