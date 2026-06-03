@@ -836,7 +836,7 @@
 
       <section class="kpis" id="kpis" aria-label="Métricas principais">
         <div class="kpi"><div class="k">Seguidores</div><div class="v" id="k-follow">—</div></div>
-        <div class="kpi"><div class="k">Alcance médio</div><div class="v" id="k-reach">—</div></div>
+        <div class="kpi"><div class="k">Alcance total</div><div class="v" id="k-reach">—</div></div>
         <div class="kpi"><div class="k">Engajamento</div><div class="v" id="k-eng">—</div></div>
         <div class="kpi"><div class="k">Posts no período</div><div class="v" id="k-posts">—</div></div>
       </section>
@@ -1234,10 +1234,8 @@
           if (row.date) byDayReach.set(row.date.slice(0,10), Number(row.reach)||0);
         }
         const reachVals = dayLabels.map(d => byDayReach.get(d) ?? 0);
-        const reachAvg = overview.length > 0
-          ? overview.reduce((s,r) => s+(Number(r.reach)||0), 0) / overview.length
-          : null;
-        document.getElementById("k-reach").textContent = reachAvg != null ? fmtNum(reachAvg) : "—";
+        const totalReach = overview.reduce((s,r) => s+(Number(r.reach)||0), 0);
+        document.getElementById("k-reach").textContent = overview.length > 0 ? fmtNum(totalReach) : "—";
 
         destroyCharts();
         const ChartCtor = window.Chart;
