@@ -760,7 +760,11 @@
       .rpt-table .date-col { color: #7d7268; }
 
       /* ── Pódio de destaques ── */
-      .rpt-podium-section { margin-bottom: 2rem; }
+      .rpt-podium-section {
+        margin-bottom: 2rem;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
       .rpt-podium-header {
         font-size: 0.82rem;
         font-weight: 700;
@@ -1429,7 +1433,7 @@
 
       /* ── Podium section builder ── */
       function buildPodiumSection(title, posts, metricFn, metricLabel) {
-        const cards = posts.slice(0, 5).map((p, i) => {
+        const cards = posts.slice(0, 6).map((p, i) => {
           const rank = i + 1;
           const src  = postImageSrc(p);
           const val  = fmtNum(metricFn(p));
@@ -1598,25 +1602,20 @@
             </div>
           </div>
 
-          <!-- ░░ DESTAQUES — pódios p.3: alcance + curtidas ░░ -->
+          <!-- ░░ DESTAQUES — uma seção por página ░░ -->
+          ${[
+            { title: "Melhores em Alcance",          posts: byReach,    fn: p => Number(p.reach)||0,    lbl: "alcance" },
+            { title: "Melhores em Curtidas",         posts: byLikes,    fn: p => Number(p.likes)||0,    lbl: "curtidas" },
+            { title: "Melhores em Comentários",      posts: byComments, fn: p => Number(p.comments)||0, lbl: "comentários" },
+            { title: "Melhores em Compartilhamentos",posts: byShares,   fn: p => Number(p.shares)||0,   lbl: "compartilhamentos" },
+          ].map(pod => `
           <div class="rpt-page" style="padding:2.5rem 3rem">
             <div class="rpt-section-header">
               <span class="rpt-section-title">Melhores Criativos</span>
               <span class="rpt-section-period">${periodLabel}</span>
             </div>
-            ${buildPodiumSection("Melhores em Alcance", byReach, p => Number(p.reach)||0, "alcance")}
-            ${buildPodiumSection("Melhores em Curtidas", byLikes, p => Number(p.likes)||0, "curtidas")}
-          </div>
-
-          <!-- ░░ DESTAQUES — pódios p.4: comentários + compartilhamentos ░░ -->
-          <div class="rpt-page" style="padding:2.5rem 3rem">
-            <div class="rpt-section-header">
-              <span class="rpt-section-title">Melhores Criativos</span>
-              <span class="rpt-section-period">${periodLabel}</span>
-            </div>
-            ${buildPodiumSection("Melhores em Comentários", byComments, p => Number(p.comments)||0, "comentários")}
-            ${buildPodiumSection("Melhores em Compartilhamentos", byShares, p => Number(p.shares)||0, "compartilhamentos")}
-          </div>
+            ${buildPodiumSection(pod.title, pod.posts, pod.fn, pod.lbl)}
+          </div>`).join("")}
 
         </div>`;
       }
