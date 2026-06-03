@@ -759,22 +759,83 @@
       .rpt-table .neg { color: #a85858; font-weight: 600; }
       .rpt-table .date-col { color: #7d7268; }
 
-      /* Tabela compacta de posts no relatório */
-      .rpt-table-sm thead th { padding: 0.4rem 0.65rem; font-size: 0.65rem; }
-      .rpt-table-sm tbody td { padding: 0.35rem 0.65rem; font-size: 0.78rem; }
-      .rpt-type-chip {
-        display: inline-block;
-        font-size: 0.58rem;
+      /* ── Pódio de destaques ── */
+      .rpt-podium-section { margin-bottom: 2rem; }
+      .rpt-podium-header {
+        font-size: 0.82rem;
         font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-        padding: 0.1rem 0.4rem;
-        border-radius: 999px;
-        white-space: nowrap;
+        color: #2a2520;
+        letter-spacing: -0.01em;
+        padding-bottom: 0.45rem;
+        border-bottom: 2px solid #e8e0d4;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
       }
-      .rpt-chip-video    { background: #f0ece4; color: #7a6032; }
-      .rpt-chip-carousel { background: #f5ede0; color: #8a5a28; }
-      .rpt-chip-image    { background: #e8f0e8; color: #3a6a38; }
+      .rpt-podium-accent { color: #a88952; font-weight: 500; font-size: 0.78rem; }
+      .rpt-podium-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 0.55rem;
+      }
+      .rpt-podium-card {
+        position: relative;
+        border-radius: 8px;
+        overflow: hidden;
+        aspect-ratio: 1;
+        background: #ede8e2;
+        border: 1.5px solid #e8e0d4;
+        flex-shrink: 0;
+      }
+      .rpt-podium-card.rpt-rank-1 { border-color: #c9a87a; border-width: 2.5px; }
+      .rpt-rank-num {
+        position: absolute;
+        top: 6px; left: 6px;
+        width: 20px; height: 20px;
+        border-radius: 50%;
+        background: rgba(0,0,0,0.42);
+        color: #fff;
+        font-size: 0.62rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2;
+        line-height: 1;
+      }
+      .rpt-rank-1 .rpt-rank-num { background: #c9a87a; }
+      .rpt-podium-card img {
+        width: 100%; height: 100%;
+        object-fit: cover; display: block;
+      }
+      .rpt-podium-ph {
+        width: 100%; height: 100%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.58rem; color: #b5a898;
+      }
+      .rpt-card-foot {
+        position: absolute;
+        bottom: 0; left: 0; right: 0;
+        padding: 0.5rem 0.4rem 0.45rem;
+        background: linear-gradient(transparent, rgba(0,0,0,0.72));
+        text-align: center;
+      }
+      .rpt-card-val {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #fff;
+        line-height: 1;
+        display: block;
+      }
+      .rpt-card-lbl {
+        font-size: 0.5rem;
+        color: rgba(255,255,255,0.72);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        display: block;
+        margin-top: 0.12rem;
+      }
 
       /* Subsection title in report */
       .rpt-sub-title {
@@ -1356,53 +1417,52 @@
 </table>`;
       }
 
-      function buildReportHtml(overview, profile, allPosts, startStr, endStr, clientName) {
-        /* ── Aggregate data ── */
-        const totalReach = overview.reduce((s, r) => s + (Number(r.reach)||0), 0);
-        const avgReach   = overview.length > 0 ? totalReach / overview.length : 0;
-        const totalFollowerGain = overview.reduce((s, r) => s + (Number(r.followers)||0), 0);
-        const totalEng   = allPosts.reduce((s, p) => s + engagementScore(p), 0);
-        const totalReachPosts = allPosts.reduce((s, p) => s + (Number(p.reach)||0), 0);
-        const engRate = totalReachPosts > 0 ? (totalEng / totalReachPosts * 100) : 0;
-        const followers = Number(profile.followers_count)||0;
-        const username  = profile.username ? "@" + profile.username : "";
-
-        /* ── Sort posts ── */
-        const byReach = [...allPosts].sort((a,b)=>(Number(b.reach)||0)-(Number(a.reach)||0)).slice(0,5);
-        const byEng   = [...allPosts].sort((a,b)=>engagementScore(b)-engagementScore(a)).slice(0,5);
-        const videos   = allPosts.filter(p=>p.media_type==="VIDEO").sort((a,b)=>(Number(b.reach)||0)-(Number(a.reach)||0)).slice(0,5);
-        const carousels= allPosts.filter(p=>p.media_type==="CAROUSEL_ALBUM").sort((a,b)=>(Number(b.reach)||0)-(Number(a.reach)||0)).slice(0,5);
-        const images   = allPosts.filter(p=>p.media_type==="IMAGE").sort((a,b)=>(Number(b.reach)||0)-(Number(a.reach)||0)).slice(0,5);
-
-        /* ── Daily table ── */
-        const days = enumerateDays(startStr, endStr);
-        const ovByDay = new Map();
-        for (const row of overview) { if (row.date) ovByDay.set(row.date.slice(0,10), row); }
-        const engByDay = new Map();
-        for (const p of allPosts) {
-          if (!p.timestamp) continue;
-          const d = localDateKey(new Date(p.timestamp));
-          engByDay.set(d, (engByDay.get(d)||0) + engagementScore(p));
-        }
-        const tableRows = days.map(d => {
-          const ov  = ovByDay.get(d) || {};
-          const reach = Number(ov.reach)||0;
-          const followersGain = Number(ov.followers)||0;
-          const eng = engByDay.get(d)||0;
-          const fGain = followersGain > 0
-            ? `<span class="pos">+${fmtNum(followersGain)}</span>`
-            : followersGain < 0
-              ? `<span class="neg">${fmtNum(followersGain)}</span>`
-              : `<span style="color:#9b9088">0</span>`;
-          const dm = new Date(d+"T12:00:00");
-          const shortDate = dm.toLocaleDateString("pt-BR",{day:"2-digit",month:"short"});
-          return `<tr>
-            <td class="date-col">${shortDate}</td>
-            <td>${fmtNum(reach)}</td>
-            <td>${fGain}</td>
-            <td>${fmtNum(eng)}</td>
-          </tr>`;
+      /* ── Podium section builder ── */
+      function buildPodiumSection(title, posts, metricFn, metricLabel) {
+        const cards = posts.slice(0, 5).map((p, i) => {
+          const rank = i + 1;
+          const src  = postImageSrc(p);
+          const val  = fmtNum(metricFn(p));
+          const rankClass = rank === 1 ? "rpt-rank-1" : "";
+          const thumb = src
+            ? `<img src="${esc(src)}" alt="" onerror="this.style.display='none';this.nextSibling.style.display='flex'" /><div class="rpt-podium-ph" style="display:none">Sem mídia</div>`
+            : `<div class="rpt-podium-ph">Sem mídia</div>`;
+          return `<div class="rpt-podium-card ${rankClass}">
+            <span class="rpt-rank-num">${rank}</span>
+            ${thumb}
+            <div class="rpt-card-foot">
+              <span class="rpt-card-val">${val}</span>
+              <span class="rpt-card-lbl">${metricLabel}</span>
+            </div>
+          </div>`;
         }).join("");
+
+        return `<div class="rpt-podium-section">
+          <div class="rpt-podium-header">
+            ${escapeHtml(title)}
+          </div>
+          ${posts.length
+            ? `<div class="rpt-podium-grid">${cards}</div>`
+            : `<p style="color:#9b9088;font-size:0.78rem">Nenhum post encontrado.</p>`}
+        </div>`;
+      }
+
+      function buildReportHtml(overview, profile, allPosts, startStr, endStr, clientName) {
+        /* ── Aggregates ── */
+        const totalReach        = overview.reduce((s,r) => s+(Number(r.reach)||0), 0);
+        const avgReach          = overview.length > 0 ? totalReach / overview.length : 0;
+        const totalFollowerGain = overview.reduce((s,r) => s+(Number(r.followers)||0), 0);
+        const totalEng          = allPosts.reduce((s,p) => s+engagementScore(p), 0);
+        const totalReachPosts   = allPosts.reduce((s,p) => s+(Number(p.reach)||0), 0);
+        const engRate           = totalReachPosts > 0 ? (totalEng / totalReachPosts * 100) : 0;
+        const followers         = Number(profile.followers_count)||0;
+        const username          = profile.username ? "@" + profile.username : "";
+
+        /* ── Sort posts for each podium ── */
+        const byReach    = [...allPosts].sort((a,b)=>(Number(b.reach)||0)   -(Number(a.reach)||0)   ).slice(0,5);
+        const byLikes    = [...allPosts].sort((a,b)=>(Number(b.likes)||0)   -(Number(a.likes)||0)   ).slice(0,5);
+        const byComments = [...allPosts].sort((a,b)=>(Number(b.comments)||0)-(Number(a.comments)||0)).slice(0,5);
+        const byShares   = [...allPosts].sort((a,b)=>(Number(b.shares)||0)  -(Number(a.shares)||0)  ).slice(0,5);
 
         const periodLabel = `${fmtDateBR(startStr)} – ${fmtDateBR(endStr)}`;
         const displayName = clientName || profile.username || "Cliente";
@@ -1410,15 +1470,17 @@
 
         return `<div class="rpt">
 
-          <!-- ░░ CAPA — simples ░░ -->
+          <!-- ░░ CAPA ░░ -->
           <div class="rpt-page rpt-cover">
             <div class="rpt-cover-accent"></div>
             <div class="rpt-cover-body">
-              <div class="rpt-cover-title">Relatório de<br>Desempenho</div>
-              <div class="rpt-cover-subtitle">Instagram Analytics</div>
+              <div>
+                <div class="rpt-cover-title">Relatório de<br>Desempenho</div>
+                <div class="rpt-cover-subtitle">Instagram Analytics</div>
+              </div>
               <div class="rpt-cover-profile">
                 ${avatarUrl
-                  ? `<img class="rpt-cover-avatar" src="${esc(avatarUrl)}" alt="" />`
+                  ? `<img class="rpt-cover-avatar" src="${esc(avatarUrl)}" alt="" onerror="this.style.display='none'" />`
                   : `<div class="rpt-cover-avatar-placeholder"></div>`}
                 <div>
                   <div class="rpt-cover-name">${escapeHtml(displayName)}</div>
@@ -1429,8 +1491,8 @@
             </div>
           </div>
 
-          <!-- ░░ RESUMO + EVOLUÇÃO DIÁRIA (página única) ░░ -->
-          <div class="rpt-page">
+          <!-- ░░ RESUMO DO PERÍODO ░░ -->
+          <div class="rpt-page" style="padding:2.5rem 3rem">
             <div class="rpt-section-header">
               <span class="rpt-section-title">Resumo do Período</span>
               <span class="rpt-section-period">${periodLabel}</span>
@@ -1467,37 +1529,18 @@
                 <div class="rpt-kpi-sub">Soma</div>
               </div>
             </div>
-
-            <div class="rpt-section-header" style="margin-top:1.5rem">
-              <span class="rpt-section-title">Evolução Diária</span>
-            </div>
-            <table class="rpt-table rpt-table-sm">
-              <thead><tr>
-                <th>Data</th><th>Alcance</th><th>Seguidores</th><th>Engajamento</th>
-              </tr></thead>
-              <tbody>${tableRows || '<tr><td colspan="4" style="color:#9b9088;padding:0.75rem">Sem dados para este período.</td></tr>'}</tbody>
-            </table>
           </div>
 
-          <!-- ░░ MELHORES POSTS ░░ -->
-          <div class="rpt-page">
+          <!-- ░░ DESTAQUES — pódios por métrica ░░ -->
+          <div class="rpt-page" style="padding:2.5rem 3rem">
             <div class="rpt-section-header">
-              <span class="rpt-section-title">Melhores Posts</span>
+              <span class="rpt-section-title">Melhores Criativos</span>
               <span class="rpt-section-period">${periodLabel}</span>
             </div>
-            ${buildPostsSection("Top 5 por Alcance", byReach)}
-            ${buildPostsSection("Top 5 por Engajamento", byEng)}
-          </div>
-
-          <!-- ░░ POR FORMATO ░░ -->
-          <div class="rpt-page">
-            <div class="rpt-section-header">
-              <span class="rpt-section-title">Análise por Formato</span>
-              <span class="rpt-section-period">${periodLabel}</span>
-            </div>
-            ${buildPostsSection("Vídeos / Reels", videos)}
-            ${buildPostsSection("Carrosséis", carousels)}
-            ${buildPostsSection("Estáticos (Imagens)", images)}
+            ${buildPodiumSection("Melhores em Alcance", byReach,    p => Number(p.reach)||0,    "alcance")}
+            ${buildPodiumSection("Melhores em Curtidas", byLikes,   p => Number(p.likes)||0,    "curtidas")}
+            ${buildPodiumSection("Melhores em Comentários", byComments, p => Number(p.comments)||0, "comentários")}
+            ${buildPodiumSection("Melhores em Compartilhamentos", byShares, p => Number(p.shares)||0, "compartilhamentos")}
           </div>
 
         </div>`;
