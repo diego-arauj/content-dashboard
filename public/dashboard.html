@@ -776,17 +776,20 @@
       .rpt-podium-accent { color: #a88952; font-weight: 500; font-size: 0.78rem; }
       .rpt-podium-grid {
         display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        gap: 0.55rem;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
       }
       .rpt-podium-card {
         position: relative;
         border-radius: 8px;
         overflow: hidden;
-        aspect-ratio: 1;
+        aspect-ratio: 3/4;
         background: #ede8e2;
         border: 1.5px solid #e8e0d4;
         flex-shrink: 0;
+        text-decoration: none;
+        display: block;
+        color: inherit;
       }
       .rpt-podium-card.rpt-rank-1 { border-color: #c9a87a; border-width: 2.5px; }
       .rpt-rank-num {
@@ -822,19 +825,26 @@
         text-align: center;
       }
       .rpt-card-val {
-        font-size: 0.88rem;
+        font-size: 1.1rem;
         font-weight: 700;
         color: #fff;
         line-height: 1;
         display: block;
       }
       .rpt-card-lbl {
-        font-size: 0.5rem;
+        font-size: 0.58rem;
         color: rgba(255,255,255,0.72);
         text-transform: uppercase;
         letter-spacing: 0.05em;
         display: block;
-        margin-top: 0.12rem;
+        margin-top: 0.15rem;
+      }
+      .rpt-card-date {
+        font-size: 0.52rem;
+        color: rgba(255,255,255,0.55);
+        letter-spacing: 0.03em;
+        display: block;
+        margin-top: 0.18rem;
       }
 
       /* Subsection title in report */
@@ -1424,17 +1434,23 @@
           const src  = postImageSrc(p);
           const val  = fmtNum(metricFn(p));
           const rankClass = rank === 1 ? "rpt-rank-1" : "";
+          const pl   = p.permalink && String(p.permalink).trim();
+          const dateStr = p.timestamp
+            ? new Date(p.timestamp).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })
+            : "";
           const thumb = src
             ? `<img src="${esc(src)}" alt="" onerror="this.style.display='none';this.nextSibling.style.display='flex'" /><div class="rpt-podium-ph" style="display:none">Sem mídia</div>`
             : `<div class="rpt-podium-ph">Sem mídia</div>`;
-          return `<div class="rpt-podium-card ${rankClass}">
-            <span class="rpt-rank-num">${rank}</span>
+          const inner = `<span class="rpt-rank-num">${rank}</span>
             ${thumb}
             <div class="rpt-card-foot">
               <span class="rpt-card-val">${val}</span>
               <span class="rpt-card-lbl">${metricLabel}</span>
-            </div>
-          </div>`;
+              ${dateStr ? `<span class="rpt-card-date">${escapeHtml(dateStr)}</span>` : ""}
+            </div>`;
+          return pl
+            ? `<a class="rpt-podium-card ${rankClass}" href="${esc(pl)}" target="_blank" rel="noopener noreferrer">${inner}</a>`
+            : `<div class="rpt-podium-card ${rankClass}">${inner}</div>`;
         }).join("");
 
         return `<div class="rpt-podium-section">
@@ -1457,6 +1473,17 @@
         const engRate           = totalReachPosts > 0 ? (totalEng / totalReachPosts * 100) : 0;
         const followers         = Number(profile.followers_count)||0;
         const username          = profile.username ? "@" + profile.username : "";
+        const totalLikes        = allPosts.reduce((s,p) => s+(Number(p.likes)||0), 0);
+        const totalComments     = allPosts.reduce((s,p) => s+(Number(p.comments)||0), 0);
+        const totalShares       = allPosts.reduce((s,p) => s+(Number(p.shares)||0), 0);
+        /* Format distribution */
+        const fmtCount = { VIDEO: 0, IMAGE: 0, CAROUSEL_ALBUM: 0 };
+        for (const p of allPosts) {
+          if (p.media_type === "VIDEO") fmtCount.VIDEO++;
+          else if (p.media_type === "IMAGE") fmtCount.IMAGE++;
+          else if (p.media_type === "CAROUSEL_ALBUM") fmtCount.CAROUSEL_ALBUM++;
+        }
+        const fmtPct = (n) => allPosts.length > 0 ? Math.round(n / allPosts.length * 100) : 0;
 
         /* ── Sort posts for each podium ── */
         const byReach    = [...allPosts].sort((a,b)=>(Number(b.reach)||0)   -(Number(a.reach)||0)   ).slice(0,5);
@@ -1528,17 +1555,65 @@
                 <div class="rpt-kpi-value">${fmtNum(totalReach)}</div>
                 <div class="rpt-kpi-sub">Soma</div>
               </div>
+              <div class="rpt-kpi c2">
+                <div class="rpt-kpi-label">Curtidas</div>
+                <div class="rpt-kpi-value">${fmtNum(totalLikes)}</div>
+                <div class="rpt-kpi-sub">Total no período</div>
+              </div>
+              <div class="rpt-kpi c3">
+                <div class="rpt-kpi-label">Comentários</div>
+                <div class="rpt-kpi-value">${fmtNum(totalComments)}</div>
+                <div class="rpt-kpi-sub">Total no período</div>
+              </div>
+              <div class="rpt-kpi c4">
+                <div class="rpt-kpi-label">Compartilhamentos</div>
+                <div class="rpt-kpi-value">${fmtNum(totalShares)}</div>
+                <div class="rpt-kpi-sub">Total no período</div>
+              </div>
+            </div>
+
+            <!-- Distribuição por Formato -->
+            <div style="margin-top:1.6rem">
+              <div class="rpt-sub-title">Distribuição por Formato</div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.65rem;margin-top:0.75rem">
+                <div style="border:1px solid #e5e5f0;border-radius:8px;padding:0.85rem 1rem;position:relative;overflow:hidden">
+                  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:#c9a87a"></div>
+                  <div style="font-size:0.65rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:#9b9088;margin-bottom:0.45rem">Vídeo</div>
+                  <div style="font-size:1.5rem;font-weight:700;color:#2a2520;line-height:1">${fmtCount.VIDEO}</div>
+                  <div style="font-size:0.7rem;color:#9b9088;margin-top:0.2rem">${fmtPct(fmtCount.VIDEO)}% dos posts</div>
+                </div>
+                <div style="border:1px solid #e5e5f0;border-radius:8px;padding:0.85rem 1rem;position:relative;overflow:hidden">
+                  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:#6ab4b8"></div>
+                  <div style="font-size:0.65rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:#9b9088;margin-bottom:0.45rem">Imagem</div>
+                  <div style="font-size:1.5rem;font-weight:700;color:#2a2520;line-height:1">${fmtCount.IMAGE}</div>
+                  <div style="font-size:0.7rem;color:#9b9088;margin-top:0.2rem">${fmtPct(fmtCount.IMAGE)}% dos posts</div>
+                </div>
+                <div style="border:1px solid #e5e5f0;border-radius:8px;padding:0.85rem 1rem;position:relative;overflow:hidden">
+                  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:#c48090"></div>
+                  <div style="font-size:0.65rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:#9b9088;margin-bottom:0.45rem">Carrossel</div>
+                  <div style="font-size:1.5rem;font-weight:700;color:#2a2520;line-height:1">${fmtCount.CAROUSEL_ALBUM}</div>
+                  <div style="font-size:0.7rem;color:#9b9088;margin-top:0.2rem">${fmtPct(fmtCount.CAROUSEL_ALBUM)}% dos posts</div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- ░░ DESTAQUES — pódios por métrica ░░ -->
+          <!-- ░░ DESTAQUES — pódios p.3: alcance + curtidas ░░ -->
           <div class="rpt-page" style="padding:2.5rem 3rem">
             <div class="rpt-section-header">
               <span class="rpt-section-title">Melhores Criativos</span>
               <span class="rpt-section-period">${periodLabel}</span>
             </div>
-            ${buildPodiumSection("Melhores em Alcance", byReach,    p => Number(p.reach)||0,    "alcance")}
-            ${buildPodiumSection("Melhores em Curtidas", byLikes,   p => Number(p.likes)||0,    "curtidas")}
+            ${buildPodiumSection("Melhores em Alcance", byReach, p => Number(p.reach)||0, "alcance")}
+            ${buildPodiumSection("Melhores em Curtidas", byLikes, p => Number(p.likes)||0, "curtidas")}
+          </div>
+
+          <!-- ░░ DESTAQUES — pódios p.4: comentários + compartilhamentos ░░ -->
+          <div class="rpt-page" style="padding:2.5rem 3rem">
+            <div class="rpt-section-header">
+              <span class="rpt-section-title">Melhores Criativos</span>
+              <span class="rpt-section-period">${periodLabel}</span>
+            </div>
             ${buildPodiumSection("Melhores em Comentários", byComments, p => Number(p.comments)||0, "comentários")}
             ${buildPodiumSection("Melhores em Compartilhamentos", byShares, p => Number(p.shares)||0, "compartilhamentos")}
           </div>
