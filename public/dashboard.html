@@ -582,7 +582,8 @@
 
       @media print {
         * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        @page { margin: 1.5cm; size: A4; }
+        /* margin: 0 removes the browser-controlled header/footer area (date, URL, page title) */
+        @page { margin: 0; size: A4; }
         body > .shell,
         body > .overlay { display: none !important; }
         #print-view { display: block !important; font-family: "Inter", Arial, sans-serif; color: #2a2520; }
@@ -610,14 +611,6 @@
         display: flex;
         flex-direction: column;
         justify-content: center;
-      }
-      .rpt-cover-agency {
-        font-size: 0.68rem;
-        font-weight: 700;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: #9b9088;
-        margin-bottom: 2.5rem;
       }
       .rpt-cover-title {
         font-size: 2.75rem;
@@ -1419,7 +1412,6 @@
           <div class="rpt-page rpt-cover">
             <div class="rpt-cover-accent"></div>
             <div class="rpt-cover-body">
-              <div class="rpt-cover-agency">TGIF &amp; Co</div>
               <div class="rpt-cover-title">Relatório de<br>Desempenho</div>
               <div class="rpt-cover-subtitle">Instagram Analytics</div>
               <div class="rpt-cover-profile">
