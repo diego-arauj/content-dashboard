@@ -359,7 +359,8 @@ app.get("/api/instagram/token-status", requireAdmin, async (req, res) => {
       const daysRemaining = expiresAt
         ? Math.round((expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
         : null;
-      let status = "unknown";
+      // "connected" = account exists but no expiry date tracked (legacy records)
+      let status = "connected";
       if (expiresAt) {
         if (daysRemaining <= 0)  status = "expired";
         else if (daysRemaining <= 10) status = "critical";

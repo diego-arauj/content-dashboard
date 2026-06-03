@@ -449,21 +449,23 @@
 
       /* Build token badge HTML */
       function tokenBadgeHtml(tokenInfo) {
-        if (!tokenInfo) return '<span class="token-badge badge-unknown"><span class="dot"></span>Sem token</span>';
+        // No instagram_accounts record at all → not connected
+        if (!tokenInfo) return '<span class="token-badge badge-unknown"><span class="dot"></span>Sem conexão</span>';
         const { status, days_remaining } = tokenInfo;
         if (status === "ok") {
-          return `<span class="token-badge badge-ok"><span class="dot"></span>${days_remaining}d</span>`;
+          return `<span class="token-badge badge-ok"><span class="dot"></span>${days_remaining}d restantes</span>`;
         }
         if (status === "warning") {
-          return `<span class="token-badge badge-warning"><span class="dot"></span>${days_remaining}d</span>`;
+          return `<span class="token-badge badge-warning"><span class="dot"></span>${days_remaining}d restantes</span>`;
         }
         if (status === "critical") {
-          return `<span class="token-badge badge-critical"><span class="dot"></span>${days_remaining}d</span>`;
+          return `<span class="token-badge badge-critical"><span class="dot"></span>${days_remaining}d — renovar!</span>`;
         }
         if (status === "expired") {
-          return `<span class="token-badge badge-expired"><span class="dot"></span>Expirado</span>`;
+          return `<span class="token-badge badge-expired"><span class="dot"></span>Token expirado</span>`;
         }
-        return '<span class="token-badge badge-unknown"><span class="dot"></span>Sem token</span>';
+        // Has record but token_expires_at is NULL → connected but expiry unknown
+        return '<span class="token-badge badge-ok" style="opacity:0.7"><span class="dot"></span>Conectado</span>';
       }
 
       async function loadClients() {
