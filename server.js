@@ -180,13 +180,40 @@ app.post("/api/clients", requireAdmin, async (req, res) => {
 });
 
 app.delete("/api/clients/:id", requireAdmin, async (req, res) => {
+  const client = await pool.connect();
   try {
     const { id } = req.params;
-    await pool.query("DELETE FROM clients WHERE id = $1", [id]);
+    await client.query("BEGIN");
+    // Delete all related data before removing the client
+    await client.query("DELETE FROM instagram_accounts WHERE client_id = $1", [id]);
+    await client.query("DELETE FROM posts_cache WHERE client_id = $1", [id]);
+    await client.query("DELETE FROM account_insights_cache WHERE client_id = $1", [id]);
+    await client.query("DELETE FROM users WHERE client_id = $1 AND role = 'client'", [id]);
+    await client.query("DELETE FROM invite_tokens WHERE client_id = $1", [id]);
+    await client.query("DELETE FROM clients WHERE id = $1", [id]);
+    await client.query("COMMIT");
     return res.json({ ok: true });
   } catch (err) {
+    await client.query("ROLLBACK");
     console.error(err);
     return res.status(500).json({ error: "Failed to delete client." });
+  } finally {
+    client.release();
+  }
+});
+
+/** Clean up orphaned instagram_accounts rows whose client no longer exists */
+app.post("/api/admin/cleanup-orphans", requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `DELETE FROM instagram_accounts
+       WHERE client_id NOT IN (SELECT id FROM clients)
+       RETURNING client_id, ig_user_id, username`
+    );
+    return res.json({ deleted: result.rows, count: result.rowCount });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Cleanup failed." });
   }
 });
 
