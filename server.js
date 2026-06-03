@@ -661,6 +661,87 @@ app.post("/api/invites/:token/accept", async (req, res) => {
   }
 });
 
+/* ═══════════════════════════════════════════════════════
+   AI ANALYSIS — powered by OpenRouter
+═══════════════════════════════════════════════════════ */
+app.post("/api/ai/analysis", requireClientAccess, async (req, res) => {
+  const key = process.env.OPENROUTER_API_KEY;
+  if (!key) {
+    return res.status(503).json({ error: "OPENROUTER_API_KEY não configurada no servidor." });
+  }
+
+  const { overview = [], posts = [], period = "", clientName = "" } = req.body;
+
+  // Aggregates from the provided data
+  const totalPosts    = posts.length;
+  const totalReach    = overview.reduce((s, r) => s + (Number(r.reach)    || 0), 0);
+  const totalLikes    = posts.reduce((s, p)    => s + (Number(p.likes)    || 0), 0);
+  const totalComments = posts.reduce((s, p)    => s + (Number(p.comments) || 0), 0);
+  const totalShares   = posts.reduce((s, p)    => s + (Number(p.shares)   || 0), 0);
+
+  const fmtCount = { VIDEO: 0, IMAGE: 0, CAROUSEL_ALBUM: 0 };
+  for (const p of posts) { if (fmtCount[p.media_type] !== undefined) fmtCount[p.media_type]++; }
+
+  const topReach = [...posts]
+    .sort((a, b) => (Number(b.reach) || 0) - (Number(a.reach) || 0))
+    .slice(0, 5);
+
+  const prompt = `Você é um estrategista de social media especializado em influenciadores brasileiros de grande porte. Analise os dados abaixo e responda em português.
+
+Cliente: ${clientName}
+Período: ${period}
+Posts publicados: ${totalPosts}
+Formatos: ${fmtCount.VIDEO} vídeos / ${fmtCount.IMAGE} imagens / ${fmtCount.CAROUSEL_ALBUM} carrosséis
+Alcance total: ${totalReach.toLocaleString("pt-BR")}
+Curtidas totais: ${totalLikes.toLocaleString("pt-BR")}
+Comentários totais: ${totalComments.toLocaleString("pt-BR")}
+Compartilhamentos totais: ${totalShares.toLocaleString("pt-BR")}
+
+Top 5 posts por alcance:
+${topReach.map((p, i) => `${i + 1}. ${p.media_type} | alcance: ${(Number(p.reach) || 0).toLocaleString("pt-BR")} | curtidas: ${(Number(p.likes) || 0).toLocaleString("pt-BR")} | compartilhamentos: ${(Number(p.shares) || 0).toLocaleString("pt-BR")}`).join("\n")}
+
+Responda com exatamente duas seções, sem markdown com asteriscos:
+
+O QUE FUNCIONOU:
+(lista de tópicos curtos — formatos, temas, estratégias que performaram melhor)
+
+SUGESTÕES PARA O PRÓXIMO MÊS:
+(3 a 5 sugestões específicas e acionáveis baseadas nos dados)
+
+Seja direto. Máximo 180 palavras no total.`;
+
+  try {
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${key}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": process.env.APP_URL || "http://localhost:3000",
+        "X-Title": "Content Dashboard",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-flash-1.5-8b",
+        messages: [{ role: "user", content: prompt }],
+        max_tokens: 600,
+        temperature: 0.7,
+      }),
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error("[ai] OpenRouter error:", errText);
+      return res.status(502).json({ error: "Erro na API de IA. Verifique a chave OpenRouter." });
+    }
+
+    const data = await response.json();
+    const analysis = data.choices?.[0]?.message?.content?.trim() || "";
+    return res.json({ analysis });
+  } catch (err) {
+    console.error("[ai] Analysis error:", err);
+    return res.status(500).json({ error: "Falha ao gerar análise." });
+  }
+});
+
 app.use(express.static(process.env.STATIC_DIR || "/app/public"));
 
 app.listen(PORT, () => {

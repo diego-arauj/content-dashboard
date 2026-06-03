@@ -7,7 +7,7 @@
     <!-- Anti-flash: apply saved theme before render -->
     <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;0,900;1,400&display=swap" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <style>
       /* ═══════════════════════════════════════
@@ -68,6 +68,26 @@
         --glow: rgba(201, 168, 122, 0.06);
         --stripe: rgba(0, 0, 0, 0.025);
         --badge-default-bg: rgba(0, 0, 0, 0.06);
+      }
+
+      /* ── OC Client Theme (Otaviano Costa) ── */
+      [data-client-theme="oc"] {
+        --accent:        #f8c339;
+        --accent-2:      #ffbe15;
+        --accent-3:      #c9930a;
+        --accent-bg:     rgba(248, 195, 57, 0.08);
+        --accent-border: rgba(248, 195, 57, 0.22);
+        --c1: #f8c339;
+        --c2: #af0005;
+        --c3: #f8c339;
+        --c4: #af0005;
+        --c5: #f8c339;
+        --glow: rgba(248, 195, 57, 0.05);
+      }
+      [data-client-theme="oc"] h1 {
+        font-family: "Playfair Display", serif;
+        font-weight: 900;
+        letter-spacing: -0.025em;
       }
 
       /* ═══════════════════════════════════════
@@ -583,7 +603,7 @@
       @media print {
         * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         @page { margin: 0; size: A4; }
-        /* Force white background everywhere — prevents dark dashboard theme bleeding */
+        /* Default: white background prevents dark dashboard theme bleeding */
         html, body { background: #fff !important; }
         body > .shell,
         body > .overlay { display: none !important; }
@@ -593,6 +613,11 @@
         .rpt-page:last-child { page-break-after: avoid; break-after: avoid; }
         /* Remove forced full-page height for content pages — only cover needs it */
         .rpt-page:not(.rpt-cover) { min-height: 0; }
+        /* OC dark pages must keep their black background in print */
+        .rpt-cover-oc,
+        .rpt-page-oc,
+        .rpt-analysis-oc { background: #000 !important; }
+        .rpt-kpi-oc { background: #111 !important; }
       }
 
       /* Report: screen preview (hidden) */
@@ -871,6 +896,178 @@
 
       /* Page footer — oculto (deixar o browser gerenciar ou não ter) */
       .rpt-page-footer { display: none; }
+
+      /* ═══════════════════════════════════════
+         OC REPORT THEME (Otaviano Costa)
+      ═══════════════════════════════════════ */
+
+      /* Cover OC */
+      .rpt-cover-oc { background: #000 !important; color: #fff !important; position: relative; overflow: hidden; }
+      .rpt-cover-oc .rpt-cover-body { color: #fff; }
+      .rpt-cover-oc .rpt-cover-title { color: #fff; font-family: "Playfair Display", serif; font-weight: 900; }
+      .rpt-cover-oc .rpt-cover-subtitle { color: #f8c339; }
+      .rpt-cover-oc .rpt-cover-name { color: #fff; font-family: "Playfair Display", serif; }
+      .rpt-cover-oc .rpt-cover-handle { color: #f8c339; }
+      .rpt-cover-oc .rpt-cover-period-txt { color: rgba(255,255,255,0.5); }
+      .rpt-cover-oc .rpt-cover-profile { border-top-color: rgba(255,255,255,0.12); }
+      .rpt-cover-oc .rpt-cover-avatar { border-color: rgba(255,255,255,0.2); }
+
+      /* Accent bar OC — topo */
+      .rpt-cover-accent-oc {
+        height: 6px;
+        background: linear-gradient(90deg, #f8c339 0%, #af0005 50%, #f8c339 100%);
+        flex-shrink: 0;
+      }
+
+      /* Listras verticais direita (TV signal bars) */
+      .rpt-oc-bars {
+        position: absolute;
+        top: 0; right: 0; bottom: 0;
+        width: 14px;
+        display: flex;
+        flex-direction: column;
+      }
+      .rpt-oc-bars span {
+        flex: 1;
+      }
+      .rpt-oc-bars span:nth-child(1) { background: #f8c339; }
+      .rpt-oc-bars span:nth-child(2) { background: #af0005; }
+      .rpt-oc-bars span:nth-child(3) { background: #00a550; }
+      .rpt-oc-bars span:nth-child(4) { background: #7b3fa0; }
+      .rpt-oc-bars span:nth-child(5) { background: #e6282a; }
+      .rpt-oc-bars span:nth-child(6) { background: #0080c8; }
+
+      /* Section header OC */
+      .rpt-section-header-oc {
+        padding: 0 0 1rem;
+        border-bottom: 2px solid #f8c339;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+      }
+      .rpt-section-title-oc {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #fff;
+        font-family: "Playfair Display", serif;
+        letter-spacing: -0.02em;
+      }
+      .rpt-section-period-oc { font-size: 0.78rem; color: #f8c339; font-weight: 500; }
+
+      /* OC page wrapper */
+      .rpt-page-oc { background: #0a0a0a !important; color: #fff !important; }
+
+      /* KPI grid OC */
+      .rpt-kpi-oc {
+        border: 1px solid #222;
+        border-radius: 8px;
+        padding: 0.85rem 1rem;
+        position: relative;
+        overflow: hidden;
+        background: #111;
+      }
+      .rpt-kpi-oc::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+      }
+      .rpt-kpi-oc.c1::before { background: #f8c339; }
+      .rpt-kpi-oc.c2::before { background: #af0005; }
+      .rpt-kpi-oc.c3::before { background: #f8c339; }
+      .rpt-kpi-oc.c4::before { background: #af0005; }
+      .rpt-kpi-oc.c5::before { background: #f8c339; }
+      .rpt-kpi-oc .rpt-kpi-label { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: #888; margin-bottom: 0.5rem; }
+      .rpt-kpi-oc .rpt-kpi-value { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.03em; color: #fff; line-height: 1; margin-bottom: 0.15rem; }
+      .rpt-kpi-oc .rpt-kpi-sub { font-size: 0.7rem; color: #666; }
+
+      /* Distribuição por formato OC */
+      .rpt-fmt-oc {
+        border: 1px solid #222;
+        border-radius: 8px;
+        padding: 0.85rem 1rem;
+        position: relative;
+        overflow: hidden;
+        background: #111;
+      }
+      .rpt-fmt-oc::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+      .rpt-fmt-oc.f1::before { background: #f8c339; }
+      .rpt-fmt-oc.f2::before { background: #af0005; }
+      .rpt-fmt-oc.f3::before { background: #f8c339; }
+      .rpt-fmt-oc .rpt-kpi-label { color: #666; }
+      .rpt-fmt-oc .rpt-kpi-value { color: #fff; }
+      .rpt-fmt-oc .rpt-kpi-sub { color: #555; }
+
+      /* Sub-title OC */
+      .rpt-sub-title-oc {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #f8c339;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin: 1.25rem 0 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .rpt-sub-title-oc::after { content: ""; flex: 1; height: 1px; background: #222; }
+
+      /* Podium OC */
+      .rpt-podium-header-oc {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding-bottom: 0.45rem;
+        border-bottom: 1px solid #333;
+        margin-bottom: 0.75rem;
+      }
+      .rpt-podium-card-oc {
+        background: #111 !important;
+        border-color: #333 !important;
+      }
+      .rpt-podium-card-oc.rpt-rank-1 {
+        border-color: #f8c339 !important;
+        border-width: 2.5px !important;
+      }
+      .rpt-podium-card-oc .rpt-rank-num { background: rgba(255,255,255,0.15); }
+      .rpt-podium-card-oc.rpt-rank-1 .rpt-rank-num { background: #f8c339; color: #000; }
+
+      /* Análise IA OC */
+      .rpt-analysis-oc {
+        background: #000 !important;
+        min-height: 100vh;
+        padding: 3rem 3.5rem;
+        color: #fff;
+      }
+      .rpt-analysis-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #f8c339;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-family: "Playfair Display", serif;
+        margin-bottom: 0.25rem;
+      }
+      .rpt-analysis-sub {
+        font-size: 0.78rem;
+        color: rgba(255,255,255,0.4);
+        margin-bottom: 1.5rem;
+      }
+      .rpt-analysis-bar {
+        width: 48px;
+        height: 3px;
+        background: #f8c339;
+        margin-bottom: 2rem;
+      }
+      .rpt-analysis-body {
+        font-size: 0.88rem;
+        line-height: 1.75;
+        color: rgba(255,255,255,0.85);
+        white-space: pre-wrap;
+      }
     </style>
   </head>
   <body>
@@ -982,6 +1179,22 @@
           <input type="date" id="rep-start" required />
           <label for="rep-end">Data de fim</label>
           <input type="date" id="rep-end" required />
+
+          <!-- Análise IA — só aparece para clientes com tema OC -->
+          <div id="ai-analysis-section" style="display:none;margin-top:0.75rem">
+            <label style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem">
+              <span>O que funcionou e sugestões</span>
+              <button type="button" id="btn-gen-ai" class="btn" style="font-size:0.75rem;padding:0.3rem 0.7rem;gap:0.3rem">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+                Gerar com IA
+              </button>
+            </label>
+            <textarea id="rep-analysis" rows="7"
+              placeholder="Clique em 'Gerar com IA' ou escreva sua análise manualmente."
+              style="width:100%;resize:vertical;padding:0.6rem 0.8rem;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface-2);color:var(--text);font:inherit;font-size:0.83rem;outline:none;transition:border-color 0.15s;line-height:1.5"
+            ></textarea>
+          </div>
+
           <div class="modal-actions">
             <button type="button" class="btn" id="rep-cancel">Cancelar</button>
             <button type="submit" class="btn primary" id="rep-submit">
@@ -1190,6 +1403,7 @@
       let sortKey = "likes", sortDir = "desc", formatKey = "", viewKey = "grid";
       let lastPosts = [];
       let clientDisplayName = ""; /* used by report generation */
+      let clientUsername = "";    /* used for OC theme detection */
 
       function renderPosts(posts) {
         const el = document.getElementById("posts");
@@ -1323,6 +1537,13 @@
             const sub = document.getElementById("subtitle");
             sub.textContent = "@" + prof.username;
             sub.style.display = "block";
+          }
+          /* Client theme */
+          clientUsername = prof.username || "";
+          if (clientUsername === "otaviano") {
+            document.documentElement.setAttribute("data-client-theme", "oc");
+          } else {
+            document.documentElement.removeAttribute("data-client-theme");
           }
         }
 
@@ -1469,7 +1690,7 @@
         </div>`;
       }
 
-      function buildReportHtml(overview, profile, allPosts, startStr, endStr, clientName) {
+      function buildReportHtml(overview, profile, allPosts, startStr, endStr, clientName, analysisText) {
         /* ── Aggregates ── */
         const totalReach        = overview.reduce((s,r) => s+(Number(r.reach)||0), 0);
         const avgReach          = overview.length > 0 ? totalReach / overview.length : 0;
@@ -1500,10 +1721,43 @@
         const periodLabel = `${fmtDateBR(startStr)} – ${fmtDateBR(endStr)}`;
         const displayName = clientName || profile.username || "Cliente";
         const avatarUrl   = profile.profile_picture_url || "";
+        const isOC        = (profile.username === "otaviano");
 
-        return `<div class="rpt">
+        /* ── helpers for conditional class names ── */
+        const kpiCls  = isOC ? "rpt-kpi-oc"  : "rpt-kpi";
+        const fmtCls  = isOC ? "rpt-fmt-oc"  : "rpt-kpi";
+        const subTCls = isOC ? "rpt-sub-title-oc" : "rpt-sub-title";
+        const secHdr  = isOC
+          ? `<div class="rpt-section-header-oc"><span class="rpt-section-title-oc">{TITLE}</span><span class="rpt-section-period-oc">${periodLabel}</span></div>`
+          : `<div class="rpt-section-header"><span class="rpt-section-title">{TITLE}</span><span class="rpt-section-period">${periodLabel}</span></div>`;
+        const mH = (t) => secHdr.replace("{TITLE}", escapeHtml(t));
 
-          <!-- ░░ CAPA ░░ -->
+        /* ── Cover: OC vs default ── */
+        const coverHtml = isOC ? `
+          <div class="rpt-page rpt-cover rpt-cover-oc">
+            <div class="rpt-cover-accent-oc"></div>
+            <div class="rpt-oc-bars">
+              <span></span><span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <div class="rpt-cover-body" style="padding-right:2.5rem">
+              <div>
+                <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.18em;color:rgba(255,255,255,0.35);text-transform:uppercase;margin-bottom:1.5rem">OTAVIANO COSTA</div>
+                <div class="rpt-cover-title" style="font-size:3rem;font-family:'Playfair Display',serif;font-weight:900">Relatório de<br>Desempenho</div>
+                <div class="rpt-cover-subtitle" style="font-size:0.95rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin-top:0.5rem">Social Media | Report</div>
+                <div style="font-size:0.85rem;font-style:italic;color:rgba(248,195,57,0.7);text-decoration:underline;margin-top:0.2rem">Mensal</div>
+              </div>
+              <div class="rpt-cover-profile">
+                ${avatarUrl
+                  ? `<img class="rpt-cover-avatar" src="${esc(avatarUrl)}" alt="" onerror="this.style.display='none'" />`
+                  : `<div class="rpt-cover-avatar-placeholder" style="background:#222"></div>`}
+                <div>
+                  <div class="rpt-cover-name">${escapeHtml(displayName)}</div>
+                  ${username ? `<div class="rpt-cover-handle">${escapeHtml(username)}</div>` : ""}
+                  <div class="rpt-cover-period-txt">${periodLabel}</div>
+                </div>
+              </div>
+            </div>
+          </div>` : `
           <div class="rpt-page rpt-cover">
             <div class="rpt-cover-accent"></div>
             <div class="rpt-cover-body">
@@ -1522,84 +1776,79 @@
                 </div>
               </div>
             </div>
-          </div>
+          </div>`;
+
+        /* ── KPI cards ── */
+        const kpi = (cls, label, value, sub) =>
+          `<div class="${kpiCls} ${cls}"><div class="rpt-kpi-label">${label}</div><div class="rpt-kpi-value">${value}</div><div class="rpt-kpi-sub">${sub}</div></div>`;
+
+        /* ── Format distribution cards ── */
+        const fmtCard = (cls, label, count, pct) =>
+          `<div class="${fmtCls} ${cls}"><div class="rpt-kpi-label">${label}</div><div class="rpt-kpi-value">${count}</div><div class="rpt-kpi-sub">${pct}% dos posts</div></div>`;
+
+        /* ── Page wrapper ── */
+        const pageStyle = isOC ? `class="rpt-page rpt-page-oc" style="padding:2.5rem 3rem"` : `class="rpt-page" style="padding:2.5rem 3rem"`;
+
+        /* ── Podium section title ── */
+        const podiumHeaderCls = isOC ? "rpt-podium-header-oc" : "rpt-podium-header";
+
+        /* ── Add OC class to podium cards when isOC ── */
+        const buildPodiumOC = isOC
+          ? (title, posts, metricFn, metricLabel) => {
+              const cards = posts.slice(0, 6).map((p, i) => {
+                const rank = i + 1;
+                const src  = postImageSrc(p);
+                const val  = fmtNum(metricFn(p));
+                const rankClass = rank === 1 ? "rpt-rank-1" : "";
+                const pl   = p.permalink && String(p.permalink).trim();
+                const dateStr = p.timestamp
+                  ? new Date(p.timestamp).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })
+                  : "";
+                const thumb = src
+                  ? `<img src="${esc(src)}" alt="" onerror="this.style.display='none';this.nextSibling.style.display='flex'" /><div class="rpt-podium-ph" style="display:none">Sem mídia</div>`
+                  : `<div class="rpt-podium-ph">Sem mídia</div>`;
+                const inner = `<span class="rpt-rank-num">${rank}</span>
+                  ${thumb}
+                  <div class="rpt-card-foot">
+                    <span class="rpt-card-val">${val}</span>
+                    <span class="rpt-card-lbl">${metricLabel}</span>
+                    ${dateStr ? `<span class="rpt-card-date">${escapeHtml(dateStr)}</span>` : ""}
+                  </div>`;
+                return pl
+                  ? `<a class="rpt-podium-card rpt-podium-card-oc ${rankClass}" href="${esc(pl)}" target="_blank" rel="noopener noreferrer">${inner}</a>`
+                  : `<div class="rpt-podium-card rpt-podium-card-oc ${rankClass}">${inner}</div>`;
+              }).join("");
+              return `<div class="rpt-podium-section">
+                <div class="${podiumHeaderCls}">${escapeHtml(title)}</div>
+                ${posts.length ? `<div class="rpt-podium-grid">${cards}</div>` : `<p style="color:#555;font-size:0.78rem">Nenhum post encontrado.</p>`}
+              </div>`;
+            }
+          : buildPodiumSection;
+
+        return `<div class="rpt">
+
+          ${coverHtml}
 
           <!-- ░░ RESUMO DO PERÍODO ░░ -->
-          <div class="rpt-page" style="padding:2.5rem 3rem">
-            <div class="rpt-section-header">
-              <span class="rpt-section-title">Resumo do Período</span>
-              <span class="rpt-section-period">${periodLabel}</span>
-            </div>
+          <div ${pageStyle}>
+            ${mH("Resumo do Período")}
             <div class="rpt-kpis">
-              <div class="rpt-kpi c1">
-                <div class="rpt-kpi-label">Seguidores</div>
-                <div class="rpt-kpi-value">${fmtNum(followers)}</div>
-                <div class="rpt-kpi-sub">Conta atual</div>
-              </div>
-              <div class="rpt-kpi c2">
-                <div class="rpt-kpi-label">Alcance médio</div>
-                <div class="rpt-kpi-value">${fmtNum(avgReach)}</div>
-                <div class="rpt-kpi-sub">Por dia</div>
-              </div>
-              <div class="rpt-kpi c3">
-                <div class="rpt-kpi-label">Engajamento</div>
-                <div class="rpt-kpi-value">${engRate > 0 ? engRate.toFixed(1).replace(".",",")+"%": "—"}</div>
-                <div class="rpt-kpi-sub">Eng. / Alcance</div>
-              </div>
-              <div class="rpt-kpi c4">
-                <div class="rpt-kpi-label">Seguidores ganhos</div>
-                <div class="rpt-kpi-value" style="color:${totalFollowerGain>=0?"#2a2520":"#a85858"}">${totalFollowerGain>=0?"+":""}${fmtNum(totalFollowerGain)}</div>
-                <div class="rpt-kpi-sub">No período</div>
-              </div>
-              <div class="rpt-kpi c5">
-                <div class="rpt-kpi-label">Posts</div>
-                <div class="rpt-kpi-value">${allPosts.length}</div>
-                <div class="rpt-kpi-sub">No período</div>
-              </div>
-              <div class="rpt-kpi c1">
-                <div class="rpt-kpi-label">Alcance total</div>
-                <div class="rpt-kpi-value">${fmtNum(totalReach)}</div>
-                <div class="rpt-kpi-sub">Soma</div>
-              </div>
-              <div class="rpt-kpi c2">
-                <div class="rpt-kpi-label">Curtidas</div>
-                <div class="rpt-kpi-value">${fmtNum(totalLikes)}</div>
-                <div class="rpt-kpi-sub">Total no período</div>
-              </div>
-              <div class="rpt-kpi c3">
-                <div class="rpt-kpi-label">Comentários</div>
-                <div class="rpt-kpi-value">${fmtNum(totalComments)}</div>
-                <div class="rpt-kpi-sub">Total no período</div>
-              </div>
-              <div class="rpt-kpi c4">
-                <div class="rpt-kpi-label">Compartilhamentos</div>
-                <div class="rpt-kpi-value">${fmtNum(totalShares)}</div>
-                <div class="rpt-kpi-sub">Total no período</div>
-              </div>
+              ${kpi("c1", "Seguidores",       fmtNum(followers),    "Conta atual")}
+              ${kpi("c2", "Alcance médio",     fmtNum(avgReach),     "Por dia")}
+              ${kpi("c3", "Engajamento",       engRate > 0 ? engRate.toFixed(1).replace(".",",")+"%": "—", "Eng. / Alcance")}
+              ${kpi("c4", "Seguidores ganhos", (totalFollowerGain>=0?"+":"")+fmtNum(totalFollowerGain), "No período")}
+              ${kpi("c5", "Posts",             String(allPosts.length), "No período")}
+              ${kpi("c1", "Alcance total",     fmtNum(totalReach),   "Soma")}
+              ${kpi("c2", "Curtidas",          fmtNum(totalLikes),   "Total no período")}
+              ${kpi("c3", "Comentários",       fmtNum(totalComments),"Total no período")}
+              ${kpi("c4", "Compartilhamentos", fmtNum(totalShares),  "Total no período")}
             </div>
-
-            <!-- Distribuição por Formato -->
             <div style="margin-top:1.6rem">
-              <div class="rpt-sub-title">Distribuição por Formato</div>
+              <div class="${subTCls}">Distribuição por Formato</div>
               <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.65rem;margin-top:0.75rem">
-                <div style="border:1px solid #e5e5f0;border-radius:8px;padding:0.85rem 1rem;position:relative;overflow:hidden">
-                  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:#c9a87a"></div>
-                  <div style="font-size:0.65rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:#9b9088;margin-bottom:0.45rem">Vídeo</div>
-                  <div style="font-size:1.5rem;font-weight:700;color:#2a2520;line-height:1">${fmtCount.VIDEO}</div>
-                  <div style="font-size:0.7rem;color:#9b9088;margin-top:0.2rem">${fmtPct(fmtCount.VIDEO)}% dos posts</div>
-                </div>
-                <div style="border:1px solid #e5e5f0;border-radius:8px;padding:0.85rem 1rem;position:relative;overflow:hidden">
-                  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:#6ab4b8"></div>
-                  <div style="font-size:0.65rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:#9b9088;margin-bottom:0.45rem">Imagem</div>
-                  <div style="font-size:1.5rem;font-weight:700;color:#2a2520;line-height:1">${fmtCount.IMAGE}</div>
-                  <div style="font-size:0.7rem;color:#9b9088;margin-top:0.2rem">${fmtPct(fmtCount.IMAGE)}% dos posts</div>
-                </div>
-                <div style="border:1px solid #e5e5f0;border-radius:8px;padding:0.85rem 1rem;position:relative;overflow:hidden">
-                  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:#c48090"></div>
-                  <div style="font-size:0.65rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:#9b9088;margin-bottom:0.45rem">Carrossel</div>
-                  <div style="font-size:1.5rem;font-weight:700;color:#2a2520;line-height:1">${fmtCount.CAROUSEL_ALBUM}</div>
-                  <div style="font-size:0.7rem;color:#9b9088;margin-top:0.2rem">${fmtPct(fmtCount.CAROUSEL_ALBUM)}% dos posts</div>
-                </div>
+                ${fmtCard("f1", "Vídeo",    fmtCount.VIDEO,          fmtPct(fmtCount.VIDEO))}
+                ${fmtCard("f2", "Imagem",   fmtCount.IMAGE,          fmtPct(fmtCount.IMAGE))}
+                ${fmtCard("f3", "Carrossel",fmtCount.CAROUSEL_ALBUM, fmtPct(fmtCount.CAROUSEL_ALBUM))}
               </div>
             </div>
           </div>
@@ -1611,13 +1860,32 @@
             { title: "Melhores em Comentários",      posts: byComments, fn: p => Number(p.comments)||0, lbl: "comentários" },
             { title: "Melhores em Compartilhamentos",posts: byShares,   fn: p => Number(p.shares)||0,   lbl: "compartilhamentos" },
           ].map(pod => `
-          <div class="rpt-page" style="padding:2.5rem 3rem">
-            <div class="rpt-section-header">
-              <span class="rpt-section-title">Melhores Conteúdos</span>
-              <span class="rpt-section-period">${periodLabel}</span>
-            </div>
-            ${buildPodiumSection(pod.title, pod.posts, pod.fn, pod.lbl)}
+          <div ${pageStyle}>
+            ${mH("Melhores Conteúdos")}
+            ${buildPodiumOC(pod.title, pod.posts, pod.fn, pod.lbl)}
           </div>`).join("")}
+
+          <!-- ░░ ANÁLISE IA — só no tema OC quando há texto ░░ -->
+          ${isOC && analysisText ? `
+          <div class="rpt-page">
+            <div class="rpt-analysis-oc">
+              <div class="rpt-oc-bars" style="position:absolute;top:0;right:0;bottom:0;width:14px"></div>
+              <div style="position:absolute;top:0;right:0;bottom:0;width:14px;display:flex;flex-direction:column">
+                <span style="flex:1;background:#f8c339"></span>
+                <span style="flex:1;background:#af0005"></span>
+                <span style="flex:1;background:#00a550"></span>
+                <span style="flex:1;background:#7b3fa0"></span>
+                <span style="flex:1;background:#e6282a"></span>
+                <span style="flex:1;background:#0080c8"></span>
+              </div>
+              <div style="padding-right:1.5rem">
+                <div class="rpt-analysis-title">O que funcionou</div>
+                <div class="rpt-analysis-sub">e sugestões para o próximo mês</div>
+                <div class="rpt-analysis-bar"></div>
+                <div class="rpt-analysis-body">${escapeHtml(analysisText)}</div>
+              </div>
+            </div>
+          </div>` : ""}
 
         </div>`;
       }
@@ -1637,7 +1905,7 @@
         return Promise.race([loaded, timeout]);
       }
 
-      async function generateReport(startStr, endStr) {
+      async function generateReport(startStr, endStr, analysisText) {
         const submitBtn = document.getElementById("rep-submit");
         submitBtn.disabled = true;
         submitBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Preparando…`;
@@ -1657,7 +1925,7 @@
           const allPosts = postsRes.ok ? await postsRes.json(): [];
 
           const clientName = clientDisplayName || profile.username || "";
-          const html = buildReportHtml(overview, profile, allPosts, startStr, endStr, clientName);
+          const html = buildReportHtml(overview, profile, allPosts, startStr, endStr, clientName, analysisText || "");
 
           const pv = document.getElementById("print-view");
           pv.innerHTML = html;
@@ -1739,8 +2007,59 @@
           const p = rangeParams();
           document.getElementById("rep-start").value = p.startDay;
           document.getElementById("rep-end").value   = p.endDay;
+          /* Show AI analysis field for OC theme */
+          document.getElementById("ai-analysis-section").style.display =
+            clientUsername === "otaviano" ? "block" : "none";
           openModal(document.getElementById("modal-report"));
         });
+
+        /* Gerar análise com IA */
+        document.getElementById("btn-gen-ai").addEventListener("click", async () => {
+          const btn = document.getElementById("btn-gen-ai");
+          const textarea = document.getElementById("rep-analysis");
+          const s  = document.getElementById("rep-start").value;
+          const en = document.getElementById("rep-end").value;
+          if (!s || !en) { alert("Selecione o período antes de gerar."); return; }
+
+          btn.disabled = true;
+          btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Gerando…`;
+          textarea.placeholder = "Aguardando IA…";
+
+          try {
+            const startIso = new Date(s  + "T00:00:00").toISOString();
+            const endIso   = new Date(en + "T23:59:59.999").toISOString();
+            const [ovR, postsR] = await Promise.all([
+              api(`/api/dashboard/${encodeURIComponent(clientId)}/overview?start=${encodeURIComponent(s)}&end=${encodeURIComponent(en)}`),
+              api(`/api/dashboard/${encodeURIComponent(clientId)}/posts?start=${encodeURIComponent(startIso)}&end=${encodeURIComponent(endIso)}&sort=reach`),
+            ]);
+            const overview = ovR.ok   ? await ovR.json()    : [];
+            const posts    = postsR.ok ? await postsR.json() : [];
+
+            const aiRes = await api("/api/ai/analysis", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                overview,
+                posts,
+                period: `${fmtDateBR(s)} – ${fmtDateBR(en)}`,
+                clientName: clientDisplayName || "Otaviano Costa",
+              }),
+            });
+            if (!aiRes.ok) {
+              const err = await aiRes.json();
+              throw new Error(err.error || "Erro desconhecido.");
+            }
+            const { analysis } = await aiRes.json();
+            textarea.value = analysis;
+          } catch (e) {
+            alert("Erro ao gerar análise: " + e.message);
+            textarea.placeholder = "Clique em 'Gerar com IA' ou escreva manualmente.";
+          } finally {
+            btn.disabled = false;
+            btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg> Gerar com IA`;
+          }
+        });
+
         document.getElementById("rep-cancel").addEventListener("click", () =>
           closeModal(document.getElementById("modal-report"))
         );
@@ -1749,7 +2068,8 @@
           const s = document.getElementById("rep-start").value;
           const en = document.getElementById("rep-end").value;
           if (!s || !en) return;
-          generateReport(s, en);
+          const analysis = document.getElementById("rep-analysis").value.trim();
+          generateReport(s, en, analysis);
         });
         document.getElementById("modal-report").addEventListener("click", (e) => {
           if (e.target === document.getElementById("modal-report")) closeModal(document.getElementById("modal-report"));
