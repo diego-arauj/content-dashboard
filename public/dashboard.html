@@ -1492,10 +1492,10 @@
         const fmtPct = (n) => allPosts.length > 0 ? Math.round(n / allPosts.length * 100) : 0;
 
         /* ── Sort posts for each podium ── */
-        const byReach    = [...allPosts].sort((a,b)=>(Number(b.reach)||0)   -(Number(a.reach)||0)   ).slice(0,5);
-        const byLikes    = [...allPosts].sort((a,b)=>(Number(b.likes)||0)   -(Number(a.likes)||0)   ).slice(0,5);
-        const byComments = [...allPosts].sort((a,b)=>(Number(b.comments)||0)-(Number(a.comments)||0)).slice(0,5);
-        const byShares   = [...allPosts].sort((a,b)=>(Number(b.shares)||0)  -(Number(a.shares)||0)  ).slice(0,5);
+        const byReach    = [...allPosts].sort((a,b)=>(Number(b.reach)||0)   -(Number(a.reach)||0)   ).slice(0,6);
+        const byLikes    = [...allPosts].sort((a,b)=>(Number(b.likes)||0)   -(Number(a.likes)||0)   ).slice(0,6);
+        const byComments = [...allPosts].sort((a,b)=>(Number(b.comments)||0)-(Number(a.comments)||0)).slice(0,6);
+        const byShares   = [...allPosts].sort((a,b)=>(Number(b.shares)||0)  -(Number(a.shares)||0)  ).slice(0,6);
 
         const periodLabel = `${fmtDateBR(startStr)} – ${fmtDateBR(endStr)}`;
         const displayName = clientName || profile.username || "Cliente";
