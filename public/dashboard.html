@@ -582,15 +582,17 @@
 
       @media print {
         * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        /* margin: 0 removes the browser-controlled header/footer area (date, URL, page title) */
         @page { margin: 0; size: A4; }
+        /* Force white background everywhere — prevents dark dashboard theme bleeding */
+        html, body { background: #fff !important; }
         body > .shell,
         body > .overlay { display: none !important; }
         #print-view { display: block !important; font-family: "Inter", Arial, sans-serif; color: #2a2520; }
 
         .rpt-page { page-break-after: always; break-after: page; }
         .rpt-page:last-child { page-break-after: avoid; break-after: avoid; }
-        .rpt-page-inner { padding: 0; }
+        /* Remove forced full-page height for content pages — only cover needs it */
+        .rpt-page:not(.rpt-cover) { min-height: 0; }
       }
 
       /* Report: screen preview (hidden) */
@@ -602,15 +604,15 @@
         display: flex;
         flex-direction: column;
       }
-      /* Cover — simples */
-      .rpt-cover { justify-content: center; }
-      .rpt-cover-accent { height: 4px; background: linear-gradient(90deg, #7a6032, #c9a87a, #dbbf91); flex-shrink: 0; }
+      /* Cover */
+      .rpt-cover { justify-content: flex-start; min-height: 100vh; }
+      .rpt-cover-accent { height: 6px; background: linear-gradient(90deg, #7a6032, #c9a87a, #dbbf91); flex-shrink: 0; }
       .rpt-cover-body {
-        padding: 3.5rem 3rem;
+        padding: 4rem 3.5rem 4.5rem;
         flex: 1;
         display: flex;
         flex-direction: column;
-        justify-content: center;
+        justify-content: space-between;
       }
       .rpt-cover-title {
         font-size: 2.75rem;
