@@ -106,6 +106,15 @@
         border-bottom: 1px solid var(--border);
       }
       .header-left { display: flex; flex-direction: column; gap: 0.2rem; }
+      .profile-row { display: flex; align-items: center; gap: 0.65rem; }
+      .profile-avatar {
+        width: 42px; height: 42px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--border);
+        flex-shrink: 0;
+        background: var(--surface-2);
+      }
       .back {
         font-size: 0.8rem;
         color: var(--text-3);
@@ -802,8 +811,13 @@
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
             Admin
           </a>
-          <h1>Dashboard</h1>
-          <p class="sub" id="subtitle" style="display:none">Carregando…</p>
+          <div class="profile-row">
+            <img id="profile-avatar" class="profile-avatar" src="" alt="" style="display:none" onerror="this.style.display='none'" />
+            <div>
+              <h1>Dashboard</h1>
+              <p class="sub" id="subtitle" style="display:none"></p>
+            </div>
+          </div>
         </div>
         <div class="header-right">
           <div class="range">
@@ -1103,6 +1117,7 @@
       let clientId = "";
       let sortKey = "likes", formatKey = "", viewKey = "grid";
       let lastPosts = [];
+      let clientDisplayName = ""; /* used by report generation */
 
       function renderPosts(posts) {
         const el = document.getElementById("posts");
@@ -1225,6 +1240,18 @@
         } else {
           const prof = await profRes.json();
           document.getElementById("k-follow").textContent = fmtNum(Number(prof.followers_count)||0);
+          /* Profile photo in header */
+          if (prof.profile_picture_url) {
+            const av = document.getElementById("profile-avatar");
+            av.src = prof.profile_picture_url;
+            av.style.display = "block";
+          }
+          /* @handle in subtitle */
+          if (prof.username) {
+            const sub = document.getElementById("subtitle");
+            sub.textContent = "@" + prof.username;
+            sub.style.display = "block";
+          }
         }
 
         const overview = ovRes.ok ? await ovRes.json() : [];
@@ -1501,7 +1528,7 @@
           const profile  = profRes.ok ? await profRes.json() : {};
           const allPosts = postsRes.ok ? await postsRes.json(): [];
 
-          const clientName = document.getElementById("subtitle").textContent || profile.username || "";
+          const clientName = clientDisplayName || profile.username || "";
           const html = buildReportHtml(overview, profile, allPosts, startStr, endStr, clientName);
 
           document.getElementById("print-view").innerHTML = html;
@@ -1634,15 +1661,14 @@
         wirePresets();
         wireReport();
 
-        /* Fetch client name for report cover */
+        /* Fetch client name — set h1 and store for report cover */
         try {
           const clientsRes = await api("/api/clients");
           if (clientsRes.ok) {
             const clients = await clientsRes.json();
             const thisClient = clients.find(c => String(c.id) === String(clientId));
             if (thisClient) {
-              document.getElementById("subtitle").textContent = thisClient.name;
-              document.getElementById("subtitle").style.display = "block";
+              clientDisplayName = thisClient.name;
               document.querySelector("h1").textContent = thisClient.name;
             }
           }
