@@ -665,6 +665,24 @@ app.post("/api/invites/:token/accept", async (req, res) => {
    AI ANALYSIS — powered by OpenRouter
 ═══════════════════════════════════════════════════════ */
 
+/** Baixa uma imagem e devolve data-URI base64; null se falhar/expirar.
+    Limita o tamanho para não estourar memória do container. */
+async function fetchImageBase64(url, maxBytes = 1_500_000) {
+  try {
+    const r = await fetch(url, {
+      headers: { "User-Agent": "ContentDashboard/1.0" },
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!r.ok) return null;
+    const buf = Buffer.from(await r.arrayBuffer());
+    if (buf.length > maxBytes) return null;
+    const mime = (r.headers.get("content-type") || "image/jpeg").split(";")[0].trim();
+    if (!mime.startsWith("image/")) return null;
+    return `data:${mime};base64,${buf.toString("base64")}`;
+  } catch {
+    return null;
+  }
+}
 
 app.post("/api/ai/analysis", requireClientAccess, async (req, res) => {
   try {
@@ -736,7 +754,7 @@ app.post("/api/ai/analysis", requireClientAccess, async (req, res) => {
       "Responda com exatamente duas seções, sem markdown com asteriscos:",
       "",
       "O QUE FUNCIONOU:",
-      "(tópicos curtos — temas, formatos e padrões de legenda que se repetem nos pódios; destaque posts que aparecem em múltiplos rankings como sinal forte)",
+      "(tópicos curtos — temas, formatos, padrões visuais (cenário, pessoas, estilo) e de legenda que se repetem nos pódios; destaque posts que aparecem em múltiplos rankings como sinal forte)",
       "",
       "SUGESTÕES PARA O PRÓXIMO MÊS:",
       "(3 a 5 sugestões específicas e acionáveis baseadas nos padrões identificados)",
@@ -746,6 +764,42 @@ app.post("/api/ai/analysis", requireClientAccess, async (req, res) => {
     ].join("\n");
 
     console.log("[ai] Prompt length:", prompt.length, "chars");
+
+    /* ── Coleta imagens dos pódios (deduplicadas, limitadas) e baixa em base64 ──
+       O CDN do Instagram costuma bloquear acesso server-side de terceiros,
+       então convertemos aqui para garantir a entrega ao modelo. */
+    const MAX_IMAGES = 10;
+    const ordered = [...top6Reach, ...top6Shares, ...top6Likes, ...top6Comments];
+    const seen = new Set();
+    const imageCandidates = [];
+    for (const p of ordered) {
+      const url = p.thumbnail_url || p.media_url;
+      if (!url || seen.has(url)) continue;
+      seen.add(url);
+      const dateStr = p.timestamp ? new Date(p.timestamp).toISOString().slice(0, 10) : "s/data";
+      imageCandidates.push({ url, label: `Post ${dateStr} — ${p.media_type || "?"} | alcance ${fmtN(p.reach)}, compart. ${fmtN(p.shares)}` });
+      if (imageCandidates.length >= MAX_IMAGES) break;
+    }
+
+    const fetched = await Promise.all(imageCandidates.map(c => fetchImageBase64(c.url)));
+    const images = imageCandidates
+      .map((c, i) => ({ ...c, data: fetched[i] }))
+      .filter(c => c.data);
+    console.log("[ai] Images:", `${images.length}/${imageCandidates.length} baixadas`);
+
+    /* Monta o conteúdo: texto + imagens (se houver) */
+    let content;
+    if (images.length) {
+      content = [
+        { type: "text", text: prompt + "\n\nA seguir, as miniaturas dos principais posts do período. Use-as para identificar padrões VISUAIS de conteúdo (cenário, pessoas, estilo) e relacione com os números acima:" },
+      ];
+      for (const img of images) {
+        content.push({ type: "text", text: img.label });
+        content.push({ type: "image_url", image_url: { url: img.data } });
+      }
+    } else {
+      content = prompt;
+    }
 
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
@@ -757,11 +811,11 @@ app.post("/api/ai/analysis", requireClientAccess, async (req, res) => {
       },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
-        messages: [{ role: "user", content: prompt }],
-        max_tokens: 600,
+        messages: [{ role: "user", content }],
+        max_tokens: 700,
         temperature: 0.7,
       }),
-      signal: AbortSignal.timeout(50000),
+      signal: AbortSignal.timeout(90000),
     });
 
     if (!response.ok) {
