@@ -2138,12 +2138,23 @@
           repAnalysis.rows = 7;
         });
 
+        const DEFAULT_AI_PROMPT =
+          "Analise os temas e o estilo das legendas dos posts de maior alcance. " +
+          "Identifique padrões de conteúdo que geraram mais engajamento (ex: família, bastidores, humor, " +
+          "espontaneidade, motivação). Nas sugestões, indique temas e abordagens específicas para replicar " +
+          "no próximo mês, não apenas formatos.";
+
         tabAI.addEventListener("click", () => {
           tabAI.classList.add("active-tab");
           tabManual.classList.remove("active-tab");
           panelAIPrompt.style.display = "block";
           repAnalysis.placeholder = "Clique em 'Gerar análise com IA' acima, ou edite diretamente aqui.";
           repAnalysis.rows = 6;
+          /* Pré-preenche o prompt padrão se ainda estiver vazio */
+          const promptEl = document.getElementById("rep-ai-prompt");
+          if (promptEl && !promptEl.value.trim()) {
+            promptEl.value = DEFAULT_AI_PROMPT;
+          }
         });
 
         /* ── Gerar análise com IA ── */
@@ -2170,7 +2181,7 @@
             const overview = ovR.ok   ? await ovR.json()    : [];
             const posts    = postsR.ok ? await postsR.json() : [];
 
-            /* Envia só os campos numéricos — evita corpo gigante com URLs/captions */
+            /* Envia campos numéricos + legenda (truncada) — sem URLs de mídia */
             const postsTrimmed = posts.map(p => ({
               media_type: p.media_type,
               timestamp:  p.timestamp,
@@ -2179,6 +2190,7 @@
               comments:   p.comments,
               shares:     p.shares,
               saved:      p.saved,
+              caption:    p.caption ? String(p.caption).slice(0, 280) : "",
             }));
 
             const aiRes = await api("/api/ai/analysis", {

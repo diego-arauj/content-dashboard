@@ -686,7 +686,12 @@ app.post("/api/ai/analysis", requireClientAccess, async (req, res) => {
     .sort((a, b) => (Number(b.reach) || 0) - (Number(a.reach) || 0))
     .slice(0, 5);
 
-  const prompt = `Você é um estrategista de social media especializado em influenciadores brasileiros de grande porte. Analise os dados abaixo e responda em português.
+  const formatCaption = (caption) => {
+    if (!caption || !String(caption).trim()) return "(sem legenda)";
+    return String(caption).trim().replace(/\n+/g, " ").slice(0, 200);
+  };
+
+  const prompt = `Você é um estrategista de social media especializado em influenciadores brasileiros de grande porte. Analise os dados e as legendas abaixo e responda em português.
 
 Cliente: ${clientName}
 Período: ${period}
@@ -697,18 +702,18 @@ Curtidas totais: ${totalLikes.toLocaleString("pt-BR")}
 Comentários totais: ${totalComments.toLocaleString("pt-BR")}
 Compartilhamentos totais: ${totalShares.toLocaleString("pt-BR")}
 
-Top 5 posts por alcance:
-${topReach.map((p, i) => `${i + 1}. ${p.media_type} | alcance: ${(Number(p.reach) || 0).toLocaleString("pt-BR")} | curtidas: ${(Number(p.likes) || 0).toLocaleString("pt-BR")} | compartilhamentos: ${(Number(p.shares) || 0).toLocaleString("pt-BR")}`).join("\n")}
+Top 5 posts por alcance (com legenda):
+${topReach.map((p, i) => `${i + 1}. ${p.media_type} | alcance: ${(Number(p.reach) || 0).toLocaleString("pt-BR")} | curtidas: ${(Number(p.likes) || 0).toLocaleString("pt-BR")} | compartilhamentos: ${(Number(p.shares) || 0).toLocaleString("pt-BR")} | legenda: "${formatCaption(p.caption)}"`).join("\n")}
 
 Responda com exatamente duas seções, sem markdown com asteriscos:
 
 O QUE FUNCIONOU:
-(lista de tópicos curtos — formatos, temas, estratégias que performaram melhor)
+(lista de tópicos curtos — temas de conteúdo, formatos e abordagens que performaram melhor; mencione padrões nas legendas quando relevante)
 
 SUGESTÕES PARA O PRÓXIMO MÊS:
-(3 a 5 sugestões específicas e acionáveis baseadas nos dados)
+(3 a 5 sugestões específicas e acionáveis baseadas nos dados e temas identificados)
 
-Seja direto. Máximo 180 palavras no total.${customPrompt ? `\n\nInstruções adicionais do gestor: ${customPrompt}` : ""}`;
+Seja direto. Máximo 200 palavras no total.${customPrompt ? `\n\nInstruções adicionais do gestor: ${customPrompt}` : ""}`;
 
   try {
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
