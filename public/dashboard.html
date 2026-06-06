@@ -2170,20 +2170,32 @@
             const overview = ovR.ok   ? await ovR.json()    : [];
             const posts    = postsR.ok ? await postsR.json() : [];
 
+            /* Envia só os campos numéricos — evita corpo gigante com URLs/captions */
+            const postsTrimmed = posts.map(p => ({
+              media_type: p.media_type,
+              timestamp:  p.timestamp,
+              reach:      p.reach,
+              likes:      p.likes,
+              comments:   p.comments,
+              shares:     p.shares,
+              saved:      p.saved,
+            }));
+
             const aiRes = await api("/api/ai/analysis", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 overview,
-                posts,
+                posts: postsTrimmed,
                 period: `${fmtDateBR(s)} – ${fmtDateBR(en)}`,
                 clientName: clientDisplayName || "Otaviano Costa",
                 customPrompt,
               }),
             });
             if (!aiRes.ok) {
-              const err = await aiRes.json();
-              throw new Error(err.error || "Erro desconhecido.");
+              let errMsg = `Erro HTTP ${aiRes.status}`;
+              try { const j = await aiRes.json(); errMsg = j.error || errMsg; } catch { /* resposta não-JSON */ }
+              throw new Error(errMsg);
             }
             const { analysis } = await aiRes.json();
             textarea.value = analysis;
