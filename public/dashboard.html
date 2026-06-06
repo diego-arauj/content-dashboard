@@ -606,7 +606,8 @@
         /* Default: white background prevents dark dashboard theme bleeding */
         html, body { background: #fff !important; }
         body > .shell,
-        body > .overlay { display: none !important; }
+        body > .overlay,
+        #preview-overlay { display: none !important; }
         #print-view { display: block !important; font-family: "Inter", Arial, sans-serif; color: #2a2520; }
 
         .rpt-page { page-break-after: always; break-after: page; }
@@ -1052,6 +1053,8 @@
         min-height: 100vh;
         padding: 3rem 3.5rem;
         color: #fff;
+        position: relative;
+        overflow: hidden;
       }
       .rpt-analysis-title {
         font-size: 1.1rem;
@@ -1099,6 +1102,37 @@
         background: var(--accent-bg);
         border-color: var(--accent-border);
         color: var(--accent);
+      }
+
+      /* ═══════════════════════════════════════
+         PREVIEW OVERLAY
+      ═══════════════════════════════════════ */
+      #preview-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 200;
+        background: #1a1a1a;
+        overflow-y: auto;
+      }
+      #preview-overlay.open { display: block; }
+      .preview-bar {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: #111;
+        border-bottom: 1px solid #2a2a2a;
+        padding: 0.7rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        font-family: var(--font);
+      }
+      .preview-frame {
+        max-width: 900px;
+        margin: 1.5rem auto 4rem;
+        box-shadow: 0 8px 64px rgba(0,0,0,0.65);
       }
     </style>
   </head>
@@ -1252,8 +1286,8 @@
           <div class="modal-actions">
             <button type="button" class="btn" id="rep-cancel">Cancelar</button>
             <button type="submit" class="btn primary" id="rep-submit">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-              Gerar PDF
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              Visualizar Prévia
             </button>
           </div>
         </form>
@@ -1262,6 +1296,25 @@
 
     <!-- Print view: populated by JS -->
     <div id="print-view" aria-hidden="true"></div>
+
+    <!-- Preview overlay: shows the report before printing -->
+    <div id="preview-overlay" aria-hidden="true">
+      <div class="preview-bar">
+        <div style="display:flex;align-items:center;gap:0.75rem">
+          <span style="font-weight:600;color:#ededed;font-size:0.88rem">Prévia do Relatório</span>
+          <span style="font-size:0.75rem;color:#555">— revise antes de imprimir</span>
+        </div>
+        <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
+          <span style="font-size:0.68rem;color:#444;max-width:220px;line-height:1.35;text-align:right">No Chrome: ative <em>Gráficos de fundo</em> na janela de impressão</span>
+          <button type="button" id="preview-close" class="btn">← Fechar e editar</button>
+          <button type="button" id="preview-print" class="btn primary">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            Imprimir / Salvar PDF
+          </button>
+        </div>
+      </div>
+      <div id="preview-content" class="preview-frame"></div>
+    </div>
 
     <script>
       /* ═══════════════════════════════════════
@@ -1923,7 +1976,6 @@
           ${isOC && analysisText ? `
           <div class="rpt-page">
             <div class="rpt-analysis-oc">
-              <div class="rpt-oc-bars" style="position:absolute;top:0;right:0;bottom:0;width:14px"></div>
               <div style="position:absolute;top:0;right:0;bottom:0;width:14px;display:flex;flex-direction:column">
                 <span style="flex:1;background:#f8c339"></span>
                 <span style="flex:1;background:#af0005"></span>
@@ -1982,20 +2034,25 @@
           const html = buildReportHtml(overview, profile, allPosts, startStr, endStr, clientName, analysisText || "");
 
           const pv = document.getElementById("print-view");
+          const pc = document.getElementById("preview-content");
           pv.innerHTML = html;
+          pc.innerHTML = html;
           closeModal(document.getElementById("modal-report"));
 
           submitBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Carregando imagens…`;
-          await waitForImages(pv, 15000);
+          await waitForImages(pc, 15000);
 
-          window.print();
+          const overlay = document.getElementById("preview-overlay");
+          overlay.classList.add("open");
+          overlay.setAttribute("aria-hidden", "false");
+          overlay.scrollTop = 0;
 
         } catch (e) {
           console.error(e);
           alert("Erro ao gerar relatório. Tente novamente.");
         } finally {
           submitBtn.disabled = false;
-          submitBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Gerar PDF`;
+          submitBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Visualizar Prévia`;
         }
       }
 
@@ -2154,7 +2211,25 @@
           if (e.target === document.getElementById("modal-report")) closeModal(document.getElementById("modal-report"));
         });
         document.addEventListener("keydown", (ev) => {
-          if (ev.key === "Escape") closeModal(document.getElementById("modal-report"));
+          if (ev.key === "Escape") {
+            closeModal(document.getElementById("modal-report"));
+            const overlay = document.getElementById("preview-overlay");
+            overlay.classList.remove("open");
+            overlay.setAttribute("aria-hidden", "true");
+          }
+        });
+
+        /* ── Preview overlay controls ── */
+        document.getElementById("preview-close").addEventListener("click", () => {
+          const overlay = document.getElementById("preview-overlay");
+          overlay.classList.remove("open");
+          overlay.setAttribute("aria-hidden", "true");
+          openModal(document.getElementById("modal-report"));
+        });
+        document.getElementById("preview-print").addEventListener("click", async () => {
+          const pv = document.getElementById("print-view");
+          await waitForImages(pv, 5000);
+          window.print();
         });
       }
 
