@@ -614,6 +614,9 @@
         .rpt-page:last-child { page-break-after: avoid; break-after: avoid; }
         /* Remove forced full-page height for content pages — only cover needs it */
         .rpt-page:not(.rpt-cover) { min-height: 0; }
+        /* OC dark content pages must fill the whole A4 sheet so the black
+           background covers it — otherwise the bottom of the page prints white */
+        .rpt-page.rpt-page-oc { min-height: 100vh; }
         /* OC dark pages must keep their black background in print */
         .rpt-cover-oc,
         .rpt-page-oc,
