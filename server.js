@@ -730,34 +730,7 @@ SUGESTÕES PARA O PRÓXIMO MÊS:
 
 Seja direto. Máximo 220 palavras no total.${customPrompt ? `\n\nInstruções adicionais do gestor: ${customPrompt}` : ""}`;
 
-  /* Monta mensagem multimodal: texto + URLs das imagens por pódio.
-     O Gemini busca as imagens diretamente — sem download server-side. */
-  const allTopPosts = [...top6Reach, ...top6Likes, ...top6Comments, ...top6Shares];
-  const hasAnyImage = allTopPosts.some(p => p.thumbnail_url || p.media_url);
   const messageContent = [{ type: "text", text: prompt }];
-  const podiums = [
-    { label: "TOP 6 — ALCANCE",           list: top6Reach    },
-    { label: "TOP 6 — CURTIDAS",          list: top6Likes    },
-    { label: "TOP 6 — COMENTÁRIOS",       list: top6Comments },
-    { label: "TOP 6 — COMPARTILHAMENTOS", list: top6Shares   },
-  ];
-  if (hasAnyImage) {
-    const seenUrls = new Set();
-    messageContent.push({ type: "text", text: "\n\nMiniaturas dos pódios — use para identificar padrões visuais de conteúdo:" });
-    for (const pod of podiums) {
-      const hasNew = pod.list.some(p => { const u = p.thumbnail_url || p.media_url; return u && !seenUrls.has(u); });
-      if (!hasNew) continue;
-      messageContent.push({ type: "text", text: `\n${pod.label}:` });
-      pod.list.forEach((p, i) => {
-        const url = p.thumbnail_url || p.media_url;
-        if (url && !seenUrls.has(url)) {
-          seenUrls.add(url);
-          messageContent.push({ type: "text", text: `#${i + 1}` });
-          messageContent.push({ type: "image_url", image_url: { url } });
-        }
-      });
-    }
-  }
 
   try {
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -774,6 +747,7 @@ Seja direto. Máximo 220 palavras no total.${customPrompt ? `\n\nInstruções ad
         max_tokens: 600,
         temperature: 0.7,
       }),
+      signal: AbortSignal.timeout(50000),
     });
 
     if (!response.ok) {
