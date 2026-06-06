@@ -665,21 +665,6 @@ app.post("/api/invites/:token/accept", async (req, res) => {
    AI ANALYSIS — powered by OpenRouter
 ═══════════════════════════════════════════════════════ */
 
-/** Busca uma URL de imagem e retorna data-URI base64; null se falhar. */
-async function fetchImageBase64(url) {
-  try {
-    const res = await fetch(url, {
-      headers: { "User-Agent": "ContentDashboard/1.0" },
-      signal: AbortSignal.timeout(7000),
-    });
-    if (!res.ok) return null;
-    const mime = (res.headers.get("content-type") || "image/jpeg").split(";")[0].trim();
-    const buf  = await res.arrayBuffer();
-    return `data:${mime};base64,${Buffer.from(buf).toString("base64")}`;
-  } catch {
-    return null;
-  }
-}
 
 app.post("/api/ai/analysis", requireClientAccess, async (req, res) => {
   const key = process.env.OPENROUTER_API_KEY;
@@ -745,15 +730,10 @@ SUGESTÕES PARA O PRÓXIMO MÊS:
 
 Seja direto. Máximo 220 palavras no total.${customPrompt ? `\n\nInstruções adicionais do gestor: ${customPrompt}` : ""}`;
 
-  /* Busca thumbnails de todos os pódios — deduplica por URL para não baixar a mesma imagem duas vezes */
+  /* Monta mensagem multimodal: texto + URLs das imagens por pódio.
+     O Gemini busca as imagens diretamente — sem download server-side. */
   const allTopPosts = [...top6Reach, ...top6Likes, ...top6Comments, ...top6Shares];
-  const uniqueUrls  = [...new Set(allTopPosts.map(p => p.thumbnail_url || p.media_url).filter(Boolean))];
-  const fetchResults = await Promise.all(uniqueUrls.map(u => fetchImageBase64(u)));
-  const urlToImg = new Map();
-  uniqueUrls.forEach((u, i) => { if (fetchResults[i]) urlToImg.set(u, fetchResults[i]); });
-  const getImg = (p) => { const u = p.thumbnail_url || p.media_url; return u ? (urlToImg.get(u) || null) : null; };
-
-  /* Monta mensagem multimodal: texto + imagens organizadas por pódio */
+  const hasAnyImage = allTopPosts.some(p => p.thumbnail_url || p.media_url);
   const messageContent = [{ type: "text", text: prompt }];
   const podiums = [
     { label: "TOP 6 — ALCANCE",           list: top6Reach    },
@@ -761,17 +741,19 @@ Seja direto. Máximo 220 palavras no total.${customPrompt ? `\n\nInstruções ad
     { label: "TOP 6 — COMENTÁRIOS",       list: top6Comments },
     { label: "TOP 6 — COMPARTILHAMENTOS", list: top6Shares   },
   ];
-  if (urlToImg.size > 0) {
+  if (hasAnyImage) {
+    const seenUrls = new Set();
     messageContent.push({ type: "text", text: "\n\nMiniaturas dos pódios — use para identificar padrões visuais de conteúdo:" });
     for (const pod of podiums) {
-      const withImg = pod.list.filter(getImg);
-      if (!withImg.length) continue;
+      const hasNew = pod.list.some(p => { const u = p.thumbnail_url || p.media_url; return u && !seenUrls.has(u); });
+      if (!hasNew) continue;
       messageContent.push({ type: "text", text: `\n${pod.label}:` });
       pod.list.forEach((p, i) => {
-        const img = getImg(p);
-        if (img) {
+        const url = p.thumbnail_url || p.media_url;
+        if (url && !seenUrls.has(url)) {
+          seenUrls.add(url);
           messageContent.push({ type: "text", text: `#${i + 1}` });
-          messageContent.push({ type: "image_url", image_url: { url: img } });
+          messageContent.push({ type: "image_url", image_url: { url } });
         }
       });
     }
