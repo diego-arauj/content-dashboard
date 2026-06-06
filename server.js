@@ -699,16 +699,20 @@ app.post("/api/ai/analysis", requireClientAccess, async (req, res) => {
   const fmtCount = { VIDEO: 0, IMAGE: 0, CAROUSEL_ALBUM: 0 };
   for (const p of posts) { if (fmtCount[p.media_type] !== undefined) fmtCount[p.media_type]++; }
 
-  const topReach = [...posts]
-    .sort((a, b) => (Number(b.reach) || 0) - (Number(a.reach) || 0))
-    .slice(0, 5);
+  const top6Reach    = [...posts].sort((a,b) => (Number(b.reach)||0)    - (Number(a.reach)||0)   ).slice(0, 6);
+  const top6Likes    = [...posts].sort((a,b) => (Number(b.likes)||0)    - (Number(a.likes)||0)   ).slice(0, 6);
+  const top6Comments = [...posts].sort((a,b) => (Number(b.comments)||0) - (Number(a.comments)||0)).slice(0, 6);
+  const top6Shares   = [...posts].sort((a,b) => (Number(b.shares)||0)   - (Number(a.shares)||0)  ).slice(0, 6);
 
   const formatCaption = (caption) => {
     if (!caption || !String(caption).trim()) return "(sem legenda)";
     return String(caption).trim().replace(/\n+/g, " ").slice(0, 200);
   };
 
-  const prompt = `Você é um estrategista de social media especializado em influenciadores brasileiros de grande porte. Analise os dados e as legendas abaixo e responda em português.
+  const fmtRow = (p, i) =>
+    `${i + 1}. ${p.media_type} | alcance: ${(Number(p.reach)||0).toLocaleString("pt-BR")} | curtidas: ${(Number(p.likes)||0).toLocaleString("pt-BR")} | coment.: ${(Number(p.comments)||0).toLocaleString("pt-BR")} | compart.: ${(Number(p.shares)||0).toLocaleString("pt-BR")} | legenda: "${formatCaption(p.caption)}"`;
+
+  const prompt = `Você é um estrategista de social media especializado em influenciadores brasileiros de grande porte. Analise os dados e os quatro pódios abaixo e responda em português.
 
 Cliente: ${clientName}
 Período: ${period}
@@ -719,39 +723,57 @@ Curtidas totais: ${totalLikes.toLocaleString("pt-BR")}
 Comentários totais: ${totalComments.toLocaleString("pt-BR")}
 Compartilhamentos totais: ${totalShares.toLocaleString("pt-BR")}
 
-Top 5 posts por alcance (com legenda):
-${topReach.map((p, i) => `${i + 1}. ${p.media_type} | alcance: ${(Number(p.reach) || 0).toLocaleString("pt-BR")} | curtidas: ${(Number(p.likes) || 0).toLocaleString("pt-BR")} | compartilhamentos: ${(Number(p.shares) || 0).toLocaleString("pt-BR")} | legenda: "${formatCaption(p.caption)}"`).join("\n")}
+TOP 6 — ALCANCE:
+${top6Reach.map(fmtRow).join("\n")}
+
+TOP 6 — CURTIDAS:
+${top6Likes.map(fmtRow).join("\n")}
+
+TOP 6 — COMENTÁRIOS:
+${top6Comments.map(fmtRow).join("\n")}
+
+TOP 6 — COMPARTILHAMENTOS:
+${top6Shares.map(fmtRow).join("\n")}
 
 Responda com exatamente duas seções, sem markdown com asteriscos:
 
 O QUE FUNCIONOU:
-(lista de tópicos curtos — temas de conteúdo, formatos e abordagens que performaram melhor; mencione padrões nas legendas quando relevante)
+(tópicos curtos — temas, formatos e padrões visuais/de legenda que se repetem nos pódios; destaque posts que aparecem em múltiplos rankings como sinal forte)
 
 SUGESTÕES PARA O PRÓXIMO MÊS:
-(3 a 5 sugestões específicas e acionáveis baseadas nos dados e temas identificados)
+(3 a 5 sugestões específicas e acionáveis baseadas nos padrões identificados)
 
-Seja direto. Máximo 200 palavras no total.${customPrompt ? `\n\nInstruções adicionais do gestor: ${customPrompt}` : ""}`;
+Seja direto. Máximo 220 palavras no total.${customPrompt ? `\n\nInstruções adicionais do gestor: ${customPrompt}` : ""}`;
 
-  /* Busca thumbnails dos top posts em paralelo (server-side, sem CORS) */
-  const imageDataList = await Promise.all(
-    topReach.map(p => {
-      const url = p.thumbnail_url || p.media_url;
-      return url ? fetchImageBase64(String(url)) : Promise.resolve(null);
-    })
-  );
+  /* Busca thumbnails de todos os pódios — deduplica por URL para não baixar a mesma imagem duas vezes */
+  const allTopPosts = [...top6Reach, ...top6Likes, ...top6Comments, ...top6Shares];
+  const uniqueUrls  = [...new Set(allTopPosts.map(p => p.thumbnail_url || p.media_url).filter(Boolean))];
+  const fetchResults = await Promise.all(uniqueUrls.map(u => fetchImageBase64(u)));
+  const urlToImg = new Map();
+  uniqueUrls.forEach((u, i) => { if (fetchResults[i]) urlToImg.set(u, fetchResults[i]); });
+  const getImg = (p) => { const u = p.thumbnail_url || p.media_url; return u ? (urlToImg.get(u) || null) : null; };
 
-  /* Monta mensagem multimodal: texto do prompt + imagens que carregaram */
+  /* Monta mensagem multimodal: texto + imagens organizadas por pódio */
   const messageContent = [{ type: "text", text: prompt }];
-  if (imageDataList.some(Boolean)) {
-    messageContent.push({
-      type: "text",
-      text: "\n\nMiniaturas dos top posts por alcance — use para identificar padrões visuais de conteúdo:",
-    });
-    for (let i = 0; i < topReach.length; i++) {
-      if (imageDataList[i]) {
-        messageContent.push({ type: "text", text: `\nPost #${i + 1} — ${topReach[i].media_type}:` });
-        messageContent.push({ type: "image_url", image_url: { url: imageDataList[i] } });
-      }
+  const podiums = [
+    { label: "TOP 6 — ALCANCE",           list: top6Reach    },
+    { label: "TOP 6 — CURTIDAS",          list: top6Likes    },
+    { label: "TOP 6 — COMENTÁRIOS",       list: top6Comments },
+    { label: "TOP 6 — COMPARTILHAMENTOS", list: top6Shares   },
+  ];
+  if (urlToImg.size > 0) {
+    messageContent.push({ type: "text", text: "\n\nMiniaturas dos pódios — use para identificar padrões visuais de conteúdo:" });
+    for (const pod of podiums) {
+      const withImg = pod.list.filter(getImg);
+      if (!withImg.length) continue;
+      messageContent.push({ type: "text", text: `\n${pod.label}:` });
+      pod.list.forEach((p, i) => {
+        const img = getImg(p);
+        if (img) {
+          messageContent.push({ type: "text", text: `#${i + 1}` });
+          messageContent.push({ type: "image_url", image_url: { url: img } });
+        }
+      });
     }
   }
 
