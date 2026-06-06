@@ -2181,16 +2181,18 @@
             const overview = ovR.ok   ? await ovR.json()    : [];
             const posts    = postsR.ok ? await postsR.json() : [];
 
-            /* Envia campos numéricos + legenda (truncada) — sem URLs de mídia */
+            /* Envia campos numéricos + legenda + URLs de mídia (servidor converte para base64) */
             const postsTrimmed = posts.map(p => ({
-              media_type: p.media_type,
-              timestamp:  p.timestamp,
-              reach:      p.reach,
-              likes:      p.likes,
-              comments:   p.comments,
-              shares:     p.shares,
-              saved:      p.saved,
-              caption:    p.caption ? String(p.caption).slice(0, 280) : "",
+              media_type:    p.media_type,
+              timestamp:     p.timestamp,
+              reach:         p.reach,
+              likes:         p.likes,
+              comments:      p.comments,
+              shares:        p.shares,
+              saved:         p.saved,
+              caption:       p.caption ? String(p.caption).slice(0, 280) : "",
+              thumbnail_url: p.thumbnail_url || null,
+              media_url:     p.media_url     || null,
             }));
 
             const aiRes = await api("/api/ai/analysis", {

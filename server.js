@@ -664,6 +664,23 @@ app.post("/api/invites/:token/accept", async (req, res) => {
 /* ═══════════════════════════════════════════════════════
    AI ANALYSIS — powered by OpenRouter
 ═══════════════════════════════════════════════════════ */
+
+/** Busca uma URL de imagem e retorna data-URI base64; null se falhar. */
+async function fetchImageBase64(url) {
+  try {
+    const res = await fetch(url, {
+      headers: { "User-Agent": "ContentDashboard/1.0" },
+      signal: AbortSignal.timeout(7000),
+    });
+    if (!res.ok) return null;
+    const mime = (res.headers.get("content-type") || "image/jpeg").split(";")[0].trim();
+    const buf  = await res.arrayBuffer();
+    return `data:${mime};base64,${Buffer.from(buf).toString("base64")}`;
+  } catch {
+    return null;
+  }
+}
+
 app.post("/api/ai/analysis", requireClientAccess, async (req, res) => {
   const key = process.env.OPENROUTER_API_KEY;
   if (!key) {
@@ -715,6 +732,29 @@ SUGESTÕES PARA O PRÓXIMO MÊS:
 
 Seja direto. Máximo 200 palavras no total.${customPrompt ? `\n\nInstruções adicionais do gestor: ${customPrompt}` : ""}`;
 
+  /* Busca thumbnails dos top posts em paralelo (server-side, sem CORS) */
+  const imageDataList = await Promise.all(
+    topReach.map(p => {
+      const url = p.thumbnail_url || p.media_url;
+      return url ? fetchImageBase64(String(url)) : Promise.resolve(null);
+    })
+  );
+
+  /* Monta mensagem multimodal: texto do prompt + imagens que carregaram */
+  const messageContent = [{ type: "text", text: prompt }];
+  if (imageDataList.some(Boolean)) {
+    messageContent.push({
+      type: "text",
+      text: "\n\nMiniaturas dos top posts por alcance — use para identificar padrões visuais de conteúdo:",
+    });
+    for (let i = 0; i < topReach.length; i++) {
+      if (imageDataList[i]) {
+        messageContent.push({ type: "text", text: `\nPost #${i + 1} — ${topReach[i].media_type}:` });
+        messageContent.push({ type: "image_url", image_url: { url: imageDataList[i] } });
+      }
+    }
+  }
+
   try {
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
@@ -726,7 +766,7 @@ Seja direto. Máximo 200 palavras no total.${customPrompt ? `\n\nInstruções ad
       },
       body: JSON.stringify({
         model: "google/gemini-2.0-flash-001",
-        messages: [{ role: "user", content: prompt }],
+        messages: [{ role: "user", content: messageContent }],
         max_tokens: 600,
         temperature: 0.7,
       }),
