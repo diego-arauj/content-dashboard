@@ -18,8 +18,8 @@ const app = express();
 
 app.set("trust proxy", 1);
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "5mb" }));
+app.use(express.urlencoded({ extended: true, limit: "5mb" }));
 
 app.use(
   session({
@@ -784,6 +784,23 @@ app.post("/api/ai/analysis", requireClientAccess, async (req, res) => {
 });
 
 app.use(express.static(process.env.STATIC_DIR || "/app/public"));
+
+/* Error handler global — garante que qualquer erro (inclusive do parser
+   de JSON, ex: corpo grande demais) retorne JSON e não HTML/502. */
+app.use((err, req, res, next) => {
+  console.error("[error-handler]", err?.type || "", err?.message || err);
+  if (res.headersSent) return next(err);
+  const status = err?.status || err?.statusCode || 500;
+  res.status(status).json({ error: err?.message || "Erro interno do servidor." });
+});
+
+/* Não deixar uma exceção/rejeição não tratada derrubar o processo */
+process.on("unhandledRejection", (reason) => {
+  console.error("[unhandledRejection]", reason);
+});
+process.on("uncaughtException", (err) => {
+  console.error("[uncaughtException]", err);
+});
 
 app.listen(PORT, () => {
   console.log(`Listening on http://localhost:${PORT}`);
