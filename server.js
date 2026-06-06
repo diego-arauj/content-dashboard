@@ -756,7 +756,7 @@ app.post("/api/ai/analysis", requireClientAccess, async (req, res) => {
         "X-Title": "Content Dashboard",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.0-flash-001",
+        model: "google/gemini-2.5-flash",
         messages: [{ role: "user", content: prompt }],
         max_tokens: 600,
         temperature: 0.7,
