@@ -667,72 +667,86 @@ app.post("/api/invites/:token/accept", async (req, res) => {
 
 
 app.post("/api/ai/analysis", requireClientAccess, async (req, res) => {
-  const key = process.env.OPENROUTER_API_KEY;
-  if (!key) {
-    return res.status(503).json({ error: "OPENROUTER_API_KEY não configurada no servidor." });
-  }
-
-  const { overview = [], posts = [], period = "", clientName = "", customPrompt = "" } = req.body;
-
-  // Aggregates from the provided data
-  const totalPosts    = posts.length;
-  const totalReach    = overview.reduce((s, r) => s + (Number(r.reach)    || 0), 0);
-  const totalLikes    = posts.reduce((s, p)    => s + (Number(p.likes)    || 0), 0);
-  const totalComments = posts.reduce((s, p)    => s + (Number(p.comments) || 0), 0);
-  const totalShares   = posts.reduce((s, p)    => s + (Number(p.shares)   || 0), 0);
-
-  const fmtCount = { VIDEO: 0, IMAGE: 0, CAROUSEL_ALBUM: 0 };
-  for (const p of posts) { if (fmtCount[p.media_type] !== undefined) fmtCount[p.media_type]++; }
-
-  const top6Reach    = [...posts].sort((a,b) => (Number(b.reach)||0)    - (Number(a.reach)||0)   ).slice(0, 6);
-  const top6Likes    = [...posts].sort((a,b) => (Number(b.likes)||0)    - (Number(a.likes)||0)   ).slice(0, 6);
-  const top6Comments = [...posts].sort((a,b) => (Number(b.comments)||0) - (Number(a.comments)||0)).slice(0, 6);
-  const top6Shares   = [...posts].sort((a,b) => (Number(b.shares)||0)   - (Number(a.shares)||0)  ).slice(0, 6);
-
-  const formatCaption = (caption) => {
-    if (!caption || !String(caption).trim()) return "(sem legenda)";
-    return String(caption).trim().replace(/\n+/g, " ").slice(0, 200);
-  };
-
-  const fmtRow = (p, i) =>
-    `${i + 1}. ${p.media_type} | alcance: ${(Number(p.reach)||0).toLocaleString("pt-BR")} | curtidas: ${(Number(p.likes)||0).toLocaleString("pt-BR")} | coment.: ${(Number(p.comments)||0).toLocaleString("pt-BR")} | compart.: ${(Number(p.shares)||0).toLocaleString("pt-BR")} | legenda: "${formatCaption(p.caption)}"`;
-
-  const prompt = `Você é um estrategista de social media especializado em influenciadores brasileiros de grande porte. Analise os dados e os quatro pódios abaixo e responda em português.
-
-Cliente: ${clientName}
-Período: ${period}
-Posts publicados: ${totalPosts}
-Formatos: ${fmtCount.VIDEO} vídeos / ${fmtCount.IMAGE} imagens / ${fmtCount.CAROUSEL_ALBUM} carrosséis
-Alcance total: ${totalReach.toLocaleString("pt-BR")}
-Curtidas totais: ${totalLikes.toLocaleString("pt-BR")}
-Comentários totais: ${totalComments.toLocaleString("pt-BR")}
-Compartilhamentos totais: ${totalShares.toLocaleString("pt-BR")}
-
-TOP 6 — ALCANCE:
-${top6Reach.map(fmtRow).join("\n")}
-
-TOP 6 — CURTIDAS:
-${top6Likes.map(fmtRow).join("\n")}
-
-TOP 6 — COMENTÁRIOS:
-${top6Comments.map(fmtRow).join("\n")}
-
-TOP 6 — COMPARTILHAMENTOS:
-${top6Shares.map(fmtRow).join("\n")}
-
-Responda com exatamente duas seções, sem markdown com asteriscos:
-
-O QUE FUNCIONOU:
-(tópicos curtos — temas, formatos e padrões visuais/de legenda que se repetem nos pódios; destaque posts que aparecem em múltiplos rankings como sinal forte)
-
-SUGESTÕES PARA O PRÓXIMO MÊS:
-(3 a 5 sugestões específicas e acionáveis baseadas nos padrões identificados)
-
-Seja direto. Máximo 220 palavras no total.${customPrompt ? `\n\nInstruções adicionais do gestor: ${customPrompt}` : ""}`;
-
-  const messageContent = [{ type: "text", text: prompt }];
-
   try {
+    const key = process.env.OPENROUTER_API_KEY;
+    if (!key) {
+      return res.status(503).json({ error: "OPENROUTER_API_KEY não configurada no servidor." });
+    }
+
+    const posts    = Array.isArray(req.body.posts)    ? req.body.posts    : [];
+    const overview = Array.isArray(req.body.overview) ? req.body.overview : [];
+    const period      = typeof req.body.period      === "string" ? req.body.period      : "";
+    const clientName  = typeof req.body.clientName  === "string" ? req.body.clientName  : "";
+    const customPrompt= typeof req.body.customPrompt=== "string" ? req.body.customPrompt: "";
+
+    /* Formatador numérico sem toLocaleString (pode não existir no container) */
+    const fmtN = (n) => {
+      const v = Number(n) || 0;
+      if (v >= 1e6) return (v / 1e6).toFixed(1).replace(".", ",") + "M";
+      if (v >= 1e3) return (v / 1e3).toFixed(1).replace(".", ",") + "k";
+      return String(Math.round(v));
+    };
+
+    const totalPosts    = posts.length;
+    const totalReach    = overview.reduce((s, r) => s + (Number(r.reach)    || 0), 0);
+    const totalLikes    = posts.reduce((s, p)    => s + (Number(p.likes)    || 0), 0);
+    const totalComments = posts.reduce((s, p)    => s + (Number(p.comments) || 0), 0);
+    const totalShares   = posts.reduce((s, p)    => s + (Number(p.shares)   || 0), 0);
+
+    const fmtCount = { VIDEO: 0, IMAGE: 0, CAROUSEL_ALBUM: 0 };
+    for (const p of posts) { if (fmtCount[p.media_type] !== undefined) fmtCount[p.media_type]++; }
+
+    const top6Reach    = [...posts].sort((a,b) => (Number(b.reach)||0)    - (Number(a.reach)||0)   ).slice(0, 6);
+    const top6Likes    = [...posts].sort((a,b) => (Number(b.likes)||0)    - (Number(a.likes)||0)   ).slice(0, 6);
+    const top6Comments = [...posts].sort((a,b) => (Number(b.comments)||0) - (Number(a.comments)||0)).slice(0, 6);
+    const top6Shares   = [...posts].sort((a,b) => (Number(b.shares)||0)   - (Number(a.shares)||0)  ).slice(0, 6);
+
+    const fmtCaption = (c) => {
+      if (!c || !String(c).trim()) return "(sem legenda)";
+      return String(c).trim().replace(/\n+/g, " ").slice(0, 200);
+    };
+
+    const fmtRow = (p, i) =>
+      `${i + 1}. ${p.media_type || "?"} | alcance: ${fmtN(p.reach)} | curtidas: ${fmtN(p.likes)} | coment.: ${fmtN(p.comments)} | compart.: ${fmtN(p.shares)} | legenda: "${fmtCaption(p.caption)}"`;
+
+    const prompt = [
+      "Você é um estrategista de social media especializado em influenciadores brasileiros de grande porte. Analise os dados e os quatro pódios abaixo e responda em português.",
+      "",
+      `Cliente: ${clientName}`,
+      `Período: ${period}`,
+      `Posts publicados: ${totalPosts}`,
+      `Formatos: ${fmtCount.VIDEO} vídeos / ${fmtCount.IMAGE} imagens / ${fmtCount.CAROUSEL_ALBUM} carrosséis`,
+      `Alcance total: ${fmtN(totalReach)}`,
+      `Curtidas totais: ${fmtN(totalLikes)}`,
+      `Comentários totais: ${fmtN(totalComments)}`,
+      `Compartilhamentos totais: ${fmtN(totalShares)}`,
+      "",
+      "TOP 6 — ALCANCE:",
+      ...top6Reach.map(fmtRow),
+      "",
+      "TOP 6 — CURTIDAS:",
+      ...top6Likes.map(fmtRow),
+      "",
+      "TOP 6 — COMENTÁRIOS:",
+      ...top6Comments.map(fmtRow),
+      "",
+      "TOP 6 — COMPARTILHAMENTOS:",
+      ...top6Shares.map(fmtRow),
+      "",
+      "Responda com exatamente duas seções, sem markdown com asteriscos:",
+      "",
+      "O QUE FUNCIONOU:",
+      "(tópicos curtos — temas, formatos e padrões de legenda que se repetem nos pódios; destaque posts que aparecem em múltiplos rankings como sinal forte)",
+      "",
+      "SUGESTÕES PARA O PRÓXIMO MÊS:",
+      "(3 a 5 sugestões específicas e acionáveis baseadas nos padrões identificados)",
+      "",
+      "Seja direto. Máximo 220 palavras no total.",
+      ...(customPrompt ? ["", `Instruções adicionais do gestor: ${customPrompt}`] : []),
+    ].join("\n");
+
+    console.log("[ai] Prompt length:", prompt.length, "chars");
+
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -743,7 +757,7 @@ Seja direto. Máximo 220 palavras no total.${customPrompt ? `\n\nInstruções ad
       },
       body: JSON.stringify({
         model: "google/gemini-2.0-flash-001",
-        messages: [{ role: "user", content: messageContent }],
+        messages: [{ role: "user", content: prompt }],
         max_tokens: 600,
         temperature: 0.7,
       }),
@@ -752,16 +766,20 @@ Seja direto. Máximo 220 palavras no total.${customPrompt ? `\n\nInstruções ad
 
     if (!response.ok) {
       const errText = await response.text();
-      console.error("[ai] OpenRouter error:", errText);
-      return res.status(502).json({ error: "Erro na API de IA. Verifique a chave OpenRouter." });
+      console.error("[ai] OpenRouter error:", response.status, errText.slice(0, 500));
+      return res.status(502).json({ error: `Erro na API de IA (${response.status}). Verifique a chave OpenRouter.` });
     }
 
     const data = await response.json();
     const analysis = data.choices?.[0]?.message?.content?.trim() || "";
+    console.log("[ai] Analysis OK, length:", analysis.length);
     return res.json({ analysis });
+
   } catch (err) {
-    console.error("[ai] Analysis error:", err);
-    return res.status(500).json({ error: "Falha ao gerar análise." });
+    console.error("[ai] Unhandled error:", err?.message || err);
+    if (!res.headersSent) {
+      return res.status(500).json({ error: "Erro interno: " + (err?.message || "desconhecido") });
+    }
   }
 });
 
