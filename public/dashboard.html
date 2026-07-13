@@ -623,6 +623,10 @@
         .rpt-analysis-oc { background: #000 !important; }
         .rpt-kpi-oc { background: #111 !important; }
         .rpt-podium-card-oc { background: #1e1e1e !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .rpt-cmp-oc tbody tr:nth-child(even) td {
+          background: #111 !important;
+          -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
       }
 
       /* Report: screen preview (hidden) */
@@ -1049,6 +1053,63 @@
       .rpt-podium-card-oc .rpt-card-val  { font-size: 1.15rem; font-weight: 600; }
       .rpt-podium-card-oc .rpt-card-lbl  { font-size: 0.64rem; font-weight: 500; letter-spacing: 0.04em; opacity: 0.9; }
       .rpt-podium-card-oc .rpt-card-date { font-size: 0.58rem; opacity: 0.65; margin-top: 0.2rem; }
+
+      /* ═══════════════════════════════════════
+         COMPARATIVO — período atual x anterior
+      ═══════════════════════════════════════ */
+      .rpt-cmp {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.8rem;
+        margin-top: 0.75rem;
+      }
+      .rpt-cmp thead th {
+        text-align: left;
+        font-size: 0.66rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: #8a7f74;
+        padding: 0.5rem 0.7rem;
+        border-bottom: 1.5px solid #e8e0d4;
+      }
+      .rpt-cmp thead th.num,
+      .rpt-cmp tbody td.num { text-align: right; }
+      .rpt-cmp tbody td {
+        padding: 0.55rem 0.7rem;
+        border-bottom: 1px solid #f0eae0;
+        color: #2a2520;
+      }
+      .rpt-cmp tbody tr:nth-child(even) td { background: #faf7f2; }
+      .rpt-cmp tbody tr:last-child td { border-bottom: none; }
+      .rpt-cmp .metric { font-weight: 600; }
+      .rpt-cmp .val-prev { color: #7d7268; }
+      .rpt-cmp .val-cur { font-weight: 700; }
+      .rpt-delta { font-weight: 700; white-space: nowrap; }
+      .rpt-delta.up   { color: #3f7a3d; }
+      .rpt-delta.down { color: #a33a3a; }
+      .rpt-delta.flat { color: #9b9088; }
+      .rpt-cmp-note { font-size: 0.72rem; color: #9b9088; margin-top: 0.9rem; line-height: 1.5; }
+
+      /* Variação embutida nos cards de KPI */
+      .rpt-kpi-delta { font-weight: 700; }
+      .rpt-kpi-delta.up   { color: #3f7a3d; }
+      .rpt-kpi-delta.down { color: #a33a3a; }
+      .rpt-kpi-delta.flat { color: #9b9088; }
+
+      /* Comparativo — tema OC */
+      .rpt-cmp-oc thead th { color: #f8c339; border-bottom-color: #f8c339; }
+      .rpt-cmp-oc tbody td { color: #eaeaea; border-bottom-color: #222; }
+      .rpt-cmp-oc tbody tr:nth-child(even) td { background: #111; }
+      .rpt-cmp-oc .val-prev { color: #888; }
+      .rpt-cmp-oc .val-cur { color: #fff; }
+      .rpt-cmp-oc .rpt-delta.up   { color: #4fc26b; }
+      .rpt-cmp-oc .rpt-delta.down { color: #ff6b6b; }
+      .rpt-cmp-oc .rpt-delta.flat { color: #777; }
+      .rpt-page-oc .rpt-cmp-note { color: #666; }
+      .rpt-page-oc .rpt-kpi-delta.up   { color: #4fc26b; }
+      .rpt-page-oc .rpt-kpi-delta.down { color: #ff6b6b; }
+      .rpt-page-oc .rpt-kpi-delta.flat { color: #666; }
 
       /* Análise IA OC */
       .rpt-analysis-oc {
@@ -1800,19 +1861,191 @@
         </div>`;
       }
 
-      function buildReportHtml(overview, profile, allPosts, startStr, endStr, clientName, analysisText) {
+      /* ── Período anterior ──────────────────────────────
+         Se o período for um mês cheio (01 → último dia), compara com o mês
+         calendário anterior. Caso contrário, com a janela de mesmo tamanho
+         imediatamente antes do início. */
+      const MESES_PT = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho",
+                        "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+
+      function parseDayStr(s) {
+        const [y, m, d] = String(s).split("-").map(Number);
+        return new Date(y, m - 1, d);
+      }
+
+      function isFullMonth(startStr, endStr) {
+        const a = parseDayStr(startStr), b = parseDayStr(endStr);
+        if (a.getDate() !== 1) return false;
+        if (a.getFullYear() !== b.getFullYear() || a.getMonth() !== b.getMonth()) return false;
+        const lastDay = new Date(b.getFullYear(), b.getMonth() + 1, 0).getDate();
+        return b.getDate() === lastDay;
+      }
+
+      function periodLabelOf(startStr, endStr) {
+        if (isFullMonth(startStr, endStr)) {
+          const a = parseDayStr(startStr);
+          return `${MESES_PT[a.getMonth()]}/${a.getFullYear()}`;
+        }
+        return `${fmtDateBR(startStr)} – ${fmtDateBR(endStr)}`;
+      }
+
+      function previousPeriod(startStr, endStr) {
+        const a = parseDayStr(startStr), b = parseDayStr(endStr);
+        if (isFullMonth(startStr, endStr)) {
+          const ps = new Date(a.getFullYear(), a.getMonth() - 1, 1);
+          const pe = new Date(a.getFullYear(), a.getMonth(), 0);
+          return { start: localDateKey(ps), end: localDateKey(pe) };
+        }
+        const days = Math.round((b - a) / 86400000) + 1;
+        const pe = new Date(a.getFullYear(), a.getMonth(), a.getDate() - 1);
+        const ps = new Date(pe.getFullYear(), pe.getMonth(), pe.getDate() - (days - 1));
+        return { start: localDateKey(ps), end: localDateKey(pe) };
+      }
+
+      /* Número cheio com separador de milhar — o comparativo pede precisão,
+         diferente dos cards de KPI que usam a forma abreviada (fmtNum). */
+      function fmtFull(n) {
+        if (n == null || !Number.isFinite(n)) return "—";
+        return Math.round(n).toLocaleString("pt-BR");
+      }
+
+      /* ── Métricas agregadas de um período ── */
+      function computeMetrics(overview, posts) {
+        const totalReach   = overview.reduce((s, r) => s + (Number(r.reach) || 0), 0);
+        const avgReach     = overview.length > 0 ? totalReach / overview.length : 0;
+        const followerGain = overview.reduce((s, r) => s + (Number(r.followers) || 0), 0);
+        const totalEng     = posts.reduce((s, p) => s + engagementScore(p), 0);
+        const reachPosts   = posts.reduce((s, p) => s + (Number(p.reach) || 0), 0);
+        return {
+          hasData: overview.length > 0 || posts.length > 0,
+          /* O ganho de seguidores só passou a ser registrado a partir de
+             jun/2026. Antes disso a coluna vem zerada no banco — é lacuna de
+             dado, não crescimento zero. Sem esta flag o relatório afirmaria
+             "o mês anterior ganhou 0 seguidores", o que é falso. */
+          followersTracked: overview.some(r => (Number(r.followers) || 0) !== 0),
+          totalReach,
+          avgReach,
+          followerGain,
+          engRate: reachPosts > 0 ? (totalEng / reachPosts * 100) : 0,
+          postCount: posts.length,
+          likes:    posts.reduce((s, p) => s + (Number(p.likes)    || 0), 0),
+          comments: posts.reduce((s, p) => s + (Number(p.comments) || 0), 0),
+          shares:   posts.reduce((s, p) => s + (Number(p.shares)   || 0), 0),
+          saved:    posts.reduce((s, p) => s + (Number(p.saved)    || 0), 0),
+        };
+      }
+
+      /* ── Variação entre dois valores ──────────────────
+         pct fica null quando a base é zero: não existe variação percentual a
+         partir do zero (o caso real são os "seguidores ganhos", que só têm
+         histórico a partir de jun/2026). */
+      function deltaOf(cur, prev) {
+        const abs = cur - prev;
+        const pct = prev > 0 ? (abs / prev * 100) : null;
+        const dir = Math.abs(abs) < 0.05 ? "flat" : (abs > 0 ? "up" : "down");
+        return { abs, pct, dir };
+      }
+
+      function deltaArrow(dir) { return dir === "up" ? "▲" : dir === "down" ? "▼" : "="; }
+
+      function fmtDeltaPct(d) {
+        if (d.pct === null) return "—";
+        const v = Math.abs(d.pct) >= 100 ? d.pct.toFixed(0) : d.pct.toFixed(1);
+        return (d.pct > 0 ? "+" : "") + v.replace(".", ",") + "%";
+      }
+
+      /* Chip curto para o rodapé dos cards de KPI. Sem base de comparação
+         (período anterior zerado), mostra a diferença absoluta em vez de uma
+         porcentagem impossível de calcular. */
+      function kpiDeltaChip(cur, prev) {
+        const d = deltaOf(cur, prev);
+        const txt = d.pct === null
+          ? `${deltaArrow(d.dir)} ${(d.abs > 0 ? "+" : "")}${fmtFull(d.abs)}`
+          : `${deltaArrow(d.dir)} ${fmtDeltaPct(d)}`;
+        return `<span class="rpt-kpi-delta ${d.dir}">${txt}</span>`;
+      }
+
+      /* ── Quadro comparativo ── */
+      function buildComparisonSection(cur, prev, curLabel, prevLabel, isOC) {
+        const rows = [
+          { label: "Alcance total",       key: "totalReach",   kind: "num" },
+          { label: "Alcance médio / dia", key: "avgReach",     kind: "num" },
+          { label: "Posts publicados",    key: "postCount",    kind: "num" },
+          { label: "Curtidas",            key: "likes",        kind: "num" },
+          { label: "Comentários",         key: "comments",     kind: "num" },
+          { label: "Compartilhamentos",   key: "shares",       kind: "num" },
+          { label: "Salvamentos",         key: "saved",        kind: "num" },
+          { label: "Engajamento",         key: "engRate",      kind: "pct" },
+          { label: "Seguidores ganhos",   key: "followerGain", kind: "num" },
+        ];
+
+        const body = rows.map((r) => {
+          const c = cur[r.key], p = prev[r.key];
+          const d = deltaOf(c, p);
+          const show = (v) => r.kind === "pct"
+            ? v.toFixed(1).replace(".", ",") + "%"
+            : fmtFull(v);
+
+          /* Sem histórico de seguidores no período anterior: não dá para
+             comparar. Melhor dizer "sem dado" do que afirmar que o mês
+             anterior ganhou zero seguidores. */
+          if (r.key === "followerGain" && !prev.followersTracked) {
+            return `<tr>
+              <td class="metric">${escapeHtml(r.label)}</td>
+              <td class="num val-prev">sem dado</td>
+              <td class="num val-cur">${show(c)}</td>
+              <td class="num"><span class="rpt-delta flat">—</span></td>
+              <td class="num"><span class="rpt-delta flat">—</span></td>
+            </tr>`;
+          }
+
+          /* Engajamento é uma taxa: a diferença absoluta se lê em pontos
+             percentuais, não em "%". */
+          const absTxt = r.kind === "pct"
+            ? (d.abs > 0 ? "+" : "") + d.abs.toFixed(1).replace(".", ",") + " p.p."
+            : (d.abs > 0 ? "+" : "") + fmtFull(d.abs);
+          const pctTxt = d.pct === null ? "—" : `${deltaArrow(d.dir)} ${fmtDeltaPct(d)}`;
+          return `<tr>
+            <td class="metric">${escapeHtml(r.label)}</td>
+            <td class="num val-prev">${show(p)}</td>
+            <td class="num val-cur">${show(c)}</td>
+            <td class="num"><span class="rpt-delta ${d.dir}">${absTxt}</span></td>
+            <td class="num"><span class="rpt-delta ${d.pct === null ? "flat" : d.dir}">${pctTxt}</span></td>
+          </tr>`;
+        }).join("");
+
+        const tableCls = isOC ? "rpt-cmp rpt-cmp-oc" : "rpt-cmp";
+        return `<table class="${tableCls}">
+          <thead><tr>
+            <th>Métrica</th>
+            <th class="num">${escapeHtml(prevLabel)}</th>
+            <th class="num">${escapeHtml(curLabel)}</th>
+            <th class="num">Variação</th>
+            <th class="num">Variação %</th>
+          </tr></thead>
+          <tbody>${body}</tbody>
+        </table>
+        <div class="rpt-cmp-note">
+          Comparação com ${escapeHtml(prevLabel)}. "—" indica que o período anterior não tem base
+          para o cálculo${prev.followersTracked ? "" : "; o ganho de seguidores só passou a ser registrado depois desse período"}.
+        </div>`;
+      }
+
+      function buildReportHtml(overview, profile, allPosts, startStr, endStr, clientName, analysisText, prevData) {
         /* ── Aggregates ── */
-        const totalReach        = overview.reduce((s,r) => s+(Number(r.reach)||0), 0);
-        const avgReach          = overview.length > 0 ? totalReach / overview.length : 0;
-        const totalFollowerGain = overview.reduce((s,r) => s+(Number(r.followers)||0), 0);
-        const totalEng          = allPosts.reduce((s,p) => s+engagementScore(p), 0);
-        const totalReachPosts   = allPosts.reduce((s,p) => s+(Number(p.reach)||0), 0);
-        const engRate           = totalReachPosts > 0 ? (totalEng / totalReachPosts * 100) : 0;
+        const cur = computeMetrics(overview, allPosts);
+        const prevMetrics = prevData && prevData.metrics;
+        const hasPrev     = !!(prevMetrics && prevMetrics.hasData);
+
+        const totalReach        = cur.totalReach;
+        const avgReach          = cur.avgReach;
+        const totalFollowerGain = cur.followerGain;
+        const engRate           = cur.engRate;
+        const totalLikes        = cur.likes;
+        const totalComments     = cur.comments;
+        const totalShares       = cur.shares;
         const followers         = Number(profile.followers_count)||0;
         const username          = profile.username ? "@" + profile.username : "";
-        const totalLikes        = allPosts.reduce((s,p) => s+(Number(p.likes)||0), 0);
-        const totalComments     = allPosts.reduce((s,p) => s+(Number(p.comments)||0), 0);
-        const totalShares       = allPosts.reduce((s,p) => s+(Number(p.shares)||0), 0);
         /* Format distribution */
         const fmtCount = { VIDEO: 0, IMAGE: 0, CAROUSEL_ALBUM: 0 };
         for (const p of allPosts) {
@@ -1889,8 +2122,17 @@
           </div>`;
 
         /* ── KPI cards ── */
-        const kpi = (cls, label, value, sub) =>
-          `<div class="${kpiCls} ${cls}"><div class="rpt-kpi-label">${label}</div><div class="rpt-kpi-value">${value}</div><div class="rpt-kpi-sub">${sub}</div></div>`;
+        const kpi = (cls, label, value, sub, deltaHtml) =>
+          `<div class="${kpiCls} ${cls}"><div class="rpt-kpi-label">${label}</div><div class="rpt-kpi-value">${value}</div><div class="rpt-kpi-sub">${sub}</div>${deltaHtml || ""}</div>`;
+
+        /* Variação do KPI vs. período anterior (só quando há período anterior).
+           Seguidores ganhos fica sem chip quando o período anterior não tem
+           registro de seguidores — não há o que comparar. */
+        const kpiDelta = (key) => {
+          if (!hasPrev) return "";
+          if (key === "followerGain" && !prevMetrics.followersTracked) return "";
+          return `<div class="rpt-kpi-sub">${kpiDeltaChip(cur[key], prevMetrics[key])} vs. anterior</div>`;
+        };
 
         /* ── Format distribution cards ── */
         const fmtCard = (cls, label, count, pct) =>
@@ -1944,14 +2186,14 @@
             ${mH("Resumo do Período")}
             <div class="rpt-kpis">
               ${kpi("c1", "Seguidores",       fmtNum(followers),    "Conta atual")}
-              ${kpi("c2", "Alcance médio",     fmtNum(avgReach),     "Por dia")}
-              ${kpi("c3", "Engajamento",       engRate > 0 ? engRate.toFixed(1).replace(".",",")+"%": "—", "Eng. / Alcance")}
-              ${kpi("c4", "Seguidores ganhos", (totalFollowerGain>=0?"+":"")+fmtNum(totalFollowerGain), "No período")}
-              ${kpi("c5", "Posts",             String(allPosts.length), "No período")}
-              ${kpi("c1", "Alcance total",     fmtNum(totalReach),   "Soma")}
-              ${kpi("c2", "Curtidas",          fmtNum(totalLikes),   "Total no período")}
-              ${kpi("c3", "Comentários",       fmtNum(totalComments),"Total no período")}
-              ${kpi("c4", "Compartilhamentos", fmtNum(totalShares),  "Total no período")}
+              ${kpi("c2", "Alcance médio",     fmtNum(avgReach),     "Por dia",          kpiDelta("avgReach"))}
+              ${kpi("c3", "Engajamento",       engRate > 0 ? engRate.toFixed(1).replace(".",",")+"%": "—", "Eng. / Alcance", kpiDelta("engRate"))}
+              ${kpi("c4", "Seguidores ganhos", (totalFollowerGain>=0?"+":"")+fmtNum(totalFollowerGain), "No período", kpiDelta("followerGain"))}
+              ${kpi("c5", "Posts",             String(allPosts.length), "No período",    kpiDelta("postCount"))}
+              ${kpi("c1", "Alcance total",     fmtNum(totalReach),   "Soma",             kpiDelta("totalReach"))}
+              ${kpi("c2", "Curtidas",          fmtNum(totalLikes),   "Total no período", kpiDelta("likes"))}
+              ${kpi("c3", "Comentários",       fmtNum(totalComments),"Total no período", kpiDelta("comments"))}
+              ${kpi("c4", "Compartilhamentos", fmtNum(totalShares),  "Total no período", kpiDelta("shares"))}
             </div>
             <div style="margin-top:1.6rem">
               <div class="${subTCls}">Distribuição por Formato</div>
@@ -1962,6 +2204,14 @@
               </div>
             </div>
           </div>
+
+          <!-- ░░ COMPARATIVO — período atual x anterior ░░ -->
+          ${hasPrev ? `
+          <div ${pageStyle}>
+            ${mH("Comparativo")}
+            <div class="${subTCls}">${escapeHtml(prevData.curLabel)} x ${escapeHtml(prevData.prevLabel)}</div>
+            ${buildComparisonSection(cur, prevMetrics, prevData.curLabel, prevData.prevLabel, isOC)}
+          </div>` : ""}
 
           <!-- ░░ DESTAQUES — uma seção por página ░░ -->
           ${[
@@ -2023,18 +2273,33 @@
           const startIso = new Date(startStr+"T00:00:00").toISOString();
           const endIso   = new Date(endStr+"T23:59:59.999").toISOString();
 
-          const [ovRes, profRes, postsRes] = await Promise.all([
+          /* Período anterior (mês calendário anterior, ou janela de mesmo tamanho) */
+          const prev = previousPeriod(startStr, endStr);
+          const prevStartIso = new Date(prev.start+"T00:00:00").toISOString();
+          const prevEndIso   = new Date(prev.end+"T23:59:59.999").toISOString();
+
+          const [ovRes, profRes, postsRes, prevOvRes, prevPostsRes] = await Promise.all([
             api(`/api/dashboard/${encodeURIComponent(clientId)}/overview?start=${encodeURIComponent(startStr)}&end=${encodeURIComponent(endStr)}`),
             api(`/api/dashboard/${encodeURIComponent(clientId)}/profile`),
             api(`/api/dashboard/${encodeURIComponent(clientId)}/posts?start=${encodeURIComponent(startIso)}&end=${encodeURIComponent(endIso)}&sort=reach`),
+            api(`/api/dashboard/${encodeURIComponent(clientId)}/overview?start=${encodeURIComponent(prev.start)}&end=${encodeURIComponent(prev.end)}`),
+            api(`/api/dashboard/${encodeURIComponent(clientId)}/posts?start=${encodeURIComponent(prevStartIso)}&end=${encodeURIComponent(prevEndIso)}&sort=reach`),
           ]);
 
           const overview = ovRes.ok  ? await ovRes.json()   : [];
           const profile  = profRes.ok ? await profRes.json() : {};
           const allPosts = postsRes.ok ? await postsRes.json(): [];
 
+          const prevOverview = prevOvRes.ok    ? await prevOvRes.json()    : [];
+          const prevPosts    = prevPostsRes.ok ? await prevPostsRes.json() : [];
+          const prevData = {
+            metrics:   computeMetrics(prevOverview, prevPosts),
+            curLabel:  periodLabelOf(startStr, endStr),
+            prevLabel: periodLabelOf(prev.start, prev.end),
+          };
+
           const clientName = clientDisplayName || profile.username || "";
-          const html = buildReportHtml(overview, profile, allPosts, startStr, endStr, clientName, analysisText || "");
+          const html = buildReportHtml(overview, profile, allPosts, startStr, endStr, clientName, analysisText || "", prevData);
 
           const pv = document.getElementById("print-view");
           const pc = document.getElementById("preview-content");
