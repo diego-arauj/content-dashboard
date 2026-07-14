@@ -734,7 +734,11 @@ app.post("/api/ai/analysis", requireClientAccess, async (req, res) => {
       `Período: ${period}`,
       `Posts publicados: ${totalPosts}`,
       `Formatos: ${fmtCount.VIDEO} vídeos / ${fmtCount.IMAGE} imagens / ${fmtCount.CAROUSEL_ALBUM} carrosséis`,
-      `Alcance total: ${fmtN(totalReach)}`,
+      /* Sem insights de conta no período, "alcance total: 0" seria um zero
+         falso e a IA analisaria um dado que não existe. Melhor omitir. */
+      ...(overview.length > 0
+        ? [`Alcance total: ${fmtN(totalReach)}`]
+        : ["Alcance total da conta: não disponível para este período (use o alcance por post nos pódios abaixo)"]),
       `Curtidas totais: ${fmtN(totalLikes)}`,
       `Comentários totais: ${fmtN(totalComments)}`,
       `Compartilhamentos totais: ${fmtN(totalShares)}`,

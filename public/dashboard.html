@@ -1111,6 +1111,26 @@
       .rpt-page-oc .rpt-kpi-delta.down { color: #ff6b6b; }
       .rpt-page-oc .rpt-kpi-delta.flat { color: #666; }
 
+      /* Análise IA — tema padrão (clientes sem tema próprio) */
+      .rpt-analysis {
+        background: #fff;
+        min-height: 100vh;
+        padding: 3rem 3.5rem;
+        color: #2a2520;
+        position: relative;
+        overflow: hidden;
+      }
+      .rpt-analysis .rpt-analysis-title { color: #2a2520; font-family: inherit; }
+      .rpt-analysis .rpt-analysis-sub   { color: #9b9088; }
+      .rpt-analysis .rpt-analysis-bar   { background: #c9a87a; }
+      .rpt-analysis .rpt-analysis-body  { color: #4a4239; }
+      .rpt-analysis-accent {
+        position: absolute;
+        top: 0; right: 0; bottom: 0;
+        width: 8px;
+        background: linear-gradient(180deg, #7a6032, #c9a87a, #dbbf91);
+      }
+
       /* Análise IA OC */
       .rpt-analysis-oc {
         background: #000 !important;
@@ -1927,6 +1947,11 @@
         const reachPosts   = posts.reduce((s, p) => s + (Number(p.reach) || 0), 0);
         return {
           hasData: overview.length > 0 || posts.length > 0,
+          /* Métricas de CONTA (alcance total/médio, seguidores) vêm do
+             account_insights_cache. Cliente recém-conectado pode ter posts
+             sincronizados e nenhum insight de conta ainda — nesse caso o valor
+             não é zero, é ausente, e o relatório precisa dizer isso. */
+          hasAccountData: overview.length > 0,
           /* O ganho de seguidores só passou a ser registrado a partir de
              jun/2026. Antes disso a coluna vem zerada no banco — é lacuna de
              dado, não crescimento zero. Sem esta flag o relatório afirmaria
@@ -1963,6 +1988,15 @@
         return (d.pct > 0 ? "+" : "") + v.replace(".", ",") + "%";
       }
 
+      /* A métrica existe para este período? Alcance e seguidores dependem dos
+         insights de conta; curtidas/comentários/posts vêm dos posts e sempre
+         existem. */
+      function metricAvailable(m, key) {
+        if (key === "followerGain") return m.followersTracked;
+        if (key === "totalReach" || key === "avgReach") return m.hasAccountData;
+        return true;
+      }
+
       /* Chip curto para o rodapé dos cards de KPI. Sem base de comparação
          (período anterior zerado), mostra a diferença absoluta em vez de uma
          porcentagem impossível de calcular. */
@@ -1995,14 +2029,15 @@
             ? v.toFixed(1).replace(".", ",") + "%"
             : fmtFull(v);
 
-          /* Sem histórico de seguidores no período anterior: não dá para
-             comparar. Melhor dizer "sem dado" do que afirmar que o mês
-             anterior ganhou zero seguidores. */
-          if (r.key === "followerGain" && !prev.followersTracked) {
+          /* Dado ausente de um dos lados: escrever "sem dado" e não comparar.
+             Afirmar "0" (ou "-100%") seria mentir sobre o que não foi medido. */
+          const cOk = metricAvailable(cur, r.key);
+          const pOk = metricAvailable(prev, r.key);
+          if (!cOk || !pOk) {
             return `<tr>
               <td class="metric">${escapeHtml(r.label)}</td>
-              <td class="num val-prev">sem dado</td>
-              <td class="num val-cur">${show(c)}</td>
+              <td class="num val-prev">${pOk ? show(p) : "sem dado"}</td>
+              <td class="num val-cur">${cOk ? show(c) : "sem dado"}</td>
               <td class="num"><span class="rpt-delta flat">—</span></td>
               <td class="num"><span class="rpt-delta flat">—</span></td>
             </tr>`;
@@ -2134,14 +2169,17 @@
         const kpi = (cls, label, value, sub, deltaHtml) =>
           `<div class="${kpiCls} ${cls}"><div class="rpt-kpi-label">${label}</div><div class="rpt-kpi-value">${value}</div><div class="rpt-kpi-sub">${sub}</div>${deltaHtml || ""}</div>`;
 
-        /* Variação do KPI vs. período anterior (só quando há período anterior).
-           Seguidores ganhos fica sem chip quando o período anterior não tem
-           registro de seguidores — não há o que comparar. */
+        /* Variação do KPI vs. período anterior. Sem período anterior, ou com
+           dado ausente de um dos lados, o card não ganha chip. */
         const kpiDelta = (key) => {
           if (!hasPrev) return "";
-          if (key === "followerGain" && !prevMetrics.followersTracked) return "";
+          if (!metricAvailable(cur, key) || !metricAvailable(prevMetrics, key)) return "";
           return `<div class="rpt-kpi-sub">${kpiDeltaChip(cur[key], prevMetrics[key])} vs. anterior</div>`;
         };
+
+        /* Valor do KPI, ou "—" quando a métrica não foi medida no período */
+        const kpiVal = (key, fmt) => metricAvailable(cur, key) ? fmt(cur[key]) : "—";
+        const kpiSub = (key, sub) => metricAvailable(cur, key) ? sub : "Sem dados de conta";
 
         /* ── Format distribution cards ── */
         const fmtCard = (cls, label, count, pct) =>
@@ -2195,11 +2233,11 @@
             ${mH("Resumo do Período")}
             <div class="rpt-kpis">
               ${kpi("c1", "Seguidores",       fmtNum(followers),    "Conta atual")}
-              ${kpi("c2", "Alcance médio",     fmtNum(avgReach),     "Por dia",          kpiDelta("avgReach"))}
+              ${kpi("c2", "Alcance médio",     kpiVal("avgReach", fmtNum), kpiSub("avgReach", "Por dia"), kpiDelta("avgReach"))}
               ${kpi("c3", "Engajamento",       engRate > 0 ? engRate.toFixed(1).replace(".",",")+"%": "—", "Eng. / Alcance", kpiDelta("engRate"))}
-              ${kpi("c4", "Seguidores ganhos", (totalFollowerGain>=0?"+":"")+fmtNum(totalFollowerGain), "No período", kpiDelta("followerGain"))}
+              ${kpi("c4", "Seguidores ganhos", kpiVal("followerGain", v => (v>=0?"+":"")+fmtNum(v)), kpiSub("followerGain", "No período"), kpiDelta("followerGain"))}
               ${kpi("c5", "Posts",             String(allPosts.length), "No período",    kpiDelta("postCount"))}
-              ${kpi("c1", "Alcance total",     fmtNum(totalReach),   "Soma",             kpiDelta("totalReach"))}
+              ${kpi("c1", "Alcance total",     kpiVal("totalReach", fmtNum), kpiSub("totalReach", "Soma"), kpiDelta("totalReach"))}
               ${kpi("c2", "Curtidas",          fmtNum(totalLikes),   "Total no período", kpiDelta("likes"))}
               ${kpi("c3", "Comentários",       fmtNum(totalComments),"Total no período", kpiDelta("comments"))}
               ${kpi("c4", "Compartilhamentos", fmtNum(totalShares),  "Total no período", kpiDelta("shares"))}
@@ -2234,8 +2272,21 @@
             ${buildPodiumOC(pod.title, pod.posts, pod.fn, pod.lbl)}
           </div>`).join("")}
 
-          <!-- ░░ ANÁLISE IA — só no tema OC quando há texto ░░ -->
-          ${isOC && analysisText ? `
+          <!-- ░░ ANÁLISE — sempre que houver texto (IA ou escrita à mão) ░░ -->
+          ${analysisText && !isOC ? `
+          <div class="rpt-page">
+            <div class="rpt-analysis">
+              <div class="rpt-analysis-accent"></div>
+              <div style="padding-right:1.5rem">
+                <div class="rpt-analysis-title">O que funcionou</div>
+                <div class="rpt-analysis-sub">e sugestões para o próximo mês</div>
+                <div class="rpt-analysis-bar"></div>
+                <div class="rpt-analysis-body">${escapeHtml(analysisText)}</div>
+              </div>
+            </div>
+          </div>` : ""}
+
+          ${analysisText && isOC ? `
           <div class="rpt-page">
             <div class="rpt-analysis-oc">
               <div style="position:absolute;top:0;right:0;bottom:0;width:14px;display:flex;flex-direction:column">
@@ -2395,9 +2446,8 @@
           const p = rangeParams();
           document.getElementById("rep-start").value = p.startDay;
           document.getElementById("rep-end").value   = p.endDay;
-          /* Show AI analysis field for OC theme */
-          document.getElementById("ai-analysis-section").style.display =
-            clientUsername === "otaviano" ? "block" : "none";
+          /* Análise (manual ou IA) disponível para todos os clientes */
+          document.getElementById("ai-analysis-section").style.display = "block";
           openModal(document.getElementById("modal-report"));
         });
 
@@ -2479,7 +2529,7 @@
                 overview,
                 posts: postsTrimmed,
                 period: `${fmtDateBR(s)} – ${fmtDateBR(en)}`,
-                clientName: clientDisplayName || "Otaviano Costa",
+                clientName: clientDisplayName || clientUsername || "Cliente",
                 customPrompt,
               }),
             });

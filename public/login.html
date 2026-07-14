@@ -226,6 +226,18 @@
       const err = document.getElementById("err");
       const btn = document.getElementById("btn");
 
+      /* Enter no e-mail com a senha ainda vazia enviava o formulário e voltava
+         "credenciais inválidas", parecendo que o Enter não funcionava. Aqui ele
+         pula para a senha; o Enter na senha é que entra. */
+      document.getElementById("email").addEventListener("keydown", (e) => {
+        if (e.key !== "Enter") return;
+        const pwd = document.getElementById("password");
+        if (!pwd.value) {
+          e.preventDefault();
+          pwd.focus();
+        }
+      });
+
       const inviteToken = new URL(window.location.href).searchParams.get("inviteToken");
       if (inviteToken) {
         document.getElementById("email").readOnly = true;
