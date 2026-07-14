@@ -1240,6 +1240,7 @@
         <button type="button" class="pill" data-preset="90">90 dias</button>
         <button type="button" class="pill" data-preset="week">Esta semana</button>
         <button type="button" class="pill" data-preset="month">Este mês</button>
+        <button type="button" class="pill" data-preset="lastmonth">Mês passado</button>
         <button type="button" class="pill" data-preset="all">Todo período</button>
       </div>
 
@@ -1468,6 +1469,14 @@
             startStr=localDateKey(s); break;
           }
           case "month": { startStr=localDateKey(new Date(end.getFullYear(),end.getMonth(),1)); break; }
+          /* Único preset que não termina hoje: fecha no último dia do mês
+             passado. Mês cheio é o que faz o relatório comparar com o mês
+             calendário anterior. */
+          case "lastmonth": {
+            const s=new Date(end.getFullYear(),end.getMonth()-1,1);
+            const e=new Date(end.getFullYear(),end.getMonth(),0);
+            return { start: localDateKey(s), end: localDateKey(e) };
+          }
           case "all": startStr="2020-01-01"; break;
           default: { const s=new Date(end); s.setDate(s.getDate()-30); startStr=localDateKey(s); }
         }
