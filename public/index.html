@@ -3,11 +3,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Clientes — Content Dashboard</title>
+    <title>Clientes · Content Dashboard</title>
     <!-- Anti-flash: apply saved theme before render -->
     <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet" />
     <style>
       /* ── Dark theme (default) ── */
       :root {
@@ -33,7 +34,9 @@
         --danger-bg: rgba(248, 113, 113, 0.07);
         --radius: 12px;
         --radius-sm: 8px;
-        --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        --on-accent: #1c1608;
+        --font: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+        --font-display: "Playfair Display", Georgia, "Times New Roman", serif;
         --shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
         --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.55);
         --glow: rgba(201, 168, 122, 0.04);
@@ -102,9 +105,10 @@
         flex-shrink: 0;
       }
       h1 {
-        font-size: 1.25rem;
+        font-family: var(--font-display);
+        font-size: 1.45rem;
         font-weight: 700;
-        letter-spacing: -0.025em;
+        letter-spacing: -0.01em;
         color: var(--text);
       }
       .actions { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
@@ -130,16 +134,15 @@
       .btn:hover { background: var(--surface-3); border-color: var(--border-hover); color: var(--text); }
       .btn:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
       .btn.primary {
-        background: linear-gradient(135deg, var(--accent), var(--accent-3));
+        background: var(--accent);
         border-color: transparent;
-        color: #fff;
-        font-weight: 600;
-        box-shadow: 0 4px 14px rgba(201, 168, 122, 0.22);
+        color: var(--on-accent);
+        font-weight: 700;
       }
       .btn.primary:hover {
-        filter: brightness(1.08);
-        background: linear-gradient(135deg, var(--accent), var(--accent-3));
-        box-shadow: 0 6px 20px rgba(201, 168, 122, 0.32);
+        background: var(--accent-2);
+        border-color: transparent;
+        color: var(--on-accent);
       }
       .btn.sm { padding: 0.35rem 0.65rem; font-size: 0.8rem; }
       .btn.danger {
@@ -191,7 +194,7 @@
         position: absolute;
         top: 0; left: 0; right: 0;
         height: 2px;
-        background: linear-gradient(90deg, var(--accent-3), var(--accent), var(--accent-2));
+        background: var(--accent);
         opacity: 0;
         transition: opacity 0.2s;
       }
@@ -274,7 +277,7 @@
         position: absolute;
         top: 0; left: 0; right: 0;
         height: 2px;
-        background: linear-gradient(90deg, var(--accent-3), var(--accent), var(--accent-2));
+        background: var(--accent);
       }
       .modal h3 {
         font-size: 1.05rem;

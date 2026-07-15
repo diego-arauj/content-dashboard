@@ -3,11 +3,11 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Dashboard — Content Dashboard</title>
+    <title>Dashboard · Content Dashboard</title>
     <!-- Anti-flash: apply saved theme before render -->
     <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;0,900;1,400&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,400&display=swap" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <style>
       /* ═══════════════════════════════════════
@@ -38,7 +38,9 @@
         --c5: #c4a858;
         --radius: 12px;
         --radius-sm: 8px;
-        --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        --font: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+        --font-display: "Playfair Display", Georgia, "Times New Roman", serif;
+        --on-accent: #1c1608;
         --shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
         --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.55);
         --glow: rgba(201, 168, 122, 0.04);
@@ -178,13 +180,12 @@
       .btn:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
       .btn:disabled { opacity: 0.45; cursor: not-allowed; }
       .btn.primary {
-        background: linear-gradient(135deg, var(--accent), var(--accent-3));
+        background: var(--accent);
         border-color: transparent;
-        color: #fff;
-        font-weight: 600;
-        box-shadow: 0 3px 12px rgba(201, 168, 122, 0.22);
+        color: var(--on-accent);
+        font-weight: 700;
       }
-      .btn.primary:hover { filter: brightness(1.08); box-shadow: 0 4px 18px rgba(201, 168, 122, 0.32); }
+      .btn.primary:hover { background: var(--accent-2); }
       .btn.report {
         background: var(--accent-bg);
         border-color: var(--accent-border);
@@ -608,7 +609,7 @@
         body > .shell,
         body > .overlay,
         #preview-overlay { display: none !important; }
-        #print-view { display: block !important; font-family: "Inter", Arial, sans-serif; color: #2a2520; }
+        #print-view { display: block !important; font-family: "Hanken Grotesk", Arial, sans-serif; color: #2a2520; }
 
         .rpt-page { page-break-after: always; break-after: page; }
         .rpt-page:last-child { page-break-after: avoid; break-after: avoid; }
@@ -1313,7 +1314,7 @@
         </div>
         <aside>
           <div class="panel">
-            <h2>Top 5 — Engajamento</h2>
+            <h2>Top 5: Engajamento</h2>
             <ol class="side-list" id="top5"></ol>
           </div>
         </aside>
@@ -1324,7 +1325,7 @@
     <div class="overlay" id="modal-report" role="dialog" aria-modal="true" aria-labelledby="modal-report-title">
       <div class="modal">
         <h3 id="modal-report-title">Gerar Relatório PDF</h3>
-        <p class="modal-sub">Escolha o período e clique em gerar. O relatório abrirá a janela de impressão — salve como PDF.<br><strong style="color:var(--accent-2)">Dica:</strong> no Chrome, desmarque <em>"Cabeçalhos e rodapés"</em> para um PDF mais limpo.</p>
+        <p class="modal-sub">Escolha o período e clique em gerar. O relatório abrirá a janela de impressão. Salve como PDF.<br><strong style="color:var(--accent-2)">Dica:</strong> no Chrome, desmarque <em>"Cabeçalhos e rodapés"</em> para um PDF mais limpo.</p>
         <form id="form-report" novalidate>
           <label for="rep-start">Data de início</label>
           <input type="date" id="rep-start" required />
@@ -1357,7 +1358,7 @@
                 Gerar análise com IA
               </button>
               <label id="label-preview" style="font-size:0.75rem;color:var(--text-2);display:block;margin-bottom:0.25rem">
-                Prévia — edite antes de gerar o PDF
+                Prévia: edite antes de gerar o PDF
               </label>
             </div>
 
@@ -1387,7 +1388,7 @@
       <div class="preview-bar">
         <div style="display:flex;align-items:center;gap:0.75rem">
           <span style="font-weight:600;color:#ededed;font-size:0.88rem">Prévia do Relatório</span>
-          <span style="font-size:0.75rem;color:#555">— revise antes de imprimir</span>
+          <span style="font-size:0.75rem;color:#555">revise antes de imprimir</span>
         </div>
         <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
           <span style="font-size:0.68rem;color:#444;max-width:220px;line-height:1.35;text-align:right">No Chrome: ative <em>Gráficos de fundo</em> na janela de impressão</span>
@@ -1555,17 +1556,17 @@
           interaction: { mode: "index", intersect: false },
           scales: {
             x: {
-              ticks: { color: c.tick, font: { size: 10, family: "'Inter', sans-serif" }, maxTicksLimit: 10 },
+              ticks: { color: c.tick, font: { size: 10, family: "'Hanken Grotesk', sans-serif" }, maxTicksLimit: 10 },
               grid: { color: c.grid },
             },
             y: {
-              ticks: { color: c.tick, font: { size: 10, family: "'Inter', sans-serif" } },
+              ticks: { color: c.tick, font: { size: 10, family: "'Hanken Grotesk', sans-serif" } },
               grid: { color: c.grid },
               beginAtZero: true,
             },
           },
           plugins: {
-            legend: { labels: { color: c.label, font: { size: 11, family: "'Inter', sans-serif" }, boxWidth: 10, padding: 14 } },
+            legend: { labels: { color: c.label, font: { size: 11, family: "'Hanken Grotesk', sans-serif" }, boxWidth: 10, padding: 14 } },
             tooltip: {
               backgroundColor: c.tooltipBg,
               borderColor: c.tooltipBorder,
